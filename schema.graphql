@@ -1,0 +1,396 @@
+type Asset implements Node {
+  fileName: String
+  fileSize: Int
+  height: Int
+  id: ID!
+  mimeType: String
+  url: String
+  userId: String
+  width: Int
+}
+
+enum BibleBook {
+  ACTS
+  AMOS
+  COLOSSIANS
+  DANIEL
+  DEUTERONOMY
+  ECCLESIASTES
+  EPHESIANS
+  ESTHER
+  EXODUS
+  EZEKIEL
+  EZRA
+  FIRST_CHRONICLES
+  FIRST_CORINTHIANS
+  FIRST_JOHN
+  FIRST_KINGS
+  FIRST_PETER
+  FIRST_SAMUEL
+  FIRST_THESSALONIANS
+  FIRST_TIMOTHY
+  GALATIANS
+  GENESIS
+  HABAKKUK
+  HAGGAI
+  HEBREWS
+  HOSEA
+  ISAIAH
+  JAMES
+  JEREMIAH
+  JOB
+  JOEL
+  JOHN
+  JONAH
+  JOSHUA
+  JUDE
+  JUDGES
+  LAMENTATIONS
+  LEVITICUS
+  LUKE
+  MALACHI
+  MARK
+  MATTHEW
+  MICAH
+  NAHUM
+  NEHEMIAH
+  NUMBERS
+  OBADIAH
+  PHILEMON
+  PHILIPPIANS
+  PROVERBS
+  PSALMS
+  REVELATION
+  ROMANS
+  RUTH
+  SECOND_CHRONICLES
+  SECOND_CORINTHIANS
+  SECOND_JOHN
+  SECOND_KINGS
+  SECOND_PETER
+  SECOND_SAMUEL
+  SECOND_THESSALONIANS
+  SECOND_TIMOTHY
+  SONG_OF_SONGS
+  THIRD_JOHN
+  TITUS
+  ZECHARIAH
+  ZEPHANIAH
+}
+
+type BibleSettings {
+  fontSize: String
+  translation: String
+  verseHighlight: VerseHighlightSettings
+}
+
+input BibleSettingsInput {
+  fontSize: String
+  translation: String
+  verseHighlight: VerseHighlightSettingsInput
+}
+
+enum BibleTranslation {
+  ASV
+  KJV
+}
+
+type BibleVerse implements Node {
+  book: BibleBook!
+  chapter: Int!
+  hasUserPost: Boolean!
+  id: ID!
+  posts(
+    after: String
+    before: String
+    first: Int
+    last: Int
+
+    """Filter posts to only show those from the same translation"""
+    sameTranslationOnly: Boolean
+  ): BibleVersePostConnection!
+  text: String!
+  translation: BibleTranslation!
+  verse: Int!
+}
+
+type BibleVersePost implements Node {
+  childPosts(after: String, before: String, first: Int, last: Int): BibleVersePostConnection!
+  childPostsCount: Int!
+  content: String
+  createdAt: DateTime!
+  id: ID!
+  images: [Asset!]!
+  likedAt: DateTime
+  likesCount: Int!
+  parentPost: BibleVersePost
+  poll: Poll
+  user: User!
+  verse: BibleVerse
+}
+
+type BibleVersePostConnection {
+  edges: [BibleVersePostEdge!]!
+  pageInfo: PageInfo!
+}
+
+input BibleVersePostCreateInput {
+  content: String!
+  imageIds: [ID!]
+  parentId: ID!
+  poll: PollCreateInput
+}
+
+type BibleVersePostCreatePayload {
+  bibleVersePost: BibleVersePost!
+}
+
+type BibleVersePostDeletePayload {
+  deletedIds: [ID!]!
+}
+
+type BibleVersePostEdge {
+  cursor: String!
+  node: BibleVersePost!
+}
+
+type BibleVersePostLikePayload {
+  likedAt: DateTime
+}
+
+type BibleVersePostUnlikePayload {
+  likedAt: DateTime
+}
+
+"""
+A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar DateTime
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+type Mutation {
+  bibleVersePostCreate(input: BibleVersePostCreateInput!): BibleVersePostCreatePayload!
+  bibleVersePostDelete(id: ID!): BibleVersePostDeletePayload!
+  bibleVersePostLike(id: ID!): BibleVersePostLikePayload!
+  bibleVersePostUnlike(id: ID!): BibleVersePostUnlikePayload!
+  notificationMarkAsRead: Boolean!
+  pollUnvote(pollId: ID!): PollUnvotePayload!
+  pollVote(optionId: ID!, pollId: ID!): PollVotePayload!
+  updateUserSettings(input: UpdateUserSettingsInput!): UpdateUserSettingsPayload!
+  userFollow(userId: ID!): UserFollowPayload!
+  userUnfollow(userId: ID!): UserUnfollowPayload!
+  userUpdate(input: UserUpdateInput!): UserUpdatePayload!
+}
+
+interface Node {
+  id: ID!
+}
+
+type Notification implements Node {
+  createdAt: DateTime
+  id: ID!
+  post: BibleVersePost
+  receipent: User!
+  sender: User!
+  type: NotificationType
+}
+
+type NotificationConnection {
+  edges: [NotificationEdge!]!
+  pageInfo: PageInfo!
+}
+
+type NotificationEdge {
+  cursor: String!
+  node: Notification!
+}
+
+type NotificationSettings {
+  push: PushNotificationSettings
+}
+
+input NotificationSettingsInput {
+  push: PushNotificationSettingsInput
+}
+
+enum NotificationType {
+  BIBLE_VERSE_POST_FOLLOWER_POST
+  BIBLE_VERSE_POST_LIKE
+  BIBLE_VERSE_POST_MENTION
+  BIBLE_VERSE_POST_REPLY
+  USER_FOLLOWED
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type Poll implements Node {
+  createdAt: DateTime
+  deadline: DateTime
+  id: ID!
+  isExpired: Boolean
+  options: [PollOption!]
+  totalVotes: Int
+  userVote: PollUserVote
+}
+
+input PollCreateInput {
+  deadline: DateTime!
+  options: [String!]!
+}
+
+type PollOption implements Node {
+  id: ID!
+  text: String
+  voteCount: Int
+  votePercentage: Float
+}
+
+type PollUnvotePayload {
+  poll: Poll!
+}
+
+type PollUserVote {
+  id: ID
+  text: String
+}
+
+type PollVotePayload {
+  poll: Poll!
+}
+
+type PushNotificationSettings {
+  enabled: Boolean
+}
+
+input PushNotificationSettingsInput {
+  enabled: Boolean
+}
+
+type Query {
+  bibleVerseById(id: ID!): BibleVerse
+  bibleVerseByReference(book: BibleBook!, chapter: Int!, translation: BibleTranslation!, verse: Int!): BibleVerse
+  bibleVersePostById(id: ID!): BibleVersePost
+  bibleVersePosts(after: String, before: String, first: Int, last: Int): BibleVersePostConnection!
+  bibleVerses: [BibleVerse!]!
+  bibleVersesByQuery(limit: Int, query: String!, translation: BibleTranslation!): [BibleVerse!]!
+  bibleVersesByReference(book: BibleBook!, chapter: Int!, translation: BibleTranslation!): [BibleVerse!]!
+  node(id: ID!): Node
+  nodes(ids: [ID!]!): [Node]!
+  notifications(after: String, before: String, first: Int, last: Int): NotificationConnection!
+  user: User
+  userById(id: ID!): User
+  userByUsername(username: String!): User
+  userSettings: UserSettings
+  users(after: String, before: String, filter: UserFilterInput!, first: Int, last: Int): QueryUsersConnection
+}
+
+type QueryUsersConnection {
+  edges: [QueryUsersConnectionEdge]
+  pageInfo: PageInfo!
+}
+
+type QueryUsersConnectionEdge {
+  cursor: String!
+  node: User
+}
+
+type ThemeSettings {
+  mode: String
+}
+
+input ThemeSettingsInput {
+  mode: String
+}
+
+input UpdateUserSettingsInput {
+  bible: BibleSettingsInput
+  locale: String
+  notifications: NotificationSettingsInput
+  theme: ThemeSettingsInput
+}
+
+type UpdateUserSettingsPayload {
+  userSettings: UserSettings!
+}
+
+type User implements Node {
+  bibleReadStates: [UserBibleReadState!]!
+  bibleVerseChildPosts(after: String, before: String, first: Int, last: Int): BibleVersePostConnection!
+  bibleVersePosts(after: String, before: String, first: Int, last: Int): BibleVersePostConnection!
+  bio: String
+  createdAt: DateTime
+  email: String
+  followedAt: DateTime
+  followerCount: Int!
+  followingCount: Int!
+  id: ID!
+  image: Asset
+  likedBibleVersePosts(after: String, before: String, first: Int, last: Int): BibleVersePostConnection!
+  name: String
+  notificationsReadAt: DateTime
+  settings: UserSettings!
+  unreadNotificationCount: Int
+  username: String
+  website: String
+}
+
+type UserBibleReadState implements Node {
+  book: BibleBook
+  chapter: Int
+  createdAt: DateTime
+  id: ID!
+  translation: BibleTranslation
+}
+
+input UserFilterInput {
+  username: String
+}
+
+type UserFollowPayload {
+  user: User!
+}
+
+type UserSettings {
+  bible: BibleSettings
+  createdAt: DateTime
+  locale: String
+  notifications: NotificationSettings
+  theme: ThemeSettings
+  updatedAt: DateTime
+  version: Int
+}
+
+type UserUnfollowPayload {
+  user: User!
+}
+
+input UserUpdateInput {
+  bio: String
+  imageId: ID
+  name: String!
+  username: String!
+  website: String
+}
+
+type UserUpdatePayload {
+  user: User!
+}
+
+type VerseHighlightSettings {
+  color: String
+  enabled: Boolean
+}
+
+input VerseHighlightSettingsInput {
+  color: String
+  enabled: Boolean
+}
