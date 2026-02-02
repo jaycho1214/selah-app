@@ -37,7 +37,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 - [x] 01-01-PLAN.md — Expo Router setup with tab navigation (home, explore, profile)
-- [ ] 01-02-PLAN.md — Relay environment and GraphQL connection
+- [x] 01-02-PLAN.md — Relay environment and GraphQL connection
 - [ ] 01-03-PLAN.md — NativeWind + react-native-reusables component library
 - [ ] 01-04-PLAN.md — Theme system with OKLCH colors and dark/light toggle
 - [ ] 01-05-PLAN.md — Rich text strategy proof-of-concept with 10tap-editor
@@ -201,7 +201,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 1/5 | In progress | - |
+| 1. Foundation | 2/5 | In progress | - |
 | 2. Authentication | 0/4 | Not started | - |
 | 3. Bible Reading | 0/9 | Not started | - |
 | 4. Profiles & Connections | 0/5 | Not started | - |
