@@ -2,9 +2,11 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Search } from 'lucide-react-native';
 import { BibleReader } from '@/components/bible/bible-reader';
 import { BibleNavigator } from '@/components/bible/bible-navigator';
 import { VerseActions, VerseActionsRef } from '@/components/bible/verse-actions';
+import { NoteEditor, NoteEditorRef } from '@/components/bible/note-editor';
 import { BIBLE_BOOK_DETAILS } from '@/lib/bible/constants';
 import { useBibleStore } from '@/lib/stores/bible-store';
 import { BibleBook } from '@/lib/bible/types';
@@ -14,6 +16,7 @@ export default function BibleChapterScreen() {
   const { currentTranslation, setPosition } = useBibleStore();
   const [navigatorVisible, setNavigatorVisible] = useState(false);
   const verseActionsRef = useRef<VerseActionsRef>(null);
+  const noteEditorRef = useRef<NoteEditorRef>(null);
 
   // Track current position locally for re-renders on navigation
   const [currentBook, setCurrentBook] = useState<BibleBook>(book as BibleBook);
@@ -57,9 +60,9 @@ export default function BibleChapterScreen() {
     verseActionsRef.current?.open(verseId, verseText ?? '');
   }, []);
 
-  const handleNotePress = useCallback(() => {
-    // TODO: Open note editor (Plan 07)
+  const handleNotePress = useCallback((verseId: string, verseText: string) => {
     verseActionsRef.current?.close();
+    noteEditorRef.current?.open(verseId, verseText);
   }, []);
 
   return (
@@ -77,6 +80,11 @@ export default function BibleChapterScreen() {
                   {currentTranslation}
                 </Text>
               </View>
+            </Pressable>
+          ),
+          headerRight: () => (
+            <Pressable onPress={() => router.push('/search')} className="p-2">
+              <Search size={22} className="text-foreground" />
             </Pressable>
           ),
         }}
@@ -103,6 +111,8 @@ export default function BibleChapterScreen() {
         ref={verseActionsRef}
         onNote={handleNotePress}
       />
+
+      <NoteEditor ref={noteEditorRef} />
     </SafeAreaView>
   );
 }
