@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-02-02)
 ## Current Position
 
 Phase: 3 of 8 (Bible Reading)
-Plan: 1 of 6 in current phase
+Plan: 2 of 6 in current phase
 Status: In progress
-Last activity: 2026-02-02 - Completed 03-01-PLAN.md (SQLite + Bible types)
+Last activity: 2026-02-02 - Completed 03-02-PLAN.md (Zustand stores with MMKV)
 
-Progress: [######....] 28%
+Progress: [#######...] 31%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
+- Total plans completed: 10
 - Average duration: 3 min
-- Total execution time: 28 min
+- Total execution time: 30 min
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [######....] 28%
 |-------|-------|-------|----------|
 | 1. Foundation | 5/5 | 18 min | 4 min |
 | 2. Authentication | 4/4 | 12 min | 3 min |
-| 3. Bible Reading | 1/6 | 3 min | 3 min |
+| 3. Bible Reading | 2/6 | 5 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (2 min), 02-02 (3 min), 02-03 (2 min), 02-04 (5 min), 03-01 (3 min)
+- Last 5 plans: 02-02 (3 min), 02-03 (2 min), 02-04 (5 min), 03-01 (3 min), 03-02 (2 min)
 - Trend: Good velocity
 
 *Updated after each plan completion*
@@ -74,6 +74,9 @@ Recent decisions affecting current work:
 - syncedAt field on annotations enables local-first sync tracking
 - version field on translations enables upgrade detection
 - BIBLE_BOOKS array in canonical order, not alphabetical
+- createMMKV (v4 API) for MMKV storage instance
+- Record<verseId, Annotation> for O(1) lookups in annotation store
+- FONT_SIZES constant map for consistent text sizing
 
 ### Pending Todos
 
@@ -81,10 +84,10 @@ None yet.
 
 ### Blockers/Concerns
 
-None.
+- MMKV requires native rebuild (`npx expo run:ios` or `npx expo run:android`) before testing on device
 
 ## Session Continuity
 
 Last session: 2026-02-02T06:27:43Z
-Stopped at: Completed 03-01-PLAN.md
+Stopped at: Completed 03-02-PLAN.md
 Resume file: None
