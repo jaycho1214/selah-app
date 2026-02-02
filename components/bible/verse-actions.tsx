@@ -1,8 +1,12 @@
 import { useCallback, useMemo, forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import { View, Pressable, useColorScheme } from 'react-native';
+import { View, Pressable, useColorScheme, Share, Platform } from 'react-native';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet';
+import * as Haptics from 'expo-haptics';
 import { Text } from '@/components/ui/text';
 import { useAnnotationsStore, HIGHLIGHT_COLORS } from '@/lib/stores/annotations-store';
+import { parseVerseId } from '@/lib/bible/utils';
+import { BIBLE_BOOK_DETAILS } from '@/lib/bible/constants';
+import type { BibleBook } from '@/lib/bible/types';
 
 interface VerseActionsProps {
   onHighlight?: () => void;
@@ -81,6 +85,7 @@ export const VerseActions = forwardRef<VerseActionsRef, VerseActionsProps>(
 
     const handleBookmarkToggle = useCallback(() => {
       if (!currentVerse) return;
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       if (isBookmarked) {
         removeBookmark(currentVerse.id);
       } else {
@@ -88,6 +93,32 @@ export const VerseActions = forwardRef<VerseActionsRef, VerseActionsProps>(
       }
       onBookmark?.();
     }, [currentVerse, isBookmarked, addBookmark, removeBookmark, onBookmark]);
+
+    const handleShare = useCallback(async () => {
+      if (!currentVerse) return;
+
+      const parsed = parseVerseId(currentVerse.id);
+      let reference = currentVerse.id;
+
+      if (parsed) {
+        const bookDetails = BIBLE_BOOK_DETAILS[parsed.book as BibleBook];
+        const bookName = bookDetails?.name ?? parsed.book;
+        reference = `${bookName} ${parsed.chapter}:${parsed.verse}`;
+      }
+
+      const shareText = `"${currentVerse.text}"\n\n— ${reference}`;
+
+      try {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        await Share.share({
+          message: shareText,
+          title: reference,
+        });
+        onShare?.();
+      } catch (error) {
+        // User cancelled or error
+      }
+    }, [currentVerse, onShare]);
 
     const renderBackdrop = useCallback(
       (props: any) => (
@@ -179,20 +210,27 @@ export const VerseActions = forwardRef<VerseActionsRef, VerseActionsProps>(
               className="flex-1 py-3 rounded-xl bg-muted items-center active:opacity-70"
             >
               <Text className="text-foreground font-medium">
-                {isBookmarked ? 'Bookmarked' : 'Bookmark'}
+                {isBookmarked ? 'Saved' : 'Save'}
               </Text>
             </Pressable>
             <Pressable
               onPress={() => {
                 if (currentVerse) {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   onNote?.(currentVerse.id, currentVerse.text);
                 }
               }}
               className="flex-1 py-3 rounded-xl bg-muted items-center active:opacity-70"
             >
               <Text className="text-foreground font-medium">
-                {hasNote ? 'Edit Note' : 'Add Note'}
+                {hasNote ? 'Edit Note' : 'Note'}
               </Text>
+            </Pressable>
+            <Pressable
+              onPress={handleShare}
+              className="flex-1 py-3 rounded-xl bg-muted items-center active:opacity-70"
+            >
+              <Text className="text-foreground font-medium">Share</Text>
             </Pressable>
           </View>
         </BottomSheetView>
