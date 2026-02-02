@@ -12,8 +12,8 @@ Selah Mobile transforms from an empty Expo project to a full-featured Bible soci
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation** - Project infrastructure: routing, Relay, component library, theming
-- [ ] **Phase 2: Authentication** - Google and Apple Sign-In with session persistence
+- [x] **Phase 1: Foundation** - Project infrastructure: routing, Relay, component library, theming
+- [x] **Phase 2: Authentication** - Google and Apple Sign-In with session persistence
 - [ ] **Phase 3: Bible Reading** - Multi-translation Bible with offline support, highlights, notes, bookmarks
 - [ ] **Phase 4: Profiles & Connections** - User profiles, following, and follower lists
 - [ ] **Phase 5: Feed & Engagement** - Social feed with likes, replies, and poll voting
@@ -39,7 +39,7 @@ Plans:
 - [x] 01-01-PLAN.md — Expo Router setup with tab navigation (home, explore, profile)
 - [x] 01-02-PLAN.md — Relay environment and GraphQL connection
 - [x] 01-03-PLAN.md — NativeWind + react-native-reusables component library
-- [ ] 01-04-PLAN.md — Theme system with OKLCH colors and dark/light toggle
+- [x] 01-04-PLAN.md — Theme system with OKLCH colors and dark/light toggle
 - [x] 01-05-PLAN.md — Rich text strategy proof-of-concept with 10tap-editor
 
 ### Phase 2: Authentication
@@ -54,10 +54,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Better Auth client setup with SecureStore and SessionProvider
-- [ ] 02-02-PLAN.md — Google Sign-In with native SDK and idToken flow
-- [ ] 02-03-PLAN.md — Apple Sign-In with Expo SDK and idToken flow
-- [ ] 02-04-PLAN.md — Sign-in screen, protected routes, and sign-out
+- [x] 02-01-PLAN.md — Better Auth client setup with SecureStore and SessionProvider
+- [x] 02-02-PLAN.md — Google Sign-In with native SDK and idToken flow
+- [x] 02-03-PLAN.md — Apple Sign-In with Expo SDK and idToken flow
+- [x] 02-04-PLAN.md — Sign-in screen, protected routes, and sign-out
 
 ### Phase 3: Bible Reading
 **Goal**: Users can read the Bible across translations with personal annotations, online and offline
@@ -72,18 +72,18 @@ Plans:
   6. User can search Bible text and navigate to results
   7. User can adjust font size and it persists across sessions
   8. User can download a translation and read it without internet connection
-**Plans**: TBD
+**Plans**: 9 plans
 
 Plans:
-- [ ] 03-01: Bible data schema and SQLite setup
-- [ ] 03-02: Chapter reading view with verse rendering
-- [ ] 03-03: Swipe navigation between chapters
-- [ ] 03-04: Highlights with color selection
-- [ ] 03-05: Bookmarks management
-- [ ] 03-06: Private notes on verses
-- [ ] 03-07: Bible search functionality
-- [ ] 03-08: Font size adjustment
-- [ ] 03-09: Translation download and offline reading
+- [ ] 03-01-PLAN.md — SQLite + Drizzle database setup and Bible types/constants
+- [ ] 03-02-PLAN.md — Zustand stores with MMKV persistence for settings and annotations
+- [ ] 03-03-PLAN.md — Chapter view with FlashList verse rendering
+- [ ] 03-04-PLAN.md — Bible reader with PagerView swipe navigation and book/chapter picker
+- [ ] 03-05-PLAN.md — Verse highlights with color selection via bottom sheet
+- [ ] 03-06-PLAN.md — Bookmarks list screen and management
+- [ ] 03-07-PLAN.md — Verse notes editor and notes list screen
+- [ ] 03-08-PLAN.md — Bible search with GraphQL query
+- [ ] 03-09-PLAN.md — Font size adjustment and translation download for offline reading
 
 ### Phase 4: Profiles & Connections
 **Goal**: Users can view profiles and build social connections
@@ -201,8 +201,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 4/5 | In progress | - |
-| 2. Authentication | 0/4 | Not started | - |
+| 1. Foundation | 5/5 | Complete | 2026-02-02 |
+| 2. Authentication | 4/4 | Complete | 2026-02-02 |
 | 3. Bible Reading | 0/9 | Not started | - |
 | 4. Profiles & Connections | 0/5 | Not started | - |
 | 5. Feed & Engagement | 0/6 | Not started | - |
@@ -214,5 +214,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 *Roadmap created: 2025-02-02*
 *Phase 1 planned: 2026-02-02*
 *Phase 2 planned: 2026-02-02*
+*Phase 3 planned: 2026-02-02*
 *Depth: comprehensive (8 phases, 47 plans estimated)*
 *Coverage: 48/48 v1 requirements mapped*
