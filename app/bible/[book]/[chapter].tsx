@@ -1,9 +1,10 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BibleReader } from '@/components/bible/bible-reader';
 import { BibleNavigator } from '@/components/bible/bible-navigator';
+import { VerseActions, VerseActionsRef } from '@/components/bible/verse-actions';
 import { BIBLE_BOOK_DETAILS } from '@/lib/bible/constants';
 import { useBibleStore } from '@/lib/stores/bible-store';
 import { BibleBook } from '@/lib/bible/types';
@@ -12,6 +13,7 @@ export default function BibleChapterScreen() {
   const { book, chapter } = useLocalSearchParams<{ book: string; chapter: string }>();
   const { currentTranslation, setPosition } = useBibleStore();
   const [navigatorVisible, setNavigatorVisible] = useState(false);
+  const verseActionsRef = useRef<VerseActionsRef>(null);
 
   // Track current position locally for re-renders on navigation
   const [currentBook, setCurrentBook] = useState<BibleBook>(book as BibleBook);
@@ -46,14 +48,18 @@ export default function BibleChapterScreen() {
     [setPosition]
   );
 
+  // Open verse actions on tap or long-press
   const handleVersePress = useCallback((verseId: string, verseText?: string) => {
-    // TODO: Show verse actions (highlight, bookmark, note, share)
-    console.log('Verse pressed:', verseId);
+    verseActionsRef.current?.open(verseId, verseText ?? '');
   }, []);
 
   const handleVerseLongPress = useCallback((verseId: string, verseText?: string) => {
-    // TODO: Show verse actions sheet
-    console.log('Verse long-pressed:', verseId);
+    verseActionsRef.current?.open(verseId, verseText ?? '');
+  }, []);
+
+  const handleNotePress = useCallback(() => {
+    // TODO: Open note editor (Plan 07)
+    verseActionsRef.current?.close();
   }, []);
 
   return (
@@ -91,6 +97,11 @@ export default function BibleChapterScreen() {
         onSelect={handleNavigatorSelect}
         visible={navigatorVisible}
         onClose={() => setNavigatorVisible(false)}
+      />
+
+      <VerseActions
+        ref={verseActionsRef}
+        onNote={handleNotePress}
       />
     </SafeAreaView>
   );
