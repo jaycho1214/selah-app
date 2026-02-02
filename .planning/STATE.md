@@ -5,33 +5,34 @@
 See: .planning/PROJECT.md (updated 2025-02-02)
 
 **Core value:** Bible reading with community sharing around verses - the intersection of personal devotion and social connection must feel seamless and meaningful.
-**Current focus:** Phase 2 - Authentication
+**Current focus:** Phase 3 - Bible Reading
 
 ## Current Position
 
-Phase: 2 of 8 (Authentication)
-Plan: 3 of 4 in current phase
+Phase: 3 of 8 (Bible Reading)
+Plan: 1 of 6 in current phase
 Status: In progress
-Last activity: 2026-02-02 - Completed 02-03-PLAN.md
+Last activity: 2026-02-02 - Completed 03-01-PLAN.md (SQLite + Bible types)
 
-Progress: [######....] 16%
+Progress: [######....] 28%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: 3 min
-- Total execution time: 25 min
+- Total execution time: 28 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Foundation | 5/5 | 18 min | 4 min |
-| 2. Authentication | 3/4 | 7 min | 2 min |
+| 2. Authentication | 4/4 | 12 min | 3 min |
+| 3. Bible Reading | 1/6 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-05 (4 min), 01-04 (4 min), 02-01 (2 min), 02-02 (3 min), 02-03 (2 min)
+- Last 5 plans: 02-01 (2 min), 02-02 (3 min), 02-03 (2 min), 02-04 (5 min), 03-01 (3 min)
 - Trend: Good velocity
 
 *Updated after each plan completion*
@@ -66,6 +67,13 @@ Recent decisions affecting current work:
 - Native AppleAuthenticationButton for App Store compliance
 - idToken flow for Apple Sign-In native experience
 - Platform.OS conditional rendering for iOS-only Apple Sign-In
+- Open-browsing pattern: no forced login, auth on protected actions
+- Bottom sheet sign-in using @gorhom/bottom-sheet
+- requireAuth() helper for protecting actions without redirects
+- Composite verse ID format: {translationId}:{book}:{chapter}:{verse}
+- syncedAt field on annotations enables local-first sync tracking
+- version field on translations enables upgrade detection
+- BIBLE_BOOKS array in canonical order, not alphabetical
 
 ### Pending Todos
 
@@ -77,6 +85,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-02T02:29:00Z
-Stopped at: Completed 02-03-PLAN.md
+Last session: 2026-02-02T06:27:43Z
+Stopped at: Completed 03-01-PLAN.md
 Resume file: None
