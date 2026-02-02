@@ -165,9 +165,8 @@ export function BibleReader({
   // Left bulge (when dragging right)
   const leftBulgeStyle = useAnimatedStyle(() => {
     const isActive = translateX.value > 5;
-    const progress = Math.min(Math.abs(translateX.value) / (SCREEN_WIDTH * 0.3), 1);
     return {
-      opacity: isActive ? progress : 0,
+      opacity: isActive ? 1 : 0,
       transform: [{ translateY: fingerY.value - BULGE_HEIGHT / 2 }],
     };
   });
@@ -183,9 +182,8 @@ export function BibleReader({
   // Right bulge (when dragging left)
   const rightBulgeStyle = useAnimatedStyle(() => {
     const isActive = translateX.value < -5;
-    const progress = Math.min(Math.abs(translateX.value) / (SCREEN_WIDTH * 0.3), 1);
     return {
-      opacity: isActive ? progress : 0,
+      opacity: isActive ? 1 : 0,
       transform: [{ translateY: fingerY.value - BULGE_HEIGHT / 2 }],
     };
   });
