@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-02-02)
 ## Current Position
 
 Phase: 3 of 8 (Bible Reading)
-Plan: 5 of 6 in current phase
-Status: In progress
-Last activity: 2026-02-02 - Completed 03-05-PLAN.md (Verse highlighting with color selection)
+Plan: 6 of 6 in current phase
+Status: Phase complete
+Last activity: 2026-02-02 - Completed 03-06-PLAN.md (Bookmarks list screen)
 
-Progress: [##########] 41%
+Progress: [###########] 44%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
+- Total plans completed: 14
 - Average duration: 3 min
-- Total execution time: 42 min
+- Total execution time: 44 min
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [##########] 41%
 |-------|-------|-------|----------|
 | 1. Foundation | 5/5 | 18 min | 4 min |
 | 2. Authentication | 4/4 | 12 min | 3 min |
-| 3. Bible Reading | 5/6 | 17 min | 3 min |
+| 3. Bible Reading | 6/6 | 19 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (3 min), 03-02 (2 min), 03-03 (5 min), 03-04 (5 min), 03-05 (2 min)
+- Last 5 plans: 03-02 (2 min), 03-03 (5 min), 03-04 (5 min), 03-05 (2 min), 03-06 (2 min)
 - Trend: Good velocity
 
 *Updated after each plan completion*
@@ -86,6 +86,8 @@ Recent decisions affecting current work:
 - useState for currentVerse in VerseActions (triggers re-render on selection)
 - BottomSheet with index={-1} pattern for verse actions
 - VerseActionsRef imperative API: open(verseId, verseText) and close()
+- parseVerseId helper extracts translation, book, chapter, verse from composite ID
+- Home screen as navigation hub for feature screens (bookmarks, notes)
 
 ### Pending Todos
 
@@ -99,6 +101,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-02T06:43:01Z
-Stopped at: Completed 03-05-PLAN.md
+Last session: 2026-02-02T06:43:20Z
+Stopped at: Completed 03-06-PLAN.md (Phase 3 complete)
 Resume file: None
