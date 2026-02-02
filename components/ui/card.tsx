@@ -25,16 +25,13 @@ const CardHeader = React.forwardRef<View, CardProps>(
 );
 CardHeader.displayName = 'CardHeader';
 
-interface CardTitleProps extends CardProps {
+interface CardTitleProps {
+  className?: string;
   children?: React.ReactNode;
 }
 
-const CardTitle = React.forwardRef<View, CardTitleProps>(
-  ({ className, children, ...props }, ref) => (
-    <Text className={cn('text-lg font-semibold', className)} {...props}>
-      {children}
-    </Text>
-  )
+const CardTitle = ({ className, children }: CardTitleProps) => (
+  <Text className={cn('text-lg font-semibold', className)}>{children}</Text>
 );
 CardTitle.displayName = 'CardTitle';
 
