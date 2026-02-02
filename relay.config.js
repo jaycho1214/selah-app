@@ -1,5 +1,5 @@
 module.exports = {
-  src: './app',
+  src: '.',
   schema: './schema.graphql',
   language: 'typescript',
   artifactDirectory: './lib/relay/__generated__',
