@@ -51,13 +51,13 @@ Plans:
   2. User can sign in with Apple account and see their profile
   3. User session persists after closing and reopening the app
   4. User can sign out from any screen and returns to login
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 02-01: Better Auth client and auth context
-- [ ] 02-02: Google Sign-In flow
-- [ ] 02-03: Apple Sign-In flow
-- [ ] 02-04: Session persistence and protected routes
+- [ ] 02-01-PLAN.md — Better Auth client setup with SecureStore and SessionProvider
+- [ ] 02-02-PLAN.md — Google Sign-In with native SDK and idToken flow
+- [ ] 02-03-PLAN.md — Apple Sign-In with Expo SDK and idToken flow
+- [ ] 02-04-PLAN.md — Sign-in screen, protected routes, and sign-out
 
 ### Phase 3: Bible Reading
 **Goal**: Users can read the Bible across translations with personal annotations, online and offline
@@ -213,5 +213,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 ---
 *Roadmap created: 2025-02-02*
 *Phase 1 planned: 2026-02-02*
+*Phase 2 planned: 2026-02-02*
 *Depth: comprehensive (8 phases, 47 plans estimated)*
 *Coverage: 48/48 v1 requirements mapped*
