@@ -30,6 +30,9 @@ yarn-error.*
 .DS_Store
 *.pem
 
+# Google Sign-In client plist (contains client ID, should not be committed)
+client_*.plist
+
 # local env files
 .env
 .env*.local
