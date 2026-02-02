@@ -1,9 +1,9 @@
 import {
   GoogleSignin,
-  statusCodes,
-  isSuccessResponse,
   isErrorWithCode,
-} from '@react-native-google-signin/google-signin';
+  isSuccessResponse,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 
 /**
  * Configure Google Sign-In with web client ID for server verification.
@@ -12,6 +12,8 @@ import {
 export function configureGoogleSignIn() {
   GoogleSignin.configure({
     webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+    iosClientId:
+      "707707053099-robncnjvk5fidk58dkhsduelgscdemnn.apps.googleusercontent.com",
     offlineAccess: false, // We only need idToken for server verification
   });
 }
@@ -41,7 +43,7 @@ export async function signInWithGoogle(): Promise<string | null> {
           // Sign-in already in progress
           return null;
         case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-          throw new Error('Google Play Services not available');
+          throw new Error("Google Play Services not available");
         default:
           throw error;
       }
