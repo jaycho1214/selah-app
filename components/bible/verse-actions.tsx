@@ -7,7 +7,7 @@ import { useAnnotationsStore, HIGHLIGHT_COLORS } from '@/lib/stores/annotations-
 interface VerseActionsProps {
   onHighlight?: () => void;
   onBookmark?: () => void;
-  onNote?: () => void;
+  onNote?: (verseId: string, verseText: string) => void;
   onShare?: () => void;
 }
 
@@ -24,7 +24,7 @@ export const VerseActions = forwardRef<VerseActionsRef, VerseActionsProps>(
     // Use state for current verse to trigger re-renders
     const [currentVerse, setCurrentVerse] = useState<{ id: string; text: string } | null>(null);
 
-    const { highlights, addHighlight, removeHighlight, bookmarks, addBookmark, removeBookmark } =
+    const { highlights, addHighlight, removeHighlight, bookmarks, addBookmark, removeBookmark, notes } =
       useAnnotationsStore();
 
     const snapPoints = useMemo(() => ['40%'], []);
@@ -52,6 +52,10 @@ export const VerseActions = forwardRef<VerseActionsRef, VerseActionsProps>(
 
     const isBookmarked = currentVerse
       ? !!bookmarks[currentVerse.id]
+      : false;
+
+    const hasNote = currentVerse
+      ? !!notes[currentVerse.id]
       : false;
 
     const handleColorSelect = useCallback(
@@ -179,10 +183,16 @@ export const VerseActions = forwardRef<VerseActionsRef, VerseActionsProps>(
               </Text>
             </Pressable>
             <Pressable
-              onPress={onNote}
+              onPress={() => {
+                if (currentVerse) {
+                  onNote?.(currentVerse.id, currentVerse.text);
+                }
+              }}
               className="flex-1 py-3 rounded-xl bg-muted items-center active:opacity-70"
             >
-              <Text className="text-foreground font-medium">Add Note</Text>
+              <Text className="text-foreground font-medium">
+                {hasNote ? 'Edit Note' : 'Add Note'}
+              </Text>
             </Pressable>
           </View>
         </BottomSheetView>
