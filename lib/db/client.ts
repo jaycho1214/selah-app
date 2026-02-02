@@ -1,6 +1,8 @@
 import { drizzle } from 'drizzle-orm/expo-sqlite';
+import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { openDatabaseSync } from 'expo-sqlite';
 import * as schema from './schema';
+import migrations from './migrations/migrations';
 
 /**
  * Opens the SQLite database synchronously.
@@ -21,5 +23,19 @@ const expoDb = openDatabaseSync('selah.db', { enableChangeListener: true });
  * ```
  */
 export const db = drizzle(expoDb, { schema });
+
+/**
+ * Hook to run database migrations on app startup.
+ * Must be called once at the root of the app before any database access.
+ *
+ * Usage:
+ * ```typescript
+ * const { success, error } = useDatabaseMigrations();
+ * if (!success) return <LoadingScreen />;
+ * ```
+ */
+export function useDatabaseMigrations() {
+  return useMigrations(db, migrations);
+}
 
 export { expoDb };
