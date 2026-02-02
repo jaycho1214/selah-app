@@ -2,11 +2,11 @@
 
 ## What This Is
 
-A React Native port of Selah — a Bible reading and community discussion app where users read Scripture, share thoughts on verses, and engage with others. This mobile app targets iOS and Android with full feature parity to the web version, connecting to the same GraphQL backend.
+A React Native (Expo) mobile app for iOS and Android, porting the selah-web Bible social platform. Users read the Bible across multiple translations, share verse-based posts with rich text and images, and engage with a community through likes, replies, and follows. Same design language and backend as the web app.
 
 ## Core Value
 
-Users can read the Bible and share their thoughts on Scripture with a community of believers — the reading and posting experience must feel native and fluid.
+Bible reading with community sharing around verses — the intersection of personal devotion and social connection must feel seamless and meaningful.
 
 ## Requirements
 
@@ -16,64 +16,57 @@ Users can read the Bible and share their thoughts on Scripture with a community 
 
 ### Active
 
-- [ ] Bible reading view as home screen with chapter navigation
-- [ ] Multiple Bible translations (KJV, ASV)
-- [ ] Swipe navigation between chapters
-- [ ] Search verses by reference or text
-- [ ] Create, edit, delete posts on verses
-- [ ] Rich text content in posts
-- [ ] Image galleries in posts
-- [ ] Polls in posts
-- [ ] Like/unlike posts
-- [ ] Reply/comment on posts
-- [ ] View user profiles
-- [ ] Follow/unfollow users
-- [ ] Notifications screen
-- [ ] Native push notifications (APNs/FCM)
-- [ ] Native Sign-In (Apple, Google) with OAuth browser fallback
-- [ ] Settings (theme, language, font size, highlight colors, notification preferences)
-- [ ] Dark/light theme support
-- [ ] Bottom tab navigation (Bible, Posts, Notifications, Profile/Settings)
+- [ ] Bible reading with multi-translation support and swipe navigation
+- [ ] Verse posts with rich text, images, and polls
+- [ ] Social features: likes, replies, follows, user profiles
+- [ ] Notifications feed
+- [ ] Reading plans (browse, create, track)
+- [ ] User settings (theme, language, font size, notifications)
+- [ ] Google Sign-In authentication
+- [ ] Apple Sign-In authentication (required for iOS)
+- [ ] Native push notifications (FCM for Android, APNs for iOS)
+- [ ] Offline Bible reading (downloadable translations)
+- [ ] Share out (verses/posts to other apps via share sheet)
+- [ ] Deep linking (selah:// and universal links)
 
 ### Out of Scope
 
-- Offline Bible reading — deferred to v2
-- Web push notifications — mobile uses native push
-- Desktop/tablet optimized layouts — focus on phone experience first
+- Share IN (receiving shares from other apps) — deferred to post-v1
+- Widgets (home screen verse of the day) — deferred to post-v1
+- Biometric auth — not required for v1
+- Web push migration — mobile uses native push instead
 
 ## Context
 
-**Source codebase:** `selah-web` is a Next.js 16 app with:
-- React 19, TypeScript, Tailwind CSS v4
-- GraphQL via Relay with persisted queries
-- Radix UI components, Lexical rich text editor
-- Better Auth for OAuth sessions
-- PostgreSQL backend via Kysely
+**Source codebase:** selah-web (Next.js 16, React 19, Relay, PostgreSQL)
+- GraphQL API via Yoga + Pothos with Relay plugin
+- OKLCH color system with dark/light themes
+- Lexical rich text editor for posts
+- Better Auth with Google One-Tap on web
 
-**Design system to port:**
-- OkLCH color model (primary deep blue/navy, light/dark themes)
-- Geist font family (sans + mono)
-- Radix UI component patterns (buttons, cards, dialogs, etc.)
-- Lucide icons
-- Rounded corners (0.625rem radius), subtle shadows, smooth transitions
+**Mobile initialization:** Expo (create-expo-app), fresh codebase
+- Will consume existing GraphQL API via Relay
+- Need React Native equivalents for web-specific libs (Lexical, Radix UI)
 
-**Existing Expo scaffolding:** Fresh `create-expo-app` in this directory.
+**Design reference:** shadcn/ui components, Geist font, clean minimal aesthetic
+- Adapt for mobile patterns (bottom nav, gestures, native controls)
 
 ## Constraints
 
-- **Backend**: Must use existing GraphQL API — no backend changes for v1
-- **Auth**: Better Auth sessions must work with mobile clients
-- **Design**: Visual language must match web — same colors, typography feel, adapted for mobile UX
-- **Platforms**: iOS and Android from single codebase (Expo/React Native)
+- **Tech stack**: React Native with Expo — already initialized, use Expo ecosystem
+- **Backend**: Existing GraphQL API — no backend changes, mobile is a new client
+- **Design**: Match selah-web visual language — OKLCH colors, typography, spacing
+- **Platforms**: iOS and Android — universal app, no platform-specific features initially
+- **Auth**: Apple Sign-In required — App Store policy when offering social login
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Expo over bare React Native | Managed workflow, easier builds, OTA updates | — Pending |
-| Relay for GraphQL | Match web app's data layer, reuse patterns | — Pending |
-| Native auth SDKs preferred | Better UX than browser redirects | — Pending |
-| Defer offline to v2 | Reduce v1 scope, requires significant caching infrastructure | — Pending |
+| Use Relay for data layer | Same as web, enables potential code sharing, familiar patterns | — Pending |
+| Expo over bare React Native | Faster development, managed workflow, OTA updates | — Pending |
+| Apple Sign-In alongside Google | Required by App Store policy when offering any social login | — Pending |
+| Native push over web push | Better reliability and UX on mobile, platform expectations | — Pending |
 
 ---
-*Last updated: 2025-02-01 after initialization*
+*Last updated: 2025-02-02 after initialization*
