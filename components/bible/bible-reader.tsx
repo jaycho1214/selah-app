@@ -19,9 +19,8 @@ import { BIBLE_BOOKS, BIBLE_BOOK_DETAILS } from '@/lib/bible/constants';
 import { BibleBook } from '@/lib/bible/types';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-const BULGE_MAX_WIDTH = 8; // Very narrow bulge
-const BULGE_HEIGHT = SCREEN_HEIGHT * 0.25; // Height of the bell curve
-const STICKY_THRESHOLD = 0.08; // Dead zone before bulge appears (sticky resistance)
+const BULGE_MAX_WIDTH = 10; // Narrow bulge
+const BULGE_HEIGHT = SCREEN_HEIGHT * 0.5; // Taller bell curve
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
@@ -141,59 +140,39 @@ export function BibleReader({
     [prev, next, setPosition, onPositionChange]
   );
 
-  // Sticky physics: dead zone at start, then accelerated expansion
-  const getStickyProgress = (offset: number) => {
-    'worklet';
-    if (offset < STICKY_THRESHOLD) {
-      // Dead zone - no bulge yet (sticky resistance)
-      return 0;
-    }
-    // After threshold, remap to 0-1 and apply exponential easing for "release" feel
-    const remapped = (offset - STICKY_THRESHOLD) / (1 - STICKY_THRESHOLD);
-    // Exponential ease-out: quick expansion after breaking free
-    return 1 - Math.pow(1 - remapped, 2.5);
-  };
-
   // Animated style for left edge bulge container
   const leftBulgeStyle = useAnimatedStyle(() => {
     const isActive = scrollDirection.value === 'left';
-    const progress = getStickyProgress(scrollOffset.value);
-    // Fade in only after sticky threshold
-    const opacity = isActive && progress > 0 ? 1 : 0;
-
+    const opacity = isActive && scrollOffset.value > 0.01 ? 1 : 0;
     return { opacity };
   });
 
-  // Animated props for left bulge SVG path (bell curve with expanding center)
+  // Animated props for left bulge SVG path (bell curve)
   const leftBulgePathProps = useAnimatedProps(() => {
-    const progress = getStickyProgress(scrollOffset.value);
-    const bulgeWidth = progress * BULGE_MAX_WIDTH;
+    // Direct 1:1 mapping - bulge follows finger drag directly
+    const bulgeWidth = Math.min(scrollOffset.value * 2, 1) * BULGE_MAX_WIDTH;
     const centerY = BULGE_HEIGHT / 2;
 
-    // Simple quadratic bell curve for clean shape
+    // Quadratic bezier bell curve
     const path = `M 0,0 Q ${bulgeWidth},${centerY} 0,${BULGE_HEIGHT}`;
-
     return { d: path };
   });
 
   // Animated style for right edge bulge container
   const rightBulgeStyle = useAnimatedStyle(() => {
     const isActive = scrollDirection.value === 'right';
-    const progress = getStickyProgress(scrollOffset.value);
-    const opacity = isActive && progress > 0 ? 1 : 0;
-
+    const opacity = isActive && scrollOffset.value > 0.01 ? 1 : 0;
     return { opacity };
   });
 
-  // Animated props for right bulge SVG path (bell curve with expanding center)
+  // Animated props for right bulge SVG path (bell curve)
   const rightBulgePathProps = useAnimatedProps(() => {
-    const progress = getStickyProgress(scrollOffset.value);
-    const bulgeWidth = progress * BULGE_MAX_WIDTH;
+    // Direct 1:1 mapping - bulge follows finger drag directly
+    const bulgeWidth = Math.min(scrollOffset.value * 2, 1) * BULGE_MAX_WIDTH;
     const centerY = BULGE_HEIGHT / 2;
 
-    // Simple quadratic bell curve for clean shape
+    // Quadratic bezier bell curve
     const path = `M ${BULGE_MAX_WIDTH},0 Q ${BULGE_MAX_WIDTH - bulgeWidth},${centerY} ${BULGE_MAX_WIDTH},${BULGE_HEIGHT}`;
-
     return { d: path };
   });
 
@@ -292,14 +271,14 @@ const styles = StyleSheet.create({
   bulgeLeft: {
     position: 'absolute',
     left: 0,
-    top: '32.5%',
+    top: '25%', // Centered vertically where fingers typically drag
     width: BULGE_MAX_WIDTH,
     height: BULGE_HEIGHT,
   },
   bulgeRight: {
     position: 'absolute',
     right: 0,
-    top: '32.5%',
+    top: '25%',
     width: BULGE_MAX_WIDTH,
     height: BULGE_HEIGHT,
   },
