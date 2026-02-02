@@ -182,14 +182,16 @@ export function BibleReader({
     };
   });
 
-  // Animated props for left bulge SVG path (smooth bell curve)
+  // Animated props for left bulge SVG path (pronounced bell curve)
   const leftBulgePathProps = useAnimatedProps(() => {
     const progress = Math.min(scrollOffset.value * 3, 1);
-    const bulgeWidth = progress * BULGE_MAX_WIDTH;
+    const apex = progress * BULGE_MAX_WIDTH;
     const h = BULGE_HEIGHT;
 
-    // Smooth bell curve using quadratic bezier
-    const path = `M 0,0 Q ${bulgeWidth},${h / 2} 0,${h}`;
+    // Bell curve: gradual start, wide middle, gradual end
+    const path = `M 0,0
+      C ${apex * 0.1},${h * 0.2} ${apex},${h * 0.35} ${apex},${h * 0.5}
+      C ${apex},${h * 0.65} ${apex * 0.1},${h * 0.8} 0,${h}`;
     return { d: path };
   });
 
@@ -206,15 +208,17 @@ export function BibleReader({
     };
   });
 
-  // Animated props for right bulge SVG path (smooth bell curve)
+  // Animated props for right bulge SVG path (pronounced bell curve)
   const rightBulgePathProps = useAnimatedProps(() => {
     const progress = Math.min(scrollOffset.value * 3, 1);
-    const bulgeWidth = progress * BULGE_MAX_WIDTH;
+    const apex = progress * BULGE_MAX_WIDTH;
     const h = BULGE_HEIGHT;
     const w = BULGE_MAX_WIDTH;
 
-    // Smooth bell curve using quadratic bezier
-    const path = `M ${w},0 Q ${w - bulgeWidth},${h / 2} ${w},${h}`;
+    // Bell curve: gradual start, wide middle, gradual end
+    const path = `M ${w},0
+      C ${w - apex * 0.1},${h * 0.2} ${w - apex},${h * 0.35} ${w - apex},${h * 0.5}
+      C ${w - apex},${h * 0.65} ${w - apex * 0.1},${h * 0.8} ${w},${h}`;
     return { d: path };
   });
 
