@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState } from 'react';
-import { View, ActivityIndicator, StyleSheet, type GestureResponderEvent } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Dimensions, type GestureResponderEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PagerView, { PagerViewOnPageScrollEvent } from 'react-native-pager-view';
 import Animated, {
@@ -19,8 +19,11 @@ import { useBibleStore } from '@/lib/stores/bible-store';
 import { BIBLE_BOOKS, BIBLE_BOOK_DETAILS } from '@/lib/bible/constants';
 import { BibleBook } from '@/lib/bible/types';
 
-const BULGE_MAX_WIDTH = 12;
-const BULGE_HEIGHT = 80; // Small - just where finger touches
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3; // 30% of screen to trigger page change
+
+const BULGE_MAX_WIDTH = 14;
+const BULGE_HEIGHT = 140; // Taller bell curve
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
