@@ -1,6 +1,6 @@
 import '../global.css';
 
-import { LogBox } from 'react-native';
+import { LogBox, View, Text, ActivityIndicator } from 'react-native';
 
 // Suppress deprecation warning from dependencies (tentap-editor, expo-router)
 LogBox.ignoreLogs(['SafeAreaView has been deprecated']);
@@ -22,14 +22,42 @@ import { ThemeProvider, useTheme } from '@/components/providers/theme-provider';
 import { RelayProvider } from '@/components/providers/relay-provider';
 import { SessionProvider } from '@/components/providers/session-provider';
 import { NAV_THEME } from '@/constants/theme';
-import { configureGoogleSignIn } from '@/lib/google-signin';
+import { useDatabaseMigrations } from '@/lib/db/client';
 
 export const unstable_settings = {
   anchor: '(tabs)',
 };
 
-// Configure Google Sign-In once on app load
-configureGoogleSignIn();
+/**
+ * Database migration gate - blocks rendering until migrations complete.
+ * Shows loading state during migration and error if migration fails.
+ */
+function DatabaseGate({ children }: { children: React.ReactNode }) {
+  const { success, error } = useDatabaseMigrations();
+
+  if (error) {
+    return (
+      <View className="flex-1 items-center justify-center bg-background p-4">
+        <Text className="text-destructive text-center mb-2 font-semibold">
+          Database Error
+        </Text>
+        <Text className="text-muted-foreground text-center text-sm">
+          {error.message}
+        </Text>
+      </View>
+    );
+  }
+
+  if (!success) {
+    return (
+      <View className="flex-1 items-center justify-center bg-background">
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  return <>{children}</>;
+}
 
 function RootLayoutNav() {
   const { resolvedTheme } = useTheme();
@@ -65,13 +93,15 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <BottomSheetModalProvider>
-          <RelayProvider>
-            <SessionProvider>
-              <ThemeProvider>
-                <RootLayoutNav />
-              </ThemeProvider>
-            </SessionProvider>
-          </RelayProvider>
+          <DatabaseGate>
+            <RelayProvider>
+              <SessionProvider>
+                <ThemeProvider>
+                  <RootLayoutNav />
+                </ThemeProvider>
+              </SessionProvider>
+            </RelayProvider>
+          </DatabaseGate>
         </BottomSheetModalProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
