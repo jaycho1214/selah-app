@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-02-02)
 ## Current Position
 
 Phase: 3 of 8 (Bible Reading)
-Plan: 6 of 6 in current phase
+Plan: 8 of 8 in current phase
 Status: Phase complete
-Last activity: 2026-02-02 - Completed 03-06-PLAN.md (Bookmarks list screen)
+Last activity: 2026-02-02 - Completed 03-08-PLAN.md (Bible search)
 
-Progress: [###########] 44%
+Progress: [############] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
+- Total plans completed: 16
 - Average duration: 3 min
-- Total execution time: 44 min
+- Total execution time: 50 min
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [###########] 44%
 |-------|-------|-------|----------|
 | 1. Foundation | 5/5 | 18 min | 4 min |
 | 2. Authentication | 4/4 | 12 min | 3 min |
-| 3. Bible Reading | 6/6 | 19 min | 3 min |
+| 3. Bible Reading | 8/8 | 25 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (2 min), 03-03 (5 min), 03-04 (5 min), 03-05 (2 min), 03-06 (2 min)
+- Last 5 plans: 03-04 (5 min), 03-05 (2 min), 03-06 (2 min), 03-07 (3 min), 03-08 (3 min)
 - Trend: Good velocity
 
 *Updated after each plan completion*
@@ -88,6 +88,8 @@ Recent decisions affecting current work:
 - VerseActionsRef imperative API: open(verseId, verseText) and close()
 - parseVerseId helper extracts translation, book, chapter, verse from composite ID
 - Home screen as navigation hub for feature screens (bookmarks, notes)
+- bibleVersesByQuery GraphQL query for server-side full-text search
+- BibleTranslation enum type required by GraphQL schema (cast from string)
 
 ### Pending Todos
 
@@ -101,6 +103,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-02T06:43:20Z
-Stopped at: Completed 03-06-PLAN.md (Phase 3 complete)
+Last session: 2026-02-02T06:44:37Z
+Stopped at: Completed 03-08-PLAN.md (Phase 3 complete)
 Resume file: None
