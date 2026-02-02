@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2025-02-02)
 ## Current Position
 
 Phase: 2 of 8 (Authentication)
-Plan: 1 of 4 in current phase
+Plan: 2 of 4 in current phase
 Status: In progress
-Last activity: 2026-02-02 - Completed 02-01-PLAN.md
+Last activity: 2026-02-02 - Completed 02-02-PLAN.md
 
-Progress: [######....] 12%
+Progress: [######....] 14%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
+- Total plans completed: 7
 - Average duration: 4 min
-- Total execution time: 20 min
+- Total execution time: 23 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Foundation | 5/5 | 18 min | 4 min |
-| 2. Authentication | 1/4 | 2 min | 2 min |
+| 2. Authentication | 2/4 | 5 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (5 min), 01-03 (4 min), 01-05 (4 min), 01-04 (4 min), 02-01 (2 min)
+- Last 5 plans: 01-03 (4 min), 01-05 (4 min), 01-04 (4 min), 02-01 (2 min), 02-02 (3 min)
 - Trend: Good velocity
 
 *Updated after each plan completion*
@@ -60,6 +60,9 @@ Recent decisions affecting current work:
 - SecureStore for auth token persistence (iOS Keychain / Android Keystore)
 - Auth client scheme "selah" matches app.json deep link config
 - storagePrefix "selah" prevents SecureStore key collisions
+- Native Google Sign-In SDK (not OAuth redirect) for better UX
+- webClientId for server-side idToken verification
+- idToken passed as {token: idToken} object to trigger idToken flow
 
 ### Pending Todos
 
@@ -71,6 +74,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-02T02:24:43Z
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-02-02T02:33:00Z
+Stopped at: Completed 02-02-PLAN.md
 Resume file: None
