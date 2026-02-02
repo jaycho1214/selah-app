@@ -1,302 +1,271 @@
 # Architecture Research
 
-**Domain:** React Native Bible/Social App with Relay GraphQL
-**Researched:** 2026-02-01
-**Confidence:** HIGH (verified with official documentation and multiple sources)
+**Domain:** React Native social/content app (Bible reading + community sharing)
+**Researched:** 2026-02-02
+**Confidence:** HIGH (verified with official Expo docs, Relay docs, community patterns)
 
-## System Overview
+## Standard Architecture
+
+### System Overview
 
 ```
 +------------------------------------------------------------------+
-|                         App Root Layer                            |
-|  +------------------------------------------------------------+  |
-|  |  _layout.tsx (Root)                                        |  |
-|  |  - RelayEnvironmentProvider                                |  |
-|  |  - AuthContext Provider                                    |  |
-|  |  - Notification Handlers                                   |  |
-|  |  - Font/Asset Loading                                      |  |
-|  +------------------------------------------------------------+  |
+|                      Presentation Layer                           |
 +------------------------------------------------------------------+
-                              |
-                              v
-+------------------------------------------------------------------+
+|  +-------------+  +-------------+  +-------------+  +-----------+ |
+|  | Bible       |  | Feed        |  | Profile     |  | Settings  | |
+|  | Screens     |  | Screens     |  | Screens     |  | Screens   | |
+|  +------+------+  +------+------+  +------+------+  +-----+-----+ |
+|         |                |                |               |       |
++---------|----------------|----------------|---------------|-------+
+          |                |                |               |
++---------|----------------|----------------|---------------|-------+
+|         v                v                v               v       |
 |                      Navigation Layer                             |
-|  +---------------------------+  +-----------------------------+  |
-|  |  (auth) Group             |  |  (tabs) Group               |  |
-|  |  - login.tsx              |  |  - _layout.tsx (Tab Nav)    |  |
-|  |  - signup.tsx             |  |  - index.tsx (Home/Feed)    |  |
-|  |  - forgot-password.tsx    |  |  - read/                    |  |
-|  +---------------------------+  |  - community/               |  |
-|                                 |  - profile/                 |  |
-|                                 +-----------------------------+  |
+|  +------------------------------------------------------------+  |
+|  |              Expo Router (File-based)                       |  |
+|  |   app/(tabs)/ -> Tab Navigator                              |  |
+|  |   app/(tabs)/feed/ -> Stack within Feed tab                 |  |
+|  |   app/modal.tsx -> Modal screens                            |  |
+|  +------------------------------------------------------------+  |
 +------------------------------------------------------------------+
-                              |
-                              v
-+------------------------------------------------------------------+
-|                      Feature Modules                              |
-|  +---------------+  +---------------+  +---------------------+   |
-|  | Reading       |  | Community     |  | User                |   |
-|  | - BibleReader |  | - Feed        |  | - Profile           |   |
-|  | - PassageView |  | - Discussion  |  | - Settings          |   |
-|  | - Bookmarks   |  | - Comments    |  | - Notifications     |   |
-|  +---------------+  +---------------+  +---------------------+   |
-+------------------------------------------------------------------+
-                              |
-                              v
-+------------------------------------------------------------------+
-|                       Data Layer                                  |
-|  +---------------------------+  +-----------------------------+  |
-|  |  Relay Environment        |  |  Local State                |  |
-|  |  - Network Layer          |  |  - Auth tokens (SecureStore)|  |
-|  |  - Store (RecordSource)   |  |  - User preferences (MMKV)  |  |
-|  |  - Fragment Subscriptions |  |  - Offline queue            |  |
-|  +---------------------------+  +-----------------------------+  |
-+------------------------------------------------------------------+
-                              |
-                              v
-+------------------------------------------------------------------+
-|                     External Services                             |
-|  +---------------+  +---------------+  +---------------------+   |
-|  | GraphQL API   |  | Auth Provider |  | Push Service        |   |
-|  | (Shared w/Web)|  | (Native SDKs) |  | (Expo + APNs/FCM)   |   |
-|  +---------------+  +---------------+  +---------------------+   |
-+------------------------------------------------------------------+
+          |
++---------|------------------------------------------------------------+
+|         v              Data Layer                                    |
+|  +------------------+  +------------------+  +---------------------+  |
+|  | Relay Store      |  | SQLite (Offline) |  | Auth Context        |  |
+|  | (Server Data)    |  | (Bible Content)  |  | (Session State)     |  |
+|  +--------+---------+  +--------+---------+  +---------+-----------+  |
+|           |                     |                      |              |
+|           v                     v                      v              |
+|  +------------------+  +------------------+  +---------------------+  |
+|  | Relay Network    |  | Sync Manager     |  | Better Auth Client  |  |
+|  | (GraphQL)        |  | (Download/Update)|  | (Google/Apple)      |  |
+|  +--------+---------+  +--------+---------+  +---------+-----------+  |
++--------------------------------------------------------------------- +
+           |                      |                      |
+           v                      v                      v
++----------------------------------------------------------------------+
+|                         External Services                             |
+|  +----------------+  +----------------+  +---------------------------+ |
+|  | GraphQL API    |  | Bible API      |  | Push Service              | |
+|  | (selah-web)    |  | (Translations) |  | (Expo Push/FCM/APNs)      | |
+|  +----------------+  +----------------+  +---------------------------+ |
++----------------------------------------------------------------------+
 ```
 
-## Component Responsibilities
+### Component Responsibilities
 
 | Component | Responsibility | Typical Implementation |
 |-----------|----------------|------------------------|
-| Root Layout | App initialization, providers, splash screen | `_layout.tsx` with RelayEnvironmentProvider wrapping app |
-| Navigation | Route structure, tab/stack configuration | Expo Router file-based with `(tabs)` and `(auth)` groups |
-| Feature Screens | UI for specific features, query data | Screen components with `useLazyLoadQuery` for page queries |
-| Shared Components | Reusable UI elements with data requirements | Components with `useFragment` for colocated data needs |
-| Relay Environment | GraphQL network, caching, subscriptions | Single Environment instance at app root |
-| Auth Context | Authentication state, token management | React Context with SecureStore for token persistence |
-| Push Handlers | Notification registration, foreground handling | expo-notifications listeners in root layout |
+| **Screens** | UI rendering, user interaction | React components with Relay fragments |
+| **Expo Router** | Navigation state, deep linking, URL structure | File-based routes in `app/` directory |
+| **Relay Store** | Server state cache, optimistic updates | In-memory normalized store with fragments |
+| **SQLite** | Offline Bible content, user preferences | `expo-sqlite` with typed queries |
+| **Auth Context** | Session state, token management | React context wrapping Better Auth |
+| **Relay Network** | GraphQL request/response | Custom fetch function with auth headers |
+| **Sync Manager** | Offline content download, version tracking | Background task with expo-sqlite |
+| **Push Service** | Notification delivery | expo-notifications with Expo Push |
 
 ## Recommended Project Structure
 
 ```
-/app                           # Expo Router routes only
-  /_layout.tsx                 # Root layout: providers, initialization
-  /index.tsx                   # Redirect to appropriate start screen
-  /(auth)/                     # Authentication flow (not logged in)
-    /_layout.tsx               # Stack layout for auth screens
-    /login.tsx
-    /signup.tsx
-    /forgot-password.tsx
-  /(tabs)/                     # Main app (logged in)
-    /_layout.tsx               # Tab navigator layout
-    /index.tsx                 # Home/Feed tab
-    /read/                     # Bible reading tab
-      /_layout.tsx             # Stack for reading screens
-      /index.tsx               # Book/chapter selection
-      /[book]/[chapter].tsx    # Dynamic passage view
-    /community/                # Community/social tab
-      /_layout.tsx             # Stack for community screens
-      /index.tsx               # Discussion feed
-      /[discussionId].tsx      # Discussion detail
-    /profile/                  # Profile tab
-      /_layout.tsx
-      /index.tsx               # User profile
-      /settings.tsx
-  /+not-found.tsx              # 404 handler
-
-/src
-  /components/                 # Shared UI components
-    /ui/                       # Base UI primitives
-      Button.tsx
-      Card.tsx
-      Text.tsx
-    /reading/                  # Reading-specific components
-      PassageView.tsx          # + PassageView_passage.graphql
-      VerseHighlight.tsx
-    /community/                # Community components
-      DiscussionCard.tsx       # + DiscussionCard_discussion.graphql
-      CommentThread.tsx
-    /common/                   # Cross-feature components
-      UserAvatar.tsx           # + UserAvatar_user.graphql
-
-  /relay/                      # Relay configuration
-    environment.ts             # Relay Environment setup
-    network.ts                 # Network layer (fetch function)
-    __generated__/             # Relay compiler output
-
-  /hooks/                      # Custom hooks
-    useAuth.ts                 # Authentication state
-    usePushNotifications.ts    # Push notification setup
-    useOnlineStatus.ts         # Network connectivity
-
-  /contexts/                   # React Contexts
-    AuthContext.tsx            # Auth provider
-    ThemeContext.tsx           # Theme provider
-
-  /services/                   # External service integrations
-    auth/
-      index.ts                 # Auth service facade
-      nativeAuth.ts            # Native SDK auth
-      webAuth.ts               # Web fallback auth
-    notifications/
-      index.ts
-      tokenManager.ts
-      handlers.ts
-
-  /utils/                      # Utility functions
-    storage.ts                 # Secure storage helpers
-    formatting.ts              # Text/date formatting
-
-  /types/                      # TypeScript types (non-GraphQL)
-    navigation.ts              # Navigation param types
-    auth.ts                    # Auth types
+src/
+├── app/                          # Expo Router screens (file-based routing)
+│   ├── (tabs)/                   # Tab navigator group
+│   │   ├── _layout.tsx           # Tab bar configuration
+│   │   ├── index.tsx             # Home/Feed tab
+│   │   ├── bible/                # Bible tab stack
+│   │   │   ├── _layout.tsx       # Stack navigator for Bible
+│   │   │   ├── index.tsx         # Book selection
+│   │   │   ├── [book]/           # Dynamic route for book
+│   │   │   │   └── [chapter].tsx # Chapter reading view
+│   │   │   └── translations.tsx  # Translation picker
+│   │   ├── notifications.tsx     # Notifications tab
+│   │   └── profile/              # Profile tab stack
+│   │       ├── _layout.tsx
+│   │       ├── index.tsx
+│   │       └── [userId].tsx      # Other user profiles
+│   ├── (auth)/                   # Auth screens group (unauthenticated)
+│   │   ├── _layout.tsx
+│   │   ├── sign-in.tsx
+│   │   └── sign-up.tsx
+│   ├── post/                     # Post-related modals/screens
+│   │   ├── [postId].tsx          # Post detail
+│   │   └── create.tsx            # Create post modal
+│   ├── _layout.tsx               # Root layout (providers, auth check)
+│   └── +not-found.tsx            # 404 screen
+│
+├── components/                   # Shared UI components
+│   ├── ui/                       # Primitive UI components (gluestack-style)
+│   │   ├── button.tsx
+│   │   ├── input.tsx
+│   │   ├── card.tsx
+│   │   └── ...
+│   ├── bible/                    # Bible-specific components
+│   │   ├── verse-text.tsx
+│   │   ├── chapter-view.tsx
+│   │   ├── translation-picker.tsx
+│   │   └── verse-selector.tsx
+│   ├── feed/                     # Feed-specific components
+│   │   ├── post-card.tsx
+│   │   ├── post-list.tsx
+│   │   └── create-post-form.tsx
+│   ├── profile/                  # Profile components
+│   │   ├── user-avatar.tsx
+│   │   ├── user-stats.tsx
+│   │   └── follow-button.tsx
+│   └── rich-text/                # Rich text rendering/editing
+│       ├── renderer.tsx
+│       └── editor.tsx
+│
+├── relay/                        # Relay configuration
+│   ├── environment.ts            # Relay environment setup
+│   ├── network.ts                # Network layer with auth
+│   └── __generated__/            # Relay compiler output
+│
+├── lib/                          # Core utilities and services
+│   ├── auth/                     # Authentication
+│   │   ├── context.tsx           # Auth context provider
+│   │   ├── client.ts             # Better Auth client setup
+│   │   └── hooks.ts              # useAuth, useSession
+│   ├── offline/                  # Offline data management
+│   │   ├── database.ts           # SQLite setup and migrations
+│   │   ├── bible-store.ts        # Bible content operations
+│   │   └── sync.ts               # Download/update logic
+│   ├── notifications/            # Push notification handling
+│   │   ├── setup.ts              # Registration and permissions
+│   │   └── handlers.ts           # Notification response handling
+│   └── theme/                    # Theming
+│       ├── colors.ts             # OKLCH color tokens
+│       └── provider.tsx          # Theme context
+│
+├── hooks/                        # Shared React hooks
+│   ├── use-bible.ts              # Bible reading state
+│   ├── use-offline.ts            # Offline status detection
+│   └── use-deep-link.ts          # Deep link handling
+│
+├── constants/                    # App-wide constants
+│   ├── bible.ts                  # Book names, abbreviations
+│   └── config.ts                 # API URLs, feature flags
+│
+└── types/                        # TypeScript types
+    ├── bible.ts                  # Bible-related types
+    ├── navigation.ts             # Navigation param types
+    └── graphql.ts                # Re-exports from Relay generated
 ```
 
 ### Structure Rationale
 
-- **`/app` contains routes only:** Expo Router convention. Non-route code goes elsewhere to avoid route confusion.
-- **Feature-based component organization:** Components grouped by domain (reading, community) with colocated fragments.
-- **Relay `__generated__` in `/src/relay/`:** Centralized compiler output, separate from source.
-- **Services layer:** Abstracts native/web differences for auth and notifications.
+- **`app/` (Expo Router):** File-based routing provides automatic deep linking, intuitive URL structure, and familiar web patterns. Grouping with `(tabs)` and `(auth)` separates navigation concerns.
+
+- **`components/` by domain:** Components organized by feature domain (bible, feed, profile) with shared `ui/` primitives. Scales better than flat structure as features grow.
+
+- **`relay/` isolated:** Relay configuration centralized. Generated files in predictable location for easy gitignore and build tooling.
+
+- **`lib/` for services:** Non-component logic (auth, offline, notifications) lives here. Clear separation between UI and business logic.
+
+- **`hooks/` for shared state:** Custom hooks that span multiple screens. Domain-specific hooks stay in their feature directories.
 
 ## Architectural Patterns
 
 ### Pattern 1: Relay Fragment Colocation
 
-**What:** Each component declares its data requirements via GraphQL fragments in the same file (or adjacent `.graphql` file).
+**What:** Each component declares exactly the data it needs via a Relay fragment. Parent components compose child fragments.
 
-**When to use:** Every component that needs GraphQL data.
+**When to use:** All server data fetching. This is the core Relay pattern.
 
 **Trade-offs:**
-- PRO: Components are self-contained and reusable across contexts
-- PRO: Relay compiler ensures type safety and query efficiency
-- CON: More files if using `.graphql` extensions
-- CON: Learning curve for fragment key passing
+- PRO: Optimal data fetching, no over-fetching, automatic re-renders on data change
+- PRO: Type safety from generated types
+- CON: Learning curve, requires Relay compiler in build
 
 **Example:**
 ```typescript
-// src/components/community/DiscussionCard.tsx
+// components/feed/post-card.tsx
 import { graphql, useFragment } from 'react-relay';
-import type { DiscussionCard_discussion$key } from '@/relay/__generated__/DiscussionCard_discussion.graphql';
+import type { PostCard_post$key } from './__generated__/PostCard_post.graphql';
 
-const DiscussionCardFragment = graphql`
-  fragment DiscussionCard_discussion on Discussion {
+const PostCardFragment = graphql`
+  fragment PostCard_post on Post {
     id
-    title
-    excerpt
+    content
+    createdAt
     author {
       ...UserAvatar_user
+      name
     }
-    commentCount
-    createdAt
+    verses {
+      reference
+      text
+    }
+    likeCount
+    viewerHasLiked
   }
 `;
 
-interface Props {
-  discussion: DiscussionCard_discussion$key;
-}
-
-export function DiscussionCard({ discussion }: Props) {
-  const data = useFragment(DiscussionCardFragment, discussion);
-  // Render using data...
+export function PostCard({ post }: { post: PostCard_post$key }) {
+  const data = useFragment(PostCardFragment, post);
+  // Render with data...
 }
 ```
 
-### Pattern 2: Screen-Level Query Composition
+### Pattern 2: Dual Data Source (Online + Offline)
 
-**What:** Screen components (routes) use `useLazyLoadQuery` to fetch data, spreading child fragments.
+**What:** Server data via Relay for social features, local SQLite for Bible content. Clear boundary between what's synced and what's cached locally.
 
-**When to use:** Every screen that needs server data.
+**When to use:** When some content must work offline (Bible) while other content is inherently online (feed, notifications).
 
 **Trade-offs:**
-- PRO: Single network request for entire screen
-- PRO: Automatic fragment stitching by Relay compiler
-- CON: Screen becomes data coordinator
+- PRO: Bible always available offline, no network dependency for core reading
+- PRO: Social features stay fresh with Relay's cache management
+- CON: Two data sources to reason about, need clear boundaries
 
 **Example:**
 ```typescript
-// app/(tabs)/community/index.tsx
-import { graphql, useLazyLoadQuery } from 'react-relay';
-import { CommunityFeedQuery } from '@/relay/__generated__/CommunityFeedQuery.graphql';
+// lib/offline/bible-store.ts
+import * as SQLite from 'expo-sqlite';
 
-const query = graphql`
-  query CommunityFeedQuery($first: Int!, $after: String) {
-    viewer {
-      discussions(first: $first, after: $after) {
-        edges {
-          node {
-            id
-            ...DiscussionCard_discussion
-          }
-        }
-        pageInfo {
-          hasNextPage
-          endCursor
-        }
-      }
-    }
-  }
-`;
+const db = SQLite.openDatabaseSync('bible.db');
 
-export default function CommunityFeedScreen() {
-  const data = useLazyLoadQuery<CommunityFeedQuery>(query, { first: 20 });
-  // Render DiscussionCard for each edge...
+export async function getChapter(
+  translation: string,
+  book: string,
+  chapter: number
+): Promise<Verse[]> {
+  return db.getAllAsync<Verse>(
+    `SELECT * FROM verses
+     WHERE translation = ? AND book = ? AND chapter = ?
+     ORDER BY verse_number`,
+    [translation, book, chapter]
+  );
 }
+
+// In component:
+// Social data from Relay, Bible content from SQLite
+const feedData = useFragment(FeedFragment, feedRef);
+const bibleVerses = useBibleChapter('ESV', 'Genesis', 1);
 ```
 
-### Pattern 3: Single RelayEnvironmentProvider at Root
+### Pattern 3: Protected Route Groups
 
-**What:** Relay Environment created once and provided at app root.
+**What:** Expo Router route groups with authentication checks at the layout level.
 
-**When to use:** Always. Only one Environment per app.
+**When to use:** Separating authenticated from unauthenticated screens.
 
 **Trade-offs:**
-- PRO: All components share the same cache/store
-- PRO: Authentication token injected via closure
-- CON: Environment recreation on logout requires careful handling
+- PRO: Clear separation, automatic redirect logic
+- PRO: Deep links work with auth state
+- CON: Slightly more complex layout hierarchy
 
 **Example:**
 ```typescript
 // app/_layout.tsx
-import { RelayEnvironmentProvider } from 'react-relay';
-import { createEnvironment } from '@/relay/environment';
-import { useAuth } from '@/hooks/useAuth';
-
-export default function RootLayout() {
-  const { token } = useAuth();
-  const environment = useMemo(
-    () => createEnvironment(token),
-    [token] // Recreate on token change
-  );
-
-  return (
-    <RelayEnvironmentProvider environment={environment}>
-      <AuthProvider>
-        <Stack />
-      </AuthProvider>
-    </RelayEnvironmentProvider>
-  );
-}
-```
-
-### Pattern 4: Protected Routes with Expo Router
-
-**What:** Use route groups and conditional rendering to protect authenticated routes.
-
-**When to use:** Separating logged-in vs logged-out experiences.
-
-**Trade-offs:**
-- PRO: File-based structure makes auth boundaries visible
-- PRO: Deep links handled automatically
-- CON: Requires careful initial route handling
-
-**Example:**
-```typescript
-// app/_layout.tsx
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/lib/auth/hooks';
 import { Redirect, Stack } from 'expo-router';
 
 export default function RootLayout() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { session, isLoading } = useAuth();
 
   if (isLoading) {
     return <SplashScreen />;
@@ -304,7 +273,7 @@ export default function RootLayout() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      {isAuthenticated ? (
+      {session ? (
         <Stack.Screen name="(tabs)" />
       ) : (
         <Stack.Screen name="(auth)" />
@@ -314,215 +283,217 @@ export default function RootLayout() {
 }
 ```
 
-### Pattern 5: Stack-in-Tabs Navigation
+### Pattern 4: Outbox Pattern for Offline Writes
 
-**What:** Each tab contains its own Stack navigator for drill-down flows.
+**What:** Mutations queue locally when offline, sync when connection restored. Each mutation has idempotency key.
 
-**When to use:** When tabs have multi-screen flows (e.g., feed -> detail -> comments).
+**When to use:** Any user action that should persist even if briefly offline (likes, follows, creating posts while on unstable connection).
 
 **Trade-offs:**
-- PRO: Intuitive URL structure (`/community/[id]`)
-- PRO: Each tab maintains its own navigation state
-- PRO: Deep linking works naturally
-- CON: More nested layouts to manage
+- PRO: UX never blocks on network
+- PRO: No lost actions due to flaky connections
+- CON: Complexity in conflict resolution
+- CON: UI must show pending states
 
-**Example structure:**
-```
-/(tabs)/
-  _layout.tsx          # Tab navigator
-  community/
-    _layout.tsx        # Stack navigator for community tab
-    index.tsx          # Discussion list
-    [discussionId].tsx # Discussion detail (pushed on stack)
+**Example:**
+```typescript
+// lib/offline/sync.ts
+interface OutboxEntry {
+  id: string;          // Idempotency key
+  mutation: string;    // GraphQL mutation name
+  variables: unknown;  // Mutation variables
+  createdAt: number;
+  status: 'pending' | 'syncing' | 'failed';
+}
+
+export async function queueMutation(
+  mutation: string,
+  variables: unknown
+): Promise<string> {
+  const id = crypto.randomUUID();
+  await db.runAsync(
+    `INSERT INTO outbox (id, mutation, variables, created_at, status)
+     VALUES (?, ?, ?, ?, 'pending')`,
+    [id, mutation, JSON.stringify(variables), Date.now()]
+  );
+  triggerSync(); // Start sync if online
+  return id;
+}
+
+export async function processOutbox() {
+  const pending = await db.getAllAsync<OutboxEntry>(
+    `SELECT * FROM outbox WHERE status = 'pending' ORDER BY created_at`
+  );
+
+  for (const entry of pending) {
+    try {
+      await executeMutation(entry);
+      await db.runAsync(`DELETE FROM outbox WHERE id = ?`, [entry.id]);
+    } catch (error) {
+      if (isDuplicateError(error)) {
+        // Already processed, remove from outbox
+        await db.runAsync(`DELETE FROM outbox WHERE id = ?`, [entry.id]);
+      } else {
+        // Mark as failed, will retry
+        await db.runAsync(
+          `UPDATE outbox SET status = 'failed' WHERE id = ?`,
+          [entry.id]
+        );
+      }
+    }
+  }
+}
 ```
 
 ## Data Flow
 
-### Request Flow (Query)
+### Request Flow (Online - Relay)
 
 ```
-[User navigates to screen]
-         |
-         v
-[Screen component mounts]
-         |
-         v
-[useLazyLoadQuery called]
-         |
-         v
-[Relay checks Store cache]
-         |
-    +----+----+
-    |         |
-[Cache hit]  [Cache miss]
-    |              |
-    v              v
-[Return data]  [Network fetch via fetchQuery]
-                   |
-                   v
-              [GraphQL API]
-                   |
-                   v
-              [Store updated]
-                   |
-                   v
-              [Components re-render]
+[User Taps Feed]
+    |
+    v
+[Screen Component]
+    |
+    v
+[useLazyLoadQuery / useFragment] --> [Relay Store]
+    |                                     |
+    | (cache miss)                        | (cache hit)
+    v                                     v
+[Relay Network]                     [Return cached data]
+    |
+    v
+[GraphQL API] --> [Response] --> [Normalize to Store] --> [Component re-renders]
 ```
 
-### Relay Store Subscriptions
+### Bible Content Flow (Offline - SQLite)
 
 ```
-[Fragment data in Store changes]
-         |
-         v
-[Store notifies subscribed components]
-         |
-         v
-[Only components using changed fields re-render]
+[User Opens Chapter]
+    |
+    v
+[BibleScreen Component]
+    |
+    v
+[useBibleChapter Hook]
+    |
+    v
+[SQLite Query] --> [Return verses] --> [Render chapter]
+
+[Background: Check for translation updates]
+    |
+    v
+[Sync Manager] --> [Download if new version] --> [Update SQLite]
+```
+
+### Mutation Flow (Hybrid)
+
+```
+[User Taps Like]
+    |
+    v
+[Optimistic Update] --> [Relay Store Update] --> [UI shows liked]
+    |
+    |-- [Online?] --YES--> [Send Mutation] --> [Server confirms]
+    |
+    |-- [Online?] --NO--> [Queue in Outbox]
+                               |
+                               v
+                          [Connection restored]
+                               |
+                               v
+                          [Process Outbox] --> [Send Mutation]
 ```
 
 ### Authentication Flow
 
 ```
-[App launch]
-     |
-     v
-[Check SecureStore for token]
-     |
-+----+----+
-|         |
-[No token] [Has token]
-    |           |
-    v           v
-[Show auth]  [Validate token with API]
-    |           |
-    |      +----+----+
-    |      |         |
-    |   [Valid]   [Invalid]
-    |      |         |
-    v      v         v
-[Login] [Show app] [Clear & show auth]
+[App Launch]
     |
     v
-[Native SDK auth OR web fallback]
+[Check Stored Session] --> [Valid?] --YES--> [Load (tabs)]
+    |                          |
+    |                          NO
+    |                          |
+    v                          v
+[Session Expired?]        [Show (auth)]
+    |                          |
+YES |                          | [User signs in]
+    v                          v
+[Refresh Token] --FAIL--> [Show (auth)]
+    |
+SUCCESS
     |
     v
-[Receive token]
-    |
-    v
-[Store in SecureStore]
-    |
-    v
-[Update AuthContext]
-    |
-    v
-[Recreate Relay Environment with token]
-    |
-    v
-[Navigate to (tabs)]
-```
-
-### Push Notification Flow
-
-```
-[App launch]
-     |
-     v
-[Request notification permissions]
-     |
-     v
-[Get Expo push token (wraps APNs/FCM)]
-     |
-     v
-[Send token to backend via GraphQL mutation]
-     |
-     v
-[Backend stores token associated with user]
-
----
-
-[Backend wants to notify user]
-     |
-     v
-[Backend sends to Expo Push Service]
-     |
-     v
-[Expo routes to APNs (iOS) or FCM (Android)]
-     |
-     v
-[Device receives notification]
-     |
-+----+----+
-|         |
-[App foreground]  [App background/closed]
-    |                    |
-    v                    v
-[Notification listener]  [System notification]
-    |                    |
-    v                    v
-[Custom in-app UI]    [User taps]
-                         |
-                         v
-                    [App opens with deep link]
+[Load (tabs)]
 ```
 
 ## Scaling Considerations
 
 | Scale | Architecture Adjustments |
 |-------|--------------------------|
-| 0-1k users | Current architecture is sufficient. Single Relay store, standard caching. |
-| 1k-100k users | Implement pagination (Relay connections), optimize re-renders with `@refetchable`. Add basic offline queue for writes. |
-| 100k+ users | Consider splitting Relay store by feature if memory becomes issue. Implement aggressive cache policies. Add background sync for offline. |
+| 0-10k users | Current architecture is fine. SQLite handles Bible content easily. Relay cache handles normal usage. |
+| 10k-100k users | May need to paginate more aggressively. Consider lazy loading heavy screens. Relay's GC release buffer may need tuning. |
+| 100k+ users | Feed rendering becomes critical. Consider `FlashList` for long lists. May need to shard Bible SQLite by translation. Background sync should be smarter about battery. |
 
 ### Scaling Priorities
 
-1. **First bottleneck: Initial load time** - Use `@preloadable` queries, implement skeleton screens, optimize bundle splitting by route.
+1. **First bottleneck: List rendering** - Feed and notification lists will hit performance issues first. Use `FlashList` from the start, implement proper pagination with Relay connections.
 
-2. **Second bottleneck: List rendering** - Implement proper virtualization with FlashList, ensure fragment subscriptions are granular.
+2. **Second bottleneck: SQLite query performance** - As Bible content grows (multiple translations), queries may slow. Add proper indexes, consider FTS5 for search.
 
-3. **Third bottleneck: Memory on lower-end devices** - Configure Relay store garbage collection, limit retained data window for large feeds.
+3. **Third bottleneck: Memory** - Large Relay store + SQLite + images in memory. Tune Relay GC, use proper image caching with `expo-image`.
 
 ## Anti-Patterns
 
-### Anti-Pattern 1: Prop-Drilling GraphQL Data
+### Anti-Pattern 1: Fetching in Components Without Fragments
 
-**What people do:** Fetch data in a parent and pass it down through props to deeply nested children.
+**What people do:** Using `fetch()` or axios directly in components instead of Relay fragments.
 
-**Why it's wrong:** Defeats Relay's fragment colocation. Children become coupled to parent's query shape. Changes require editing multiple files.
+**Why it's wrong:** Loses all Relay benefits - no caching, no optimistic updates, no automatic re-renders, no data colocation, no type safety.
 
-**Do this instead:** Each component that needs data declares its own fragment. Pass fragment keys, not data.
+**Do this instead:** Always use Relay for server data. Define fragments for each component's data needs.
 
-### Anti-Pattern 2: Shared/Generic Fragments
+### Anti-Pattern 2: Mixing Online and Offline Data Sources
 
-**What people do:** Create a `UserFragment` used by 15 different components with all possible user fields.
+**What people do:** Trying to cache Relay data in SQLite for offline, or fetching Bible content from GraphQL.
 
-**Why it's wrong:** Over-fetching. Every component gets all fields even if it only needs `name`. Network and memory waste.
+**Why it's wrong:** Creates complex sync logic, duplicate data, inconsistent states. Two caching layers fighting each other.
 
-**Do this instead:** Each component declares exactly the fields it needs. Relay handles deduplication.
+**Do this instead:** Clear separation - Relay for social/online content, SQLite for Bible/offline content. Don't mix.
 
-### Anti-Pattern 3: Multiple Relay Environments
+### Anti-Pattern 3: Passing Data Through Navigation Params
 
-**What people do:** Create new Environment in each feature or screen.
+**What people do:** Passing full objects through navigation params to avoid refetching.
 
-**Why it's wrong:** Each Environment has its own cache. Data consistency breaks. Same query fetches multiple times.
+**Why it's wrong:** Navigation params should be minimal (IDs, references). Large objects cause serialization overhead, memory issues, and stale data.
 
-**Do this instead:** Single Environment at root. Recreate only on auth token change.
+**Do this instead:** Pass IDs, let destination screen fetch from Relay store (cache hit will be instant).
 
-### Anti-Pattern 4: Direct AsyncStorage for Auth Tokens
+```typescript
+// Bad
+navigation.navigate('Post', { post: fullPostObject });
 
-**What people do:** Store JWT tokens in AsyncStorage.
+// Good
+navigation.navigate('Post', { postId: post.id });
+// In PostScreen: useFragment to get data from Relay store
+```
 
-**Why it's wrong:** AsyncStorage is not encrypted. Tokens can be extracted on rooted/jailbroken devices.
+### Anti-Pattern 4: Global State for Server Data
 
-**Do this instead:** Use `expo-secure-store` for sensitive tokens. It uses Keychain (iOS) and Keystore (Android).
+**What people do:** Using Zustand/Jotai/Redux for server-fetched data.
 
-### Anti-Pattern 5: Mixing Navigation State Sources
+**Why it's wrong:** Relay already manages server state. Adding another state layer creates duplication, sync issues, and confusion about source of truth.
 
-**What people do:** Track navigation state in Redux AND Expo Router.
+**Do this instead:** Relay for server state, local state managers (if needed) only for purely client-side state (UI state, form state, etc.).
 
-**Why it's wrong:** Two sources of truth. State gets out of sync. Deep linking breaks.
+### Anti-Pattern 5: Blocking UI on Network for Bible Content
 
-**Do this instead:** Let Expo Router own navigation state entirely. Use its hooks (`useSegments`, `usePathname`) for state-dependent logic.
+**What people do:** Fetching Bible verses from the server on every read.
+
+**Why it's wrong:** Bible content rarely changes. Users expect instant access. Network dependency for core feature is unacceptable.
+
+**Do this instead:** Pre-download Bible translations to SQLite. Check for updates in background. Never block reading on network.
 
 ## Integration Points
 
@@ -530,94 +501,85 @@ export default function RootLayout() {
 
 | Service | Integration Pattern | Notes |
 |---------|---------------------|-------|
-| GraphQL API (shared backend) | Relay Network Layer | Auth token in headers. Same schema as web app. |
-| Auth (Native SDKs) | Service facade pattern | `react-native-app-auth` for OAuth. Fallback to web for unsupported providers. |
-| Auth (Web fallback) | expo-auth-session | For providers without native SDK support. Opens in-app browser. |
-| Push (Expo) | expo-notifications | Gets Expo push token. Backend sends via Expo Push Service. |
-| Secure Storage | expo-secure-store | Keychain/Keystore for tokens. |
-| Fast KV Storage | react-native-mmkv | User preferences, feature flags. 30-50x faster than AsyncStorage. |
+| GraphQL API (selah-web) | Relay Network layer with auth header injection | Same API as web, no mobile-specific endpoints needed |
+| Push Notifications | expo-notifications with Expo Push Service | Token sent to backend on registration, backend sends via Expo Push API |
+| Google Sign-In | @react-native-google-signin with Better Auth | ID token sent to backend for session creation |
+| Apple Sign-In | expo-apple-authentication with Better Auth | Identity token sent to backend for session creation |
+| Deep Links | Expo Router automatic handling | Universal links configured in app.json, verified with AASA file on web domain |
 
 ### Internal Boundaries
 
 | Boundary | Communication | Notes |
 |----------|---------------|-------|
-| Screen <-> Components | Fragment keys via props | Never pass raw data, always fragment refs |
-| Auth <-> Relay | Token via Environment closure | Environment recreated on token change |
-| Navigation <-> Auth | AuthContext in root layout | Auth state determines route group visibility |
-| Push <-> Backend | GraphQL mutation | `registerPushToken(token: String!)` mutation |
-| Features <-> Shared | Import from `/src/components/common/` | Shared components define their own fragments |
+| Screens <-> Relay | Fragment refs, hooks | Screens never call network directly |
+| Screens <-> SQLite | Custom hooks (useBibleChapter, etc.) | Abstraction layer hides SQLite details |
+| Auth <-> All | React Context | AuthProvider wraps app, useAuth hook everywhere |
+| Notifications <-> Navigation | Expo Router linking | Notification tap triggers navigation via deep link |
+| Offline Sync <-> SQLite | Direct function calls | Sync manager owns SQLite writes for Bible content |
 
 ## Build Order Implications
 
-Based on architectural dependencies, suggested implementation order:
+Based on dependencies between components:
 
-### Phase 1: Foundation
-1. **Expo project setup** - Initialize with Expo Router
-2. **Relay environment** - Network layer, store, compiler configuration
-3. **Basic navigation structure** - Root layout, tab navigator skeleton
+1. **Foundation (must be first)**
+   - Expo Router setup with route groups
+   - Theme provider with OKLCH colors
+   - Basic UI components (button, input, card)
 
-**Rationale:** Everything depends on navigation and data layer.
+2. **Data Layer (depends on foundation)**
+   - Relay environment and network layer
+   - SQLite database setup and migrations
+   - Auth context and Better Auth client
 
-### Phase 2: Authentication
-1. **Auth context and hooks** - State management
-2. **Secure token storage** - expo-secure-store integration
-3. **Login/signup screens** - Basic auth flow
-4. **Protected routes** - Auth-based navigation
+3. **Bible Features (depends on data layer)**
+   - Bible SQLite schema and operations
+   - Translation download/sync
+   - Chapter reading view
+   - Verse selection
 
-**Rationale:** Most features require authentication. Blocks feature work.
+4. **Social Features (depends on data layer, can parallel with Bible)**
+   - Feed list with Relay pagination
+   - Post creation (requires rich text decision)
+   - Likes, follows (optimistic updates)
+   - User profiles
 
-### Phase 3: Core Reading Feature
-1. **Bible reading screens** - Book/chapter selection
-2. **Passage view component** - Rich text rendering with fragments
-3. **Basic navigation within reading** - Stack for drill-down
+5. **Notifications (depends on auth)**
+   - Push token registration
+   - Notification handlers
+   - Notifications screen
 
-**Rationale:** Primary feature. Validates Relay fragment patterns.
-
-### Phase 4: Community Feature
-1. **Feed screen** - List with pagination
-2. **Discussion components** - Card, detail, comments
-3. **Social interactions** - Mutations for likes, comments
-
-**Rationale:** Depends on auth. Validates mutations and optimistic updates.
-
-### Phase 5: Push Notifications
-1. **Permission request flow** - User-facing
-2. **Token registration** - Backend mutation
-3. **Notification handlers** - Foreground/background handling
-4. **Deep link handling** - Navigation from notifications
-
-**Rationale:** Requires backend work. Deferrable.
-
-### Phase 6: Offline Considerations (Deferred)
-1. **Cache policies** - What to keep offline
-2. **Offline mutation queue** - Write-through pattern
-3. **Sync on reconnect** - Conflict resolution
-
-**Rationale:** Architecture supports this but implementation deferred per project scope.
+6. **Polish (depends on all above)**
+   - Deep linking verification
+   - Offline state handling
+   - Error boundaries
+   - Loading states
 
 ## Sources
 
 ### Official Documentation (HIGH confidence)
-- [Expo Router - Navigation layouts](https://docs.expo.dev/router/basics/layout/)
-- [Expo Router - Stack navigation](https://docs.expo.dev/router/advanced/stack/)
-- [Expo Router - Tab navigation](https://docs.expo.dev/router/advanced/tabs/)
-- [Expo Router - Core concepts](https://docs.expo.dev/router/basics/core-concepts/)
-- [Expo Push Notifications - Overview](https://docs.expo.dev/push-notifications/overview/)
-- [Expo Authentication](https://docs.expo.dev/develop/authentication/)
-- [Relay - Fragments](https://relay.dev/docs/guided-tour/rendering/fragments/)
-- [Relay - Environment Provider](https://relay.dev/docs/api-reference/relay-environment-provider/)
+- [Expo Router Introduction](https://docs.expo.dev/router/introduction/)
+- [Expo Local-First Architecture Guide](https://docs.expo.dev/guides/local-first/)
+- [Expo SQLite Documentation](https://docs.expo.dev/versions/latest/sdk/sqlite/)
+- [Expo Push Notifications Setup](https://docs.expo.dev/push-notifications/push-notifications-setup/)
+- [Relay Guided Tour - Presence of Data](https://relay.dev/docs/guided-tour/reusing-cached-data/presence-of-data/)
+- [Expo Common Navigation Patterns](https://docs.expo.dev/router/basics/common-navigation-patterns/)
+- [Expo Deep Linking Overview](https://docs.expo.dev/linking/overview/)
+- [Expo Authentication Guide](https://docs.expo.dev/develop/authentication/)
+- [Expo Rich Text Editing Guide](https://docs.expo.dev/guides/editing-richtext/)
 
-### Community Resources (MEDIUM confidence)
-- [React Native Relay GraphQL patterns](https://medium.com/@felippepuhle/how-we-improved-a-react-native-app-performance-by-using-graphql-and-relay-ed983a89747b)
-- [Building Scalable React Apps with GraphQL and Relay](https://www.velotio.com/engineering-blog/building-react-applications-using-graphql-and-relay)
-- [Expo managed workflow 2026](https://metadesignsolutions.com/expo-2026-the-best-way-to-build-cross-platform-apps/)
-- [React Native best practices 2026](https://www.esparkinfo.com/blog/react-native-best-practices)
-- [Relay Setup for React Native](https://www.back4app.com/docs/react-native/graphql/relay-setup)
+### Community Patterns (MEDIUM confidence)
+- [Expo App Folder Structure Best Practices](https://expo.dev/blog/expo-app-folder-structure-best-practices) - Expo Blog
+- [React Native Relay Performance Case Study](https://medium.com/@felippepuhle/how-we-improved-a-react-native-app-performance-by-using-graphql-and-relay-ed983a89747b)
+- [Offline-First SQLite Sync Pattern](https://dev.to/sathish_daggula/how-to-build-offline-first-sqlite-sync-in-expo-1lli)
+- [react-relay-offline Library](https://github.com/morrys/react-relay-offline)
+- [Feature-Based React Folder Structure](https://asrulkadir.medium.com/3-folder-structures-in-react-ive-used-and-why-feature-based-is-my-favorite-e1af7c8e91ec)
+- [gluestack-ui v3 Release](https://gluestack.io/blogs/gluestack-v3-release) - Component library patterns
 
-### Authentication Patterns
-- [React Navigation Auth Flow](https://reactnavigation.org/docs/auth-flow/)
-- [react-native-app-auth](https://github.com/FormidableLabs/react-native-app-auth)
+### Architecture References (MEDIUM confidence)
+- [State Management in 2026](https://www.nucamp.co/blog/state-management-in-2026-redux-context-api-and-modern-patterns)
+- [Cross-Platform Lexical Editor Architecture](https://storyie.com/blog/cross-platform-lexical-editor)
+- [React Native Push Notifications Guide](https://www.courier.com/blog/react-native-push-notifications-fcm-expo-guide)
 
 ---
-*Architecture research for: Selah Mobile - React Native Bible/Social App with Relay GraphQL*
-*Researched: 2026-02-01*
+*Architecture research for: Selah Mobile - React Native Bible social platform*
+*Researched: 2026-02-02*

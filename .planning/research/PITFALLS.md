@@ -1,257 +1,256 @@
 # Pitfalls Research
 
-**Domain:** React Native Bible/Social App (Next.js/Relay Web Port)
-**Researched:** 2026-02-01
-**Confidence:** MEDIUM-HIGH (official docs + multiple verified sources)
-
----
+**Domain:** React Native/Expo mobile app (Bible social platform, porting from Next.js)
+**Researched:** 2026-02-02
+**Confidence:** MEDIUM-HIGH (verified via multiple sources, Expo docs, community reports)
 
 ## Critical Pitfalls
 
-### Pitfall 1: Relay Environment Mismatch Between Web and Native
+### Pitfall 1: Lexical Editor Incompatibility
 
 **What goes wrong:**
-The Relay environment configured for Next.js web doesn't work on React Native. Network requests fail, auth headers aren't included, or localhost URLs are unreachable from mobile devices. Developers copy web Relay configs expecting them to work.
+Lexical is web-only. Teams attempt to use it in React Native and discover it doesn't work, requiring a complete rich text strategy rewrite mid-project.
 
 **Why it happens:**
-- Web uses browser's `fetch` with cookies automatically attached; React Native requires explicit header management
-- `localhost` URLs work in web browsers but are inaccessible from mobile emulators/devices
-- Session/auth credentials work differently: web uses cookies, mobile needs manual header injection
-- Metro bundler and Babel plugin for Relay require separate configuration from Next.js/webpack
+Lexical is a JavaScript framework for web browsers. There's an effort to port it to iOS/Android with a React Native wrapper, but it's not production-ready. Teams assume "it's React" means "it works in React Native."
 
 **How to avoid:**
-1. Create platform-specific Relay environments: `createEnvironment.web.ts` and `createEnvironment.native.ts`
-2. Replace `localhost` with `10.0.2.2` (Android emulator) or actual IP address for physical devices
-3. Configure environment-aware base URL: `process.env.EXPO_PUBLIC_API_URL`
-4. Manually inject auth tokens from SecureStore into request headers:
-```typescript
-// Native network layer must manually add auth
-headers: {
-  'Authorization': `Bearer ${await SecureStore.getItemAsync('session_token')}`,
-  'content-type': 'application/json',
-}
-```
+- Choose a React Native-native rich text solution from the start
+- Options: WebView-based editor (performance penalty), native editor wrapped via Expo Modules API, or simplified markdown-based input
+- If posts from web use Lexical's JSON format, you need a render-only solution for mobile (parse Lexical JSON, render with native components)
+- Consider: Can you simplify post creation on mobile? Maybe text-only with images, while full rich text is web-only
 
 **Warning signs:**
-- Network requests hang or return CORS errors
-- "Network request failed" errors only on native
-- Auth working on web but 401s on mobile
-- Relay compiler output not being picked up by Metro
+- Planning to "port" Lexical without researching RN compatibility
+- Assuming any web React library works in RN
+- Not prototyping rich text early
 
-**Phase to address:** Phase 1 - Foundation/Project Setup
+**Phase to address:**
+Foundation phase - must decide rich text strategy before building post creation UI
+
+**Sources:**
+- [Expo Rich Text Guide](https://docs.expo.dev/guides/editing-richtext/)
+- [Lexical Official Site](https://lexical.dev/)
+
+---
+
+### Pitfall 2: Radix UI Component Assumptions
+
+**What goes wrong:**
+Teams plan to reuse shadcn/ui or Radix primitives from the web app and discover these are DOM-based and won't work in React Native.
+
+**Why it happens:**
+Radix UI is built on web primitives (DOM, CSS). shadcn/ui is Radix + Tailwind CSS. Neither has React Native support. Teams underestimate the UI rewrite scope.
+
+**How to avoid:**
+- Accept that ALL UI components must be rewritten for React Native
+- Choose a React Native component library early: Tamagui (performance-focused, web+native), Gluestack UI (NativeBase successor, accessible), or build custom
+- Map shadcn components to RN equivalents: Button, Dialog, Sheet, Toast, etc.
+- Focus on matching design tokens (colors, spacing, typography) rather than components
+
+**Warning signs:**
+- Estimates assume component reuse from web
+- No RN component library selected
+- "We'll just use Tailwind" (NativeWind exists but components still need rewriting)
+
+**Phase to address:**
+Foundation phase - component library selection is architectural decision
+
+**Sources:**
+- [Tamagui](https://tamagui.dev/)
+- [React Native UI Libraries 2026](https://blog.logrocket.com/best-react-native-ui-component-libraries/)
+
+---
+
+### Pitfall 3: Relay Environment Misconfiguration
+
+**What goes wrong:**
+Relay works on web but fails silently or crashes on React Native due to network layer, fetch polyfills, or environment setup differences.
+
+**Why it happens:**
+Relay's network layer assumes browser fetch. React Native's fetch has subtle differences. Missing regenerator-runtime causes "regeneratorRuntime is not defined" errors. Environment not properly configured for mobile context.
+
+**How to avoid:**
+- Use react-relay-network-modern for customizable network layer with middlewares
+- Ensure regenerator-runtime is imported before Relay
+- Test Relay queries in RN development build early, not just web
+- Configure proper error boundaries - Relay errors can crash the app
+- Set up network layer to handle offline states gracefully (not just errors)
+
+**Warning signs:**
+- "It works on web" without RN testing
+- No custom network layer (using basic fetch)
+- regeneratorRuntime errors in console
+- Relay queries silently failing
+
+**Phase to address:**
+Foundation phase - Relay environment setup is prerequisite for all data features
 
 **Sources:**
 - [Relay Network Layer Docs](https://relay.dev/docs/guides/network-layer/)
-- [GitHub: Relay + React Native Web issues](https://github.com/necolas/react-native-web/issues/1611)
-- [Stack Overflow: localhost network failures in RN](https://dev.to/cathylai/fixing-network-request-failed-in-react-native-the-localhost-problem-7dg)
+- [react-relay-network-modern](https://github.com/relay-tools/react-relay-network-modern)
 
 ---
 
-### Pitfall 2: Better Auth Session Handling on Mobile
+### Pitfall 4: Offline Bible Storage Architecture
 
 **What goes wrong:**
-Sessions work on web but don't persist on mobile. Users must re-login every app launch. Or worse: requests fail silently because cookie headers aren't attached correctly.
+Teams implement offline storage with basic SQLite but face: no reactive UI updates, sync conflicts, schema migration hell, and poor performance on large Bible texts.
 
 **Why it happens:**
-- Web automatically handles cookies; mobile requires explicit SecureStore + manual header injection
-- Developers set `credentials: "include"` (web pattern) instead of `credentials: "omit"` with manual headers
-- Missing Metro config for Better Auth package exports
-- Session cache not initialized properly, causing infinite re-fetching
+SQLite is reliable but lacks observability (UI doesn't update when data changes), has no built-in replication, and requires manual schema migrations. Bible translations are large (each ~5-10MB), making download/storage strategy critical.
 
 **How to avoid:**
-1. Install and configure `expo-secure-store` for session persistence
-2. Use `@better-auth/expo` plugin on both server and client
-3. Set `credentials: "omit"` and manually attach session cookie to headers:
-```typescript
-const sessionCookie = await SecureStore.getItemAsync('better-auth.session_token');
-fetch(url, {
-  credentials: 'omit', // Prevent browser cookie interference
-  headers: {
-    'Cookie': sessionCookie,
-  }
-});
-```
-4. Add to `metro.config.js`:
-```javascript
-const config = {
-  resolver: {
-    unstable_enablePackageExports: true,
-  },
-};
-```
-5. After config changes: `npx expo start --clear`
+- Consider WatermelonDB for reactive, performant offline data with sync primitives
+- Or use SQLite with a reactive layer (TinyBase, custom observers)
+- Design schema migrations from day one - users will update the app
+- Implement download manager: progress tracking, resume on failure, background downloads
+- Store Bible text in chunks (by book) not monolithic files
+- Use expo-sqlite with proper async patterns, avoid blocking main thread
 
 **Warning signs:**
-- `useSession()` always returns loading/null state
-- Import errors for `better-auth` modules
-- Sessions lost on app background/foreground
-- Infinite network requests for session data
+- "Just use AsyncStorage" for Bible data (will be too slow)
+- No schema migration strategy
+- Downloading entire Bible as single file
+- UI polling for data changes instead of reactive updates
 
-**Phase to address:** Phase 2 - Authentication
+**Phase to address:**
+Bible reading phase - offline architecture must be designed before implementation
 
 **Sources:**
-- [Better Auth Expo Integration](https://www.better-auth.com/docs/integrations/expo)
+- [Expo SQLite Guide](https://medium.com/@aargon007/expo-sqlite-a-complete-guide-for-offline-first-react-native-apps-984fd50e3adb)
+- [React Native Local Database Options](https://www.powersync.com/blog/react-native-local-database-options)
+- [WatermelonDB](https://github.com/Nozbe/WatermelonDB)
 
 ---
 
-### Pitfall 3: OAuth Deep Link Configuration Mismatch
+### Pitfall 5: Push Notification Token Management
 
 **What goes wrong:**
-Apple Sign-In or Google Sign-In redirects fail. Users tap sign-in, browser opens, auth succeeds, but the redirect back to the app fails or goes nowhere.
+Push notifications work in development but fail in production. Tokens become stale, users don't receive notifications, and debugging is nearly impossible.
 
 **Why it happens:**
-- App scheme not registered in `app.json`
-- Scheme not added to `trustedOrigins` on Better Auth server
-- Development uses `exp://` scheme, production uses custom scheme - configs mixed
-- Missing URL scheme configuration in Xcode for iOS
-- Wrong client IDs (Android vs iOS vs Web) used
+- Expo SDK 53+ dropped push notification support from Expo Go on Android
+- Push tokens can change while app is running (rare but happens)
+- Tokens change on reinstall
+- APNs/FCM configuration differs from development to production
+- No visibility into whether notification was actually delivered
 
 **How to avoid:**
-1. Register app scheme in `app.json`:
-```json
-{
-  "expo": {
-    "scheme": "selah"
-  }
-}
-```
-2. Add all schemes to Better Auth server `trustedOrigins`:
-```typescript
-trustedOrigins: [
-  "selah://",           // Production
-  "exp://**",           // Expo Go development (if needed)
-  "http://localhost:*"  // Web development
-]
-```
-3. For Google Sign-In: use **Web Client ID** in app code, but ensure Android/iOS Client IDs exist in Google Console
-4. Enable "Sign In with Apple" capability in Apple Developer account AND set `ios.usesAppleSignIn: true` in app.json
+- Use development builds from day one for notification testing, not Expo Go
+- Implement token refresh listener to update backend immediately when token changes
+- Store token with device ID to detect reinstalls
+- Test on real devices only (simulators don't support push)
+- Set priority: "high" for Android lock screen notifications
+- Handle the "app killed" state - no way to react to notification when app is killed
+- Configure proper entitlements: ios.usesAppleSignIn, aps-environment in app config
 
 **Warning signs:**
-- OAuth redirects to web browser but never returns to app
-- "Invalid redirect URI" errors in console
-- DEVELOPER_ERROR (code 10) from Google Sign-In
-- App crashes when tapping sign-in button (iOS URL scheme issue)
+- Testing only in Expo Go
+- No token refresh handling
+- Testing on simulator
+- Notifications work in debug but not release
 
-**Phase to address:** Phase 2 - Authentication
-
-**Sources:**
-- [Expo Apple Authentication](https://docs.expo.dev/versions/latest/sdk/apple-authentication/)
-- [React Native Google Sign-In Troubleshooting](https://react-native-google-signin.github.io/docs/troubleshooting)
-- [Better Auth Expo Integration](https://www.better-auth.com/docs/integrations/expo)
-
----
-
-### Pitfall 4: Push Notification Development vs Production Credential Mismatch
-
-**What goes wrong:**
-Push notifications work in development but fail completely in production/TestFlight builds. Or notifications work on Android but not iOS (or vice versa).
-
-**Why it happens:**
-- SDK 53+: Expo Go no longer supports push notifications, but devs test in Expo Go anyway
-- iOS push keys expire without warning
-- Different credentials for development vs production not configured
-- FCM (Firebase Cloud Messaging) not set up for Android production builds
-- Testing on emulator/simulator (which can't receive push notifications)
-
-**How to avoid:**
-1. Use development builds from day one: `npx expo run:ios` / `npx expo run:android`
-2. Never test push notifications on simulators/emulators
-3. Set up EAS credentials early: `eas credentials`
-4. Use `eas build --platform ios --profile preview` for TestFlight testing
-5. Monitor for "DeviceNotRegistered" errors and remove invalid tokens from your database
-6. Set priority to "high" for reliable Android delivery
-
-**Warning signs:**
-- Notifications work in `expo start` but not in EAS builds
-- "No valid aps-environment entitlement string found" errors
-- getDevicePushTokenAsync hangs indefinitely
-- Gray/white square icons instead of your notification icon (Android)
-
-**Phase to address:** Phase 3 - Push Notifications
+**Phase to address:**
+Push notifications phase - requires development build infrastructure first
 
 **Sources:**
 - [Expo Push Notifications FAQ](https://docs.expo.dev/push-notifications/faq/)
-- [Expo Push Notifications Troubleshooting](https://docs.expo.dev/push-notifications/faq/)
+- [Expo Notifications Setup](https://docs.expo.dev/push-notifications/push-notifications-setup/)
 
 ---
 
-### Pitfall 5: Lexical Editor Not Working in React Native
+### Pitfall 6: Apple Sign-In Missing = App Store Rejection
 
 **What goes wrong:**
-Teams try to reuse Lexical rich text editor from the web app and discover it doesn't work at all in React Native. Either nothing renders, or they spend weeks trying to make it work.
+App is submitted to App Store with only Google Sign-In and gets rejected. Team scrambles to implement Apple Sign-In under deadline pressure.
 
 **Why it happens:**
-- Lexical is built for DOM manipulation; React Native has no DOM
-- Lexical's architecture assumes browser APIs (contenteditable, Selection API, etc.)
-- There's no official React Native support from the Lexical team
-- Developers assume "React library" means "React Native compatible"
+Apple requires Sign in with Apple if ANY third-party social login is offered. This is App Store Review guideline 4.8. Teams focus on Google (matching web app) and forget Apple requirement.
 
 **How to avoid:**
-1. Accept that Lexical cannot be directly ported to React Native
-2. Choose one of these strategies:
-   - **WebView wrapper**: Run Lexical inside a WebView with bridge communication (see [react-native-lexical-editor](https://github.com/davevilela/react-native-lexical-editor))
-   - **Read-only rendering**: Parse Lexical JSON on mobile and render with native Text components
-   - **Alternative editor**: Use a native rich text solution for editing (react-native-pell-rich-editor, etc.)
-3. Design data format to be editor-agnostic (store as JSON, render per-platform)
+- Implement Apple Sign-In alongside Google Sign-In from the start
+- Both require development builds (won't work in Expo Go)
+- Configure ios.usesAppleSignIn in app.json
+- Test both auth flows in TestFlight before submission
+- Ensure your backend supports Apple Sign-In tokens
 
 **Warning signs:**
-- `contentEditable is not a function` or DOM-related errors
-- Blank screen where editor should appear
-- Attempting to install `@lexical/react` in RN project
+- Auth planning only mentions Google
+- No Apple Developer account configuration for Sign in with Apple
+- Backend doesn't have Apple auth endpoint
 
-**Phase to address:** Phase 4 - Rich Text / Content Display
+**Phase to address:**
+Authentication phase - both providers must be implemented together
 
 **Sources:**
-- [Expo Rich Text Editing Guide](https://docs.expo.dev/guides/editing-richtext/)
-- [How to set up Lexical in React Native](https://strdr4605.com/how-to-set-up-lexical-editor-in-react-native)
-- [GitHub: react-native-lexical-editor](https://github.com/davevilela/react-native-lexical-editor)
+- [Expo Apple Authentication](https://docs.expo.dev/versions/latest/sdk/apple-authentication/)
+- [App Store Review Guidelines 4.8](https://developer.apple.com/app-store/review/guidelines/#sign-in-with-apple)
 
 ---
 
-### Pitfall 6: Bible Content Performance Degradation
+### Pitfall 7: Deep Link Configuration Fragility
 
 **What goes wrong:**
-Bible chapters (large text blocks) cause janky scrolling, slow initial render, or memory issues. Users report lag when scrolling through chapters or the app crashes on older devices.
+Deep links work inconsistently: work in some apps but not Gmail, work on Android but not iOS, work on fresh install but not updates.
 
 **Why it happens:**
-- Using `ScrollView` instead of `FlatList`/`FlashList` for verse lists
-- Not virtualizing verse components
-- Re-rendering all verses on any state change
-- Loading entire book into memory instead of paginating by chapter
-- Not using `useMemo` or `React.memo` for verse components
+Universal Links (iOS) and App Links (Android) require perfect alignment across: AASA file on web server, assetlinks.json, app entitlements, navigation configuration. iOS caches AASA aggressively (up to 48 hours). Email providers wrap links with tracking that breaks detection.
 
 **How to avoid:**
-1. Use `FlashList` (Shopify) for verse lists - better than FlatList for complex content
-2. Configure virtualization properly:
-```typescript
-<FlashList
-  data={verses}
-  estimatedItemSize={80}
-  renderItem={renderVerse}
-  keyExtractor={(verse) => verse.id}
-/>
-```
-3. Memoize verse components:
-```typescript
-const VerseItem = React.memo(({ verse }) => (
-  <Text>{verse.number}. {verse.text}</Text>
-));
-```
-4. Paginate by chapter, not by book
-5. Use `removeClippedSubviews={true}` on Android for large lists
+- Use Expo Router for file-based routing with built-in deep link support
+- Validate AASA and assetlinks.json with Apple/Google official validators
+- Test from real apps (Gmail, Mail, Messages), not Safari address bar
+- Test on fresh installs - iOS caches AASA on install
+- Avoid redirects, tracking wrappers, or URL shorteners in shared links
+- Handle cold start: queue deep link URL until navigation is ready
+- Disable remote JS debugging when testing getInitialURL (returns null with debugger)
 
 **Warning signs:**
-- JS thread frame drops in Flipper/Perf Monitor
-- "VirtualizedList: You have a large list that is slow to update" warning
-- App freezes when navigating to long chapters (Psalms 119, etc.)
-- Memory usage grows unbounded when scrolling
+- Only testing deep links from Notes app or Safari
+- No AASA/assetlinks.json validation
+- Deep links work in dev but not production
+- getInitialURL always returns null
 
-**Phase to address:** Phase 4 - Bible Display / Content Phase
+**Phase to address:**
+Deep linking phase - but URL scheme should be decided in foundation
 
 **Sources:**
-- [React Native VirtualizedList Docs](https://reactnative.dev/docs/virtualizedlist)
-- [React Native Performance Optimization for Lists](https://medium.com/@benjaminharringtonrose/react-native-performance-optimization-techniques-for-lists-c9f5c6beb109)
-- [react-native-big-list](https://github.com/marcocesarato/react-native-big-list)
+- [Universal & Deep Links 2026 Guide](https://prototyp.digital/blog/universal-links-deep-linking-2026)
+- [Expo Deep Linking](https://docs.expo.dev/guides/deep-linking/)
+
+---
+
+### Pitfall 8: FlatList Performance Degradation
+
+**What goes wrong:**
+Social feed and Bible chapter views are janky, drop frames, and feel sluggish - especially on older devices. App feels "slow" compared to native apps.
+
+**Why it happens:**
+FlatList has inherent performance limitations. Anonymous functions in renderItem cause re-renders. Not using getItemLayout forces async layout calculations. Loading all data upfront defeats virtualization.
+
+**How to avoid:**
+- Use FlashList (Shopify) instead of FlatList for long lists - designed for performance
+- Wrap renderItem components in React.memo()
+- Move renderItem function outside JSX, wrap in useCallback
+- Provide getItemLayout if items have consistent height
+- Implement pagination/infinite scroll, don't load all data upfront
+- Use removeClippedSubviews={true} (but test - can have bugs on iOS)
+- Profile with React DevTools Profiler to identify re-renders
+- Tune maxToRenderPerBatch and updateCellsBatchingPeriod
+
+**Warning signs:**
+- Using ScrollView for long lists (should use FlatList/FlashList)
+- Anonymous arrow functions in renderItem
+- No pagination (loading all posts at once)
+- No performance profiling during development
+
+**Phase to address:**
+Every phase with lists - but establish patterns in foundation phase
+
+**Sources:**
+- [React Native FlatList Optimization](https://reactnative.dev/docs/optimizing-flatlist-configuration)
+- [FlashList by Shopify](https://github.com/Shopify/flash-list)
 
 ---
 
@@ -259,12 +258,12 @@ const VerseItem = React.memo(({ verse }) => (
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Copying web Relay config | Faster initial setup | Network failures on mobile, auth issues | Never - design platform-aware from start |
-| Testing only in Expo Go | Faster iteration | Push notifications untested, native features broken | Only for UI-only iterations |
-| Using ScrollView for verse lists | Simpler code | Performance death on long chapters | Only for lists under 20 items |
-| Storing session in AsyncStorage | Simpler setup | Security vulnerability (unencrypted) | Never for auth tokens |
-| Hardcoding localhost URLs | Works on web | Breaks all mobile testing | Never - use env variables |
-| Skipping Apple Sign-In | Less config | App Store rejection | Never if Google Sign-In is included |
+| Using Expo Go for all testing | Faster iteration, no build wait | Can't test push, auth, or native modules | Never for features requiring native code |
+| Inline styles | Quick styling | No reuse, harder theming, performance cost | Prototyping only, refactor before merge |
+| Any-typing in TypeScript | Faster development | Type safety loss, runtime errors | Never - use proper types or unknown |
+| Skipping error boundaries | Less code | App crashes on component errors | Never - always wrap feature boundaries |
+| Console.log debugging | Quick answers | Left in production, performance impact | Development only, use proper logging service |
+| Not testing on Android | Faster dev cycle on Mac | Android-specific bugs in production | Never - test both platforms regularly |
 
 ---
 
@@ -272,12 +271,11 @@ const VerseItem = React.memo(({ verse }) => (
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| Relay + React Native | Using web `fetch` with cookies | Create mobile-specific network layer with manual auth headers |
-| Better Auth + Expo | Missing `unstable_enablePackageExports` in Metro | Add to metro.config.js resolver, clear cache |
-| Google Sign-In | Using wrong client ID (Android vs Web) | Use Web Client ID in app, but create iOS/Android IDs in Console |
-| Apple Sign-In | Forgetting `usesAppleSignIn` in app.json | Set `ios.usesAppleSignIn: true` AND enable in Apple Developer portal |
-| Expo Push Notifications | Testing on emulator | Always use physical devices for push testing |
-| Lexical | Trying to import directly | Use WebView wrapper or alternative native editor |
+| Google Sign-In | Using only web client ID | Configure all three client IDs (web, iOS, Android) even though only web ID is used in code |
+| Apple Sign-In | Forgetting backend support | Backend must validate Apple ID tokens, not just Google |
+| Relay + Offline | Assuming Relay handles offline | Implement custom network layer with offline queue |
+| expo-notifications + Firebase | Mixing client implementations | Choose one approach, don't mix expo-notifications with @react-native-firebase/messaging |
+| Better Auth | Assuming web auth works | Mobile needs native OAuth flows, not web redirects |
 
 ---
 
@@ -285,11 +283,11 @@ const VerseItem = React.memo(({ verse }) => (
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| Non-virtualized verse lists | Janky scroll, high memory | Use FlashList with proper estimatedItemSize | 50+ verses (most chapters) |
-| Relay over-fetching | Slow chapter loads | Use fragments to fetch only needed verse fields | Large chapters, slow networks |
-| Unoptimized images | Slow load, memory pressure | Use expo-image with caching, specify dimensions | 10+ images in feed |
-| Full book data in memory | Memory crash on old devices | Paginate by chapter, lazy load | Book of Psalms, Isaiah |
-| Sync re-renders | UI freeze on data updates | useDeferredValue, React.memo | Any data sync while scrolling |
+| Large Bible images | Slow chapter transitions | Use optimized images, lazy loading, caching | First use of high-res images |
+| Unoptimized re-renders | Janky scrolling, dropped frames | React.memo, useMemo, useCallback | 50+ items in list |
+| Synchronous SQLite | UI freezes during queries | Use async patterns, run queries off main thread | Complex queries or large datasets |
+| No image caching | Re-downloading images on every view | Use expo-image or react-native-fast-image | Any image-heavy screen |
+| Bundle size bloat | Slow app launch | Tree-shake, analyze bundle, lazy load screens | When bundle exceeds ~10MB JS |
 
 ---
 
@@ -297,11 +295,11 @@ const VerseItem = React.memo(({ verse }) => (
 
 | Mistake | Risk | Prevention |
 |---------|------|------------|
-| Storing auth tokens in AsyncStorage | Token theft from rooted/jailbroken devices | Use expo-secure-store exclusively for tokens |
-| Hardcoding API keys in JS | Key extraction from bundle | Use environment variables, server-side key storage |
-| Not validating OAuth state parameter | CSRF attacks on auth flow | Better Auth handles this - don't override |
-| Exposing GraphQL introspection in production | Schema discovery by attackers | Disable introspection in production Relay server |
-| Trusting client-provided user IDs | Privilege escalation | Always derive user from session server-side |
+| Sensitive data in deep link URLs | Token/password exposure | Use short-lived, single-use tokens for sensitive deep links |
+| Storing auth tokens in AsyncStorage | Tokens accessible if device rooted | Use expo-secure-store for sensitive data |
+| Hardcoded API keys in code | Keys extracted from app bundle | Use environment variables, never commit secrets |
+| Not validating deep link data | Injection attacks via malicious links | Validate and sanitize all deep link parameters |
+| Logging sensitive data | Credentials in crash reports | Scrub logs, use proper error boundaries |
 
 ---
 
@@ -309,24 +307,25 @@ const VerseItem = React.memo(({ verse }) => (
 
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| Notification permission prompt on first launch | Users deny, never see notifications | Delay prompt, explain value first, use soft-ask |
-| Long chapter loads without skeleton | Users think app is frozen | Show skeleton/shimmer while Relay query loads |
-| Auth session expiry without warning | Users lose unsaved highlights/notes | Proactive token refresh, offline queue for writes |
-| Platform-inconsistent navigation | Confusion switching iOS/Android | Use React Navigation with platform-specific patterns |
-| Blocking UI during Relay mutations | App feels unresponsive | Optimistic updates with rollback on failure |
+| Web-style navigation | Confusion, back button issues | Use bottom tabs + stack nav, respect platform patterns |
+| No loading states | App feels frozen | Skeleton screens, progress indicators, optimistic updates |
+| No offline indication | User doesn't know why things fail | Clear offline banner, retry buttons, cached data messaging |
+| Ignoring safe areas | Content under notch/home indicator | Use SafeAreaView, test on devices with notch |
+| Tiny touch targets | Frustrating taps, accessibility issues | Minimum 44x44pt touch targets |
+| No haptic feedback | App feels cheap | Add haptics for important actions (Expo Haptics) |
 
 ---
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **Push Notifications:** Works in dev but untested in production build - verify with EAS preview builds
-- [ ] **OAuth:** Works with one provider but Apple Sign-In not tested - App Store requires both if one exists
-- [ ] **Relay Queries:** Works online but no offline/error handling - test airplane mode behavior
-- [ ] **Bible Display:** Works for short chapters but Psalm 119 (176 verses) not tested
-- [ ] **Session Persistence:** Works on fresh install but not tested after app update
-- [ ] **Deep Links:** Works from browser but not tested from push notification tap
-- [ ] **Images:** Load correctly but no placeholder/error states for failed loads
-- [ ] **Android Notifications:** Notification received but icon is gray square - check asset requirements
+- [ ] **Push notifications:** Test on real device, test app killed state, test production build
+- [ ] **Deep links:** Test from Gmail (not Notes), test cold start, test after 48 hours on iOS
+- [ ] **Authentication:** Test token refresh, test session expiry, test re-authentication flow
+- [ ] **Offline mode:** Test airplane mode, test poor connectivity, test coming back online
+- [ ] **List performance:** Test with 100+ items, test on old Android device
+- [ ] **Bible downloads:** Test download interruption, test resume, test storage full scenario
+- [ ] **Images:** Test slow network, test cache miss, test very large images
+- [ ] **Keyboard:** Test all input fields, test with external keyboard, test keyboard avoidance
 
 ---
 
@@ -334,12 +333,12 @@ const VerseItem = React.memo(({ verse }) => (
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Wrong Relay environment config | LOW | Create platform-specific environments, update imports |
-| Sessions not persisting | LOW | Add SecureStore, migrate auth to @better-auth/expo |
-| OAuth redirect failures | MEDIUM | Audit all scheme configs, regenerate credentials |
-| Push notifications broken in production | MEDIUM | Regenerate credentials, rebuild with EAS |
-| Lexical not working | HIGH | Implement WebView wrapper or rewrite with native editor |
-| Performance issues with verse lists | MEDIUM | Replace ScrollView with FlashList, add virtualization |
+| Wrong rich text library | HIGH | Extract data layer, rebuild UI with new library, migrate content format |
+| Missing Apple Sign-In | MEDIUM | Add expo-apple-authentication, configure app.json, add backend support, rebuild |
+| Bad offline architecture | HIGH | Refactor data layer, migrate local storage, test extensively |
+| Poor list performance | MEDIUM | Switch to FlashList, memoize components, add pagination |
+| Broken deep links | MEDIUM | Regenerate AASA/assetlinks, validate, wait for cache expiry |
+| Push token management | LOW-MEDIUM | Add token refresh listener, migrate existing tokens, notify users |
 
 ---
 
@@ -347,38 +346,45 @@ const VerseItem = React.memo(({ verse }) => (
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| Relay environment mismatch | Phase 1: Foundation | API calls succeed from iOS and Android devices |
-| Session handling issues | Phase 2: Auth | User stays logged in after app restart |
-| OAuth deep link failures | Phase 2: Auth | Sign-in completes and returns to app on both platforms |
-| Push notification credential mismatch | Phase 3: Notifications | Notifications received in EAS preview build |
-| Lexical incompatibility | Phase 4: Content | Rich text displays correctly (even if read-only) |
-| Bible content performance | Phase 4: Content | Psalm 119 scrolls at 60fps on 3-year-old device |
-| Image caching issues | Phase 4: Content | Images load quickly on repeat views, offline gracefully |
+| Lexical incompatibility | Foundation | Rich text POC before building post creation |
+| Radix UI assumptions | Foundation | Component library selected and prototyped |
+| Relay misconfiguration | Foundation | Relay queries working in RN dev build |
+| Offline storage architecture | Bible Reading | Download + read offline works end-to-end |
+| Push token management | Push Notifications | Notifications received on production build |
+| Apple Sign-In missing | Authentication | Both providers tested in TestFlight |
+| Deep link fragility | Deep Linking | Links tested from multiple apps, fresh install |
+| FlatList performance | Every phase with lists | 60fps scrolling on mid-tier device |
+
+---
+
+## Phase-Specific Risk Summary
+
+| Phase | Highest Risk Pitfall | Mitigation |
+|-------|---------------------|------------|
+| Foundation | Relay + component library choices | Prototype early, test in dev build |
+| Bible Reading | Offline storage architecture | Design schema + migration strategy first |
+| Authentication | Apple Sign-In forgotten | Implement both providers together |
+| Social Features | List performance | Use FlashList, pagination from start |
+| Push Notifications | Token management | Implement refresh listener, test production |
+| Deep Linking | Configuration fragility | Use official validators, test extensively |
 
 ---
 
 ## Sources
 
-### Official Documentation
-- [Relay Network Layer](https://relay.dev/docs/guides/network-layer/)
-- [Better Auth Expo Integration](https://www.better-auth.com/docs/integrations/expo)
+**Official Documentation:**
+- [Expo Documentation](https://docs.expo.dev/)
+- [React Native Documentation](https://reactnative.dev/docs/getting-started)
+- [Relay Documentation](https://relay.dev/docs/)
+
+**Community & Research:**
+- [Universal & Deep Links 2026 Complete Guide](https://prototyp.digital/blog/universal-links-deep-linking-2026)
+- [React Native Best Practices for AI Agents](https://www.callstack.com/blog/announcing-react-native-best-practices-for-ai-agents)
+- [Expo SDK 54 Upgrade Issues](https://medium.com/elobyte-software/what-breaks-after-an-expo-54-reactnative-0-81-15cb83cdb248)
+- [FlashList Performance Tips](https://github.com/filipemerker/flatlist-performance-tips)
+- [React Native Local Database Options](https://www.powersync.com/blog/react-native-local-database-options)
 - [Expo Push Notifications FAQ](https://docs.expo.dev/push-notifications/faq/)
-- [Expo Apple Authentication](https://docs.expo.dev/versions/latest/sdk/apple-authentication/)
-- [Expo Image](https://docs.expo.dev/versions/latest/sdk/image/)
-- [Expo Rich Text Editing](https://docs.expo.dev/guides/editing-richtext/)
-- [React Native VirtualizedList](https://reactnative.dev/docs/virtualizedlist)
-
-### Troubleshooting Guides
-- [React Native Google Sign-In Troubleshooting](https://react-native-google-signin.github.io/docs/troubleshooting)
-- [Expo Common Development Errors](https://docs.expo.dev/workflow/common-development-errors/)
-- [Expo Build Troubleshooting](https://docs.expo.dev/build-reference/troubleshooting/)
-
-### Community Resources
-- [7 React Native Mistakes in 2026](https://medium.com/@baheer224/7-react-native-mistakes-slowing-your-app-in-2026-19702572796a)
-- [Making Expo Notifications Work on Android 12+ and iOS](https://medium.com/@gligor99/making-expo-notifications-actually-work-even-on-android-12-and-ios-206ff632a845)
-- [How to set up Lexical in React Native](https://strdr4605.com/how-to-set-up-lexical-editor-in-react-native)
-- [Migrating React to React Native](https://quabyt.com/blog/migrating-react-to-react-native)
 
 ---
-*Pitfalls research for: Selah Mobile - React Native Bible/Social App*
-*Researched: 2026-02-01*
+*Pitfalls research for: Selah Mobile (React Native/Expo Bible social platform)*
+*Researched: 2026-02-02*

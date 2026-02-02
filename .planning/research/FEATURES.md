@@ -1,272 +1,213 @@
-# Feature Research
+# Feature Research: Mobile Bible Social App
 
-**Domain:** React Native Bible Reading & Social Community App
-**Researched:** 2026-02-01
-**Confidence:** MEDIUM-HIGH (verified through multiple sources including official docs, UX research, and competitor analysis)
+**Domain:** Mobile Bible reading + social sharing platform
+**Researched:** 2026-02-02
+**Confidence:** MEDIUM-HIGH (based on analysis of major competitors and mobile UX research)
 
 ## Feature Landscape
 
 ### Table Stakes (Users Expect These)
 
-Features users assume exist. Missing these = product feels incomplete.
+Features users assume exist. Missing these = product feels incomplete or unusable.
 
-| Feature | Why Expected | Complexity | Mobile-Specific Notes |
-|---------|--------------|------------|----------------------|
-| **Swipe navigation between chapters** | Standard book-reading gesture on mobile; simulates flipping pages | MEDIUM | Use `react-native-pager-view` for smooth horizontal paging; avoid button-only navigation which feels outdated |
-| **Verse tap-to-select** | YouVersion and all major Bible apps use tap-to-select flow | MEDIUM | Show dotted underline on selection; display action menu at bottom (not popover which obscures content) |
-| **Verse highlighting with colors** | Core Bible study feature in every Bible app | MEDIUM | Support 5+ colors; sync across devices; only visible in version where added |
-| **Bookmarks** | Users expect to save their place | LOW | Smart bookmark that resumes reading position even after app close |
-| **Copy/Share verses** | Basic content utility | LOW | Swipe action menu to reveal Copy; support sharing to SMS, email, social media |
-| **Offline Bible access** | Mobile users read in transit, planes, areas with poor signal | HIGH | Download entire Bible versions for offline use; offline-first architecture essential |
-| **Font size adjustment** | Accessibility requirement; different contexts need different sizes | LOW | Use Dynamic Type on iOS; respect system accessibility settings |
-| **Dark/Light mode** | Eye comfort, battery savings on OLED; users expect per-app control | LOW | Respect system preference but allow override; smooth transition animation |
-| **Pull-to-refresh on feeds** | Universal mobile pattern for content refresh | LOW | Use RefreshControl with tintColor matching theme |
-| **Infinite scroll on feeds** | Standard social feed pattern; no pagination buttons | MEDIUM | Use FlatList with onEndReached; show loading indicator in footer |
-| **Push notifications** | Essential for engagement; users expect control over notification types | HIGH | Separate transactional vs promotional; respect user preferences; rich notifications with images |
-| **User profiles** | Social identity requirement | MEDIUM | Avatar, bio, follower/following counts, post history |
-| **Follow/unfollow users** | Core social networking pattern | MEDIUM | Optimistic UI updates; handle pending states |
-| **Like posts** | Basic social engagement | LOW | Haptic feedback on tap; optimistic updates; show like count |
-| **Comments on posts** | Essential social interaction | MEDIUM | Support replies (1-2 levels max on mobile); threaded display |
-| **Basic search** | Finding specific verses or content | MEDIUM | Autocomplete suggestions; recent searches; highlight matches |
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| **Multi-translation Bible reading** | Users want to compare translations; YouVersion offers 2,500+ versions | MEDIUM | Already planned; swipe navigation is mobile-native |
+| **Offline Bible access** | Users read in planes, subways, areas with poor signal | HIGH | Must download translations; storage management needed |
+| **Highlights with multiple colors** | Standard in all major Bible apps; YouVersion reports 2.4B highlights/year | MEDIUM | Need color picker, verse selection UI |
+| **Bookmarks** | Basic reading app functionality | LOW | Simple save/retrieve pattern |
+| **Notes (private)** | Users want to capture insights during reading | MEDIUM | Rich text optional but valuable |
+| **Search (full-text)** | Finding verses by keyword is fundamental | MEDIUM | Server-side; expose existing API |
+| **Adjustable font size** | Accessibility requirement; 25% of Android users change font size | LOW | System dynamic type + custom slider |
+| **Dark mode** | Expected in 2025+; reduces eye strain for reading | LOW | Already planned; OKLCH system supports this |
+| **Daily verse notifications** | Engagement driver; most Bible apps offer this | MEDIUM | Push notification + scheduling logic |
+| **Reading plans** | Core engagement feature; YouVersion has 1,000+ plans | HIGH | Already planned; includes progress tracking |
+| **Share verses to other apps** | Native mobile expectation; share sheet integration | LOW | Native share sheet; verse image optional |
+| **Audio Bible playback** | Major differentiator becoming table stakes; Dwell, YouVersion lead | HIGH | May require licensed audio content or TTS |
+| **Cloud sync across devices** | Users expect seamless experience web-to-mobile | MEDIUM | Existing backend should support; need sync logic |
 
 ### Differentiators (Competitive Advantage)
 
-Features that set the product apart. Not required, but valued.
+Features that set Selah apart. These align with the "Bible reading with community sharing" core value.
 
-| Feature | Value Proposition | Complexity | Mobile-Specific Notes |
-|---------|-------------------|------------|----------------------|
-| **Posts on specific verses** | Unique community layer tied to scripture context | HIGH | Bridge between Bible reading and social discussion; context-aware posting |
-| **Rich text posts with images** | More expressive than plain text; encourages engagement | HIGH | Use webview-based editor or simplified markdown; compress images before upload to max 2MB |
-| **Polls on verses** | Interactive engagement tool; theological questions | MEDIUM | Max 5 options to fit mobile screen; tap-to-vote without separate submit; show results after voting |
-| **Verse images (shareable)** | Visual content for social sharing outside app | MEDIUM | Generate verse graphics with customizable backgrounds; direct share to Instagram Stories, WhatsApp |
-| **Haptic feedback on interactions** | Premium feel; confirms actions without visual distraction | LOW | Use selection haptics for verse tap; impact haptics for likes; success haptics for post creation |
-| **Gesture-based actions** | Power user efficiency | MEDIUM | Swipe to bookmark, swipe to share; long-press for context menu |
-| **Cross-reference navigation** | Deep Bible study capability | HIGH | Tap verse references to jump; maintain reading history for back navigation |
-| **Reading plans/streaks** | Habit formation; gamification of reading | MEDIUM | Daily check-ins; streak counters; gentle push reminders |
-| **Audio Bible playback** | Accessibility and multitasking | HIGH | Background playback; sleep timer; playback speed control |
-| **Widget support** | Daily engagement without opening app | MEDIUM | Verse of the day widget; iOS 14+ widgets; Android home screen widgets |
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| **Verse-centric social posts** | Unlike generic social apps, posts center on Scripture | HIGH | Core differentiator; rich text + images + polls |
+| **Social activity feed** | See friends' highlights, bookmarks, notes (YouVersion feature) | MEDIUM | "What friends are reading" creates community |
+| **Verse images for sharing** | Create beautiful graphics from verses (YouVersion Verse Images: 1.8M+ created) | HIGH | Canvas/image generation; templates, backgrounds |
+| **Reading plans with friends** | Accountability through shared progress; YouVersion "Plans With Friends" | HIGH | Group progress, private discussion area |
+| **Haptic feedback on interactions** | Polished feel for likes, bookmarks, navigation | LOW | Expo Haptics; subtle confirmation |
+| **Deep linking to verses/posts** | Open app directly to content from notifications, shares | MEDIUM | Universal Links (iOS) + App Links (Android) |
+| **Swipe navigation between chapters** | Natural mobile reading gesture | LOW | Gesture handler; intuitive for readers |
+| **Pull-to-refresh on feeds** | Standard mobile pattern; keeps content fresh | LOW | Built into React Native lists |
+| **Infinite scroll social feed** | Smooth content loading; no pagination friction | MEDIUM | FlashList + React Query recommended |
+| **User profiles with reading history** | Social identity + accountability | MEDIUM | Already planned from web port |
+
+### Mobile-Specific Patterns (Web Doesn't Have)
+
+Unique mobile UX patterns that don't exist on web.
+
+| Pattern | Implementation | Complexity | Notes |
+|---------|---------------|------------|-------|
+| **Native push notifications** | FCM (Android) + APNs (iOS) via Expo | MEDIUM | Already planned; critical for engagement |
+| **Home screen widgets** | Verse of the day, reading plan progress | HIGH | Out of scope for v1, but high value |
+| **Bottom tab navigation** | Standard iOS/Android pattern vs web sidebar | LOW | React Navigation bottom tabs |
+| **Gesture-based navigation** | Swipe back (iOS native), swipe between chapters | MEDIUM | Must not conflict with other swipes |
+| **Share sheet (receive)** | Accept shares from other apps | MEDIUM | Out of scope v1; adds complexity |
+| **Biometric quick unlock** | Face ID, fingerprint for returning users | MEDIUM | Out of scope v1; nice to have |
+| **System font scaling** | Respect user's accessibility settings | LOW | Support Dynamic Type (iOS), font scale (Android) |
+| **Haptic feedback** | Tactile confirmation for key actions | LOW | expo-haptics; impact, selection, notification types |
+| **Background audio** | Continue Bible audio when app backgrounded | HIGH | Requires audio session management |
+| **Offline-first architecture** | Read, highlight, note while offline; sync later | HIGH | Complex state management; conflict resolution |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
-Features that seem good but create problems.
+Features that seem good but create problems. Deliberately NOT building these.
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| **Real-time everything** | "Users expect instant updates" | Battery drain, complexity, often unnecessary | Use optimistic UI with background sync; real-time only for direct messages or active discussions |
-| **Deeply nested comment threads (3+ levels)** | "Enable full discussion hierarchy" | Impossible to read on mobile screens; horizontal scrolling nightmare | Max 2 levels of nesting; Reddit-style "thread scroller" for navigation; collapse by default |
-| **Complex rich text editor** | "Full formatting options" | No good native solution; webview editors are laggy; users struggle on mobile keyboards | Simplified markdown subset; or just bold/italic/link; image-first approach |
-| **Sync everything immediately** | "Consistency across devices" | Network calls block UI; fails offline; battery drain | Offline-first with background sync; queue actions for batch processing |
-| **Pop-up modals for everything** | "Keep user on page" | Blocks content; back button confusion; accessibility issues | Bottom sheets for actions; dedicated screens for forms |
-| **Auto-playing video/audio** | "Increase engagement" | Annoying; data usage; unexpected sound in public | Play-on-tap only; show clear preview thumbnails |
-| **Complex filtering/sorting on every list** | "Power users need it" | Clutters UI; rarely used on mobile | Sensible defaults; advanced filters in dedicated settings screen |
-| **Custom font selection** | "Personalization" | Font rendering issues; large bundle sizes; accessibility problems | 2-3 carefully chosen fonts max; honor system font size preferences |
-
-## Mobile-Specific UX Patterns
-
-### Bible Reading Experience
-
-**Gesture Expectations:**
-- **Horizontal swipe**: Navigate between chapters (must feel like page-turning)
-- **Vertical scroll**: Read within a chapter
-- **Tap on verse**: Select verse, show action menu
-- **Long-press on verse**: Alternative selection method
-- **Double-tap**: Quick bookmark or highlight with default color
-- **Pinch-to-zoom**: Adjust font size (optional, system settings preferred)
-
-**Navigation Patterns:**
-- Book/chapter selector as bottom sheet or dedicated picker screen
-- Current chapter indicator always visible
-- Quick jump to any verse via search
-- Back button returns to previous reading position, not just previous screen
-
-**Reading Comfort:**
-- Line height optimization for readability
-- Proper margins for thumb-reach zones
-- Night mode with warm amber tint option
-- Auto-brightness adjustment consideration
-
-### Social Feed Experience
-
-**Feed Patterns:**
-- Pull-to-refresh with spinner at top
-- Infinite scroll with onEndReachedThreshold of 0.5 (start loading before bottom)
-- Loading indicator in ListFooterComponent
-- Empty state with call-to-action if no posts
-- "Scroll to top" FAB after scrolling down
-
-**Interaction Patterns:**
-- Like with haptic feedback (impactLight)
-- Comment counts visible; tap to expand thread
-- Share sheet access via share icon
-- User avatar tap navigates to profile
-- Post timestamp with relative time ("2h ago")
-
-**Performance Requirements:**
-- Use FlashList for large feeds (better recycling than FlatList)
-- Lazy load images with placeholder
-- Prefetch next page of content
-- Cache feed state for instant app resume
-
-### Notification Patterns
-
-**User Expectations (2026 standards):**
-- Granular notification controls (not just on/off)
-- Separate categories: social (likes, comments, follows), spiritual (verse of day, reading reminders), system
-- Quiet hours respect
-- Rich notifications with images on iOS/Android
-- Deep linking to specific content
-
-**Best Practices:**
-- 71% of uninstalls triggered by bad notification practices
-- Average user gets 46 push notifications/day - be respectful
-- Time-sensitive or highly personalized only
-- 40% of users interact within an hour - make CTAs clear
-
-### Offline-First Requirements
-
-**Core Principle:** Save locally first, sync in background. Never show "please check your connection" for local actions.
-
-**Offline Capabilities:**
-- Bible text: Fully available offline after download
-- Highlights/bookmarks: Saved locally, synced when online
-- Draft posts: Saved locally, queued for posting
-- Feed: Cached version available; stale indicator shown
-- Search: Offline search of downloaded Bible versions
-
-**Sync Strategy:**
-- Conflict resolution: Server wins for content, merge for user edits (highlights, notes)
-- Queue offline actions for batch sync
-- Background sync when app regains connectivity
-- Clear sync status indicators
+| **Real-time everything** | Feels "modern" and "live" | Complexity, battery drain, server cost; reading is not real-time | Update on pull-to-refresh; background sync |
+| **Custom Bible translations upload** | Power users want obscure translations | Copyright liability; QA nightmare; storage bloat | Support popular translations well; link to web for rare ones |
+| **AI-generated devotionals** | Trendy; FaithPod has "Bible Chat Assistant" | Theological accuracy concerns; user trust; potential for misinformation | Human-curated reading plans from trusted sources |
+| **Gamification/achievements** | YouVersion has achievement system | Can trivialize Scripture; "grinding" Bible reading feels wrong | Gentle progress indicators; celebration without competition |
+| **Social pressure metrics** | Show follower counts, like counts prominently | theWell hides these intentionally; reduces social anxiety | Optional visibility; focus on connection not comparison |
+| **Voice rooms/audio chat** | FaithPod offers group voice rooms | High complexity; moderation challenges; scope creep | Text-based comments on posts; DMs later |
+| **Dating features** | FaithCircle combines dating + Bible | Mission drift; different product category entirely | Stay focused on Bible reading community |
+| **Complex video features** | TikTok-style video feed | High complexity; bandwidth; storage; moderation; distracts from reading | Allow image posts; link to external videos |
+| **Aggressive notification frequency** | "Drive engagement" | 46% opt-out at 2-5 messages/week; 78% churn without clear strategy | Quality over quantity; user-controlled frequency |
+| **Lock screen Bible reading** | Constant Scripture visibility | Battery drain; privacy concerns; OS restrictions | Home screen widget (future); daily verse notification |
 
 ## Feature Dependencies
 
 ```
-Core Reading Features
-    [Bible Display]
-        |
-        +---> [Verse Selection] ---> [Highlighting]
-        |                       |
-        |                       +---> [Copy/Share]
-        |                       |
-        |                       +---> [Post on Verse]
-        |
-        +---> [Chapter Navigation (Swipe)]
-        |
-        +---> [Offline Download]
+[Bible Reading Core]
+    |
+    |---requires---> [Authentication]
+    |                    |
+    |                    +---enhances---> [Cloud Sync]
+    |
+    +---enables---> [Highlights/Bookmarks/Notes]
+    |                    |
+    |                    +---enables---> [Social Activity Feed]
+    |
+    +---enables---> [Reading Plans]
+    |                    |
+    |                    +---enables---> [Plans With Friends]
+    |                    |
+    |                    +---enhances---> [Push Notifications]
+    |
+    +---enables---> [Search]
 
-Social Features
-    [User Authentication]
-        |
-        +---> [User Profile] ---> [Follow System]
-        |                    |
-        |                    +---> [Follower/Following Lists]
-        |
-        +---> [Posts] ---> [Likes]
-        |            |
-        |            +---> [Comments] ---> [Nested Replies]
-        |            |
-        |            +---> [Polls]
-        |
-        +---> [Notifications]
+[Social Core]
+    |
+    +---requires---> [User Profiles]
+    |                    |
+    |                    +---enables---> [Follows]
+    |                                        |
+    |                                        +---enables---> [Social Feed]
+    |
+    +---requires---> [Verse Posts]
+                         |
+                         +---enables---> [Likes/Replies]
+                         |
+                         +---enhances---> [Verse Images]
 
-Settings
-    [Settings Screen]
-        |
-        +---> [Theme (Dark/Light)]
-        |
-        +---> [Font Size]
-        |
-        +---> [Language]
-        |
-        +---> [Notification Preferences]
+[Mobile-Specific]
+    |
+    +---requires---> [Push Notifications] --requires--> [Device Registration]
+    |
+    +---requires---> [Offline Mode] --requires--> [Local Database]
+    |
+    +---requires---> [Deep Linking] --requires--> [Universal Links config]
+    |
+    +---enhances---> [Share Out] --uses--> [Native Share Sheet]
+
+[Conflicts]
+    - Swipe chapter navigation conflicts with swipe-to-delete on lists
+    - Pull-to-refresh conflicts with scroll-to-top in some contexts
+    - Offline mode complexity conflicts with real-time features
 ```
 
 ### Dependency Notes
 
-- **Verse Selection requires Bible Display:** Can't select what isn't rendered
-- **Highlighting requires Verse Selection:** Must select before applying highlight
-- **Post on Verse requires both Verse Selection AND User Authentication:** Social feature tied to reading
-- **Comments require Posts:** No orphan comments
-- **Notifications require all social features:** Can't notify about nonexistent interactions
-- **Follow System requires User Profiles:** Must have identity before relationships
-
-### Conflicts to Avoid
-
-- **Rich text editor + Offline-first:** Complex editors depend on web tech; offline sync of rich content is tricky. Consider: simplified formatting that serializes to plain markdown.
-- **Real-time updates + Battery optimization:** Pick your battles. Real-time for active screens only.
+- **Bible Reading requires Auth:** Even anonymous reading needs user ID for sync
+- **Social Feed requires Highlights + Follows:** No feed without content or connections
+- **Reading Plans With Friends requires Reading Plans + Social:** Build single-user plans first
+- **Push Notifications enhance everything:** Daily verse, plan reminders, social activity
+- **Offline Mode affects all features:** Must decide offline scope early (reading only? highlights?)
+- **Deep Linking requires URL structure:** Plan deep link schema early for all content types
 
 ## MVP Definition
 
 ### Launch With (v1)
 
-Minimum viable product - what's needed to validate the concept as a mobile Bible + community app.
+Minimum viable product - what's needed to validate the core value proposition.
 
-- [ ] **Bible chapter reading with swipe navigation** - Core value prop; must feel native
-- [ ] **Verse tap-to-select** - Foundation for all Bible interactions
-- [ ] **Basic highlighting (single color minimum)** - Table stakes for Bible apps
-- [ ] **Offline Bible (at least one version)** - Mobile users expect offline access
-- [ ] **User registration/login** - Required for social features
-- [ ] **Create posts on verses** - Core differentiator of Selah
-- [ ] **View social feed of posts** - Basic discovery
-- [ ] **Like posts** - Minimal engagement mechanism
-- [ ] **Basic comments (no nesting for MVP)** - Social interaction
-- [ ] **User profiles (view only)** - Basic identity
-- [ ] **Dark/Light theme** - Expected customization
-- [ ] **Font size adjustment** - Accessibility requirement
-- [ ] **Push notifications for social actions** - Re-engagement
+- [x] **Bible reading with multi-translation support** - Core functionality
+- [x] **Swipe navigation between chapters** - Mobile-native reading experience
+- [x] **Authentication (Google + Apple)** - Required for social, Apple required for App Store
+- [x] **Highlights and bookmarks** - Basic engagement with Scripture
+- [x] **Notes (private)** - Personal reflection capture
+- [x] **Search** - Find verses by keyword
+- [x] **User profiles** - Social identity
+- [x] **Follows** - Build community connections
+- [x] **Verse posts with rich text** - Core social sharing
+- [x] **Likes and replies** - Basic social engagement
+- [x] **Social feed** - See what friends are sharing
+- [x] **Notifications feed** - In-app notification center
+- [x] **Reading plans (browse, join, track)** - Engagement and habit formation
+- [x] **Push notifications** - Re-engagement driver
+- [x] **Offline Bible reading** - Essential mobile feature
+- [x] **Share out to other apps** - Spread content beyond app
+- [x] **Deep linking** - Navigate from notifications/shares
+- [x] **Dark mode** - User comfort
+- [x] **Adjustable font size** - Accessibility
 
 ### Add After Validation (v1.x)
 
 Features to add once core is working and users are engaged.
 
-- [ ] **Multiple highlight colors** - When usage shows people highlight frequently
-- [ ] **Follow system** - When user base is large enough for social graph
-- [ ] **Nested comment replies** - When discussions get substantive
-- [ ] **Rich text in posts (images)** - When plain text feels limiting
-- [ ] **Polls** - When community engagement patterns emerge
-- [ ] **Verse sharing/images** - When growth becomes a goal
-- [ ] **Search for verses** - When content volume demands it
-- [ ] **Bookmarks** - When reading sessions are long enough
-- [ ] **Multiple Bible versions** - When users request
+- [ ] **Verse images creation** - Trigger: Users requesting image sharing options
+- [ ] **Reading plans with friends** - Trigger: Users trying to share plans manually
+- [ ] **Audio Bible playback** - Trigger: User research shows demand for listening
+- [ ] **Private notes on posts** - Trigger: Users wanting personal reflection on others' posts
+- [ ] **Image posts** - Trigger: Users wanting richer content creation
+- [ ] **Polls in posts** - Trigger: Community discussion engagement metrics
 
 ### Future Consideration (v2+)
 
 Features to defer until product-market fit is established.
 
-- [ ] **Audio Bible** - High complexity; requires content licensing
-- [ ] **Reading plans/streaks** - Gamification after core engagement proven
-- [ ] **Widgets** - Platform polish after core value established
-- [ ] **Cross-reference navigation** - Power user feature
-- [ ] **Language localization** - After English market validation
+- [ ] **Home screen widgets** - HIGH complexity; OS-specific implementations
+- [ ] **Background audio** - HIGH complexity; audio session management
+- [ ] **Offline social features** - HIGH complexity; sync conflict resolution
+- [ ] **Receive shares from other apps** - MEDIUM complexity; limited user value
+- [ ] **Biometric auth** - LOW value; OS handles app unlock
+- [ ] **Video posts** - Scope creep; different product category
 
 ## Feature Prioritization Matrix
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| Swipe chapter navigation | HIGH | MEDIUM | P1 |
-| Verse selection + highlighting | HIGH | MEDIUM | P1 |
-| Offline Bible | HIGH | HIGH | P1 |
-| Posts on verses | HIGH | MEDIUM | P1 |
-| Social feed (infinite scroll) | HIGH | MEDIUM | P1 |
-| Like posts | HIGH | LOW | P1 |
-| Comments (flat) | HIGH | MEDIUM | P1 |
-| User profiles | MEDIUM | MEDIUM | P1 |
-| Push notifications | HIGH | HIGH | P1 |
-| Dark/Light theme | HIGH | LOW | P1 |
-| Font size | MEDIUM | LOW | P1 |
-| Follow system | MEDIUM | MEDIUM | P2 |
-| Multiple highlight colors | MEDIUM | LOW | P2 |
-| Nested comments | MEDIUM | MEDIUM | P2 |
-| Images in posts | MEDIUM | HIGH | P2 |
+| Bible reading + swipe nav | HIGH | MEDIUM | P1 |
+| Highlights/bookmarks/notes | HIGH | MEDIUM | P1 |
+| Authentication | HIGH | MEDIUM | P1 |
+| Offline Bible reading | HIGH | HIGH | P1 |
+| Social feed | HIGH | MEDIUM | P1 |
+| Verse posts | HIGH | HIGH | P1 |
+| Push notifications | HIGH | MEDIUM | P1 |
+| Reading plans | HIGH | HIGH | P1 |
+| Deep linking | MEDIUM | MEDIUM | P1 |
+| Search | MEDIUM | LOW | P1 |
+| Dark mode + font size | MEDIUM | LOW | P1 |
+| Verse images | HIGH | HIGH | P2 |
+| Plans with friends | HIGH | HIGH | P2 |
+| Audio Bible | HIGH | HIGH | P2 |
+| Image posts | MEDIUM | MEDIUM | P2 |
 | Polls | MEDIUM | MEDIUM | P2 |
-| Verse image sharing | MEDIUM | MEDIUM | P2 |
-| Search | MEDIUM | MEDIUM | P2 |
-| Bookmarks | MEDIUM | LOW | P2 |
-| Audio Bible | MEDIUM | HIGH | P3 |
-| Reading plans | MEDIUM | HIGH | P3 |
-| Widgets | LOW | MEDIUM | P3 |
-| Cross-references | LOW | HIGH | P3 |
+| Widgets | HIGH | HIGH | P3 |
+| Background audio | MEDIUM | HIGH | P3 |
+| Biometric auth | LOW | MEDIUM | P3 |
 
 **Priority key:**
 - P1: Must have for launch
@@ -275,71 +216,72 @@ Features to defer until product-market fit is established.
 
 ## Competitor Feature Analysis
 
-| Feature | YouVersion | Logos | Selah (Our Approach) |
-|---------|------------|-------|----------------------|
-| Bible reading | Swipe between chapters; tap to select verses | Tap to select; extensive study tools | Swipe navigation; tap-to-select with immediate action menu |
-| Highlighting | 5+ colors; visible only in version added | Extensive markup tools | 5 colors; sync across versions for same verse |
-| Social features | Share verse images; limited community | None | Full social feed on verses; posts, likes, comments |
-| Notes | Private notes on verses | Extensive notes with linking | Public posts on verses (community notes) |
-| Offline | Download individual versions | Full library offline | Offline-first architecture; Bible + cached content |
-| Profiles | Basic account; reading streak | Account for purchases | Full social profiles with follow system |
-| Notifications | Verse of day; reading reminders | Purchase/update alerts | Social notifications + verse of day |
-| Rich content | Verse images; video clips | Video courses | Posts with images and polls |
+| Feature | YouVersion | Dwell | Grow | theWell | Selah Approach |
+|---------|------------|-------|------|---------|----------------|
+| Multi-translation | 2,500+ versions | 14 versions | 7 translations | Limited | Support popular ones; use existing API |
+| Audio Bible | Yes (dramatized) | Premium (20 voices) | No | No | Defer to v1.x; evaluate licensing |
+| Verse images | Yes (very popular) | No | Yes | No | P2 - high differentiator potential |
+| Reading plans | 1,000+ | Playlists | Yes (devotionals) | No | Yes - core engagement feature |
+| Plans with friends | Yes | Yes (share playlists) | No | No | P2 - social differentiator |
+| Social feed | Activity stream | No | Yes (full social) | Yes (full social) | Yes - core product |
+| Highlights/notes | Yes | Favorites | Basic | Basic | Yes - enhance with social sharing |
+| Widgets | Yes (iOS 14+) | No | No | No | Defer to v2 |
+| Dark mode | Yes | Yes | Yes | Yes | Yes - standard expectation |
+| Offline | Yes | Yes (download) | Limited | No | Yes - critical for mobile |
+| Privacy features | No | N/A | No | Yes (hide metrics) | Optional - respect user preference |
+| Push notifications | Yes | Yes | Yes | Yes | Yes - smart frequency |
 
-## React Native Implementation Notes
+## Mobile UX Patterns to Implement
 
-### Key Libraries
+### Gestures
 
-| Feature | Recommended Library | Notes |
-|---------|---------------------|-------|
-| Swipe navigation | react-native-pager-view | Used by React Navigation's TabView; native performance |
-| Gestures | react-native-gesture-handler | Foundation for swipe, long-press, pan |
-| Haptics | react-native-haptic-feedback | iOS Taptic Engine + Android vibration |
-| Image picker | expo-image-picker or react-native-image-crop-picker | With compression before upload |
-| Image compression | react-native-compressor or expo-image-manipulator | WhatsApp-quality compression |
-| Lists | @shopify/flash-list | Better than FlatList for large feeds |
-| Offline storage | WatermelonDB or MMKV | SQLite-based for complex queries; MMKV for key-value |
-| Push notifications | expo-notifications or react-native-firebase | FCM for Android, APNs for iOS |
-| Infinite scroll | React Query useInfiniteQuery | Built-in pagination state management |
+| Gesture | Action | Platform | Notes |
+|---------|--------|----------|-------|
+| Swipe left/right | Navigate chapters | Both | Must disable for lists |
+| Swipe from left edge | Back navigation | iOS | System standard; don't override |
+| Pull down | Refresh feed | Both | Standard pattern |
+| Long press | Select verse/show menu | Both | For highlighting, sharing |
+| Double tap | Like post | Both | Instagram-popularized pattern |
+| Pinch | Zoom text (optional) | Both | Alternative to font slider |
 
-### Performance Considerations
+### Haptic Feedback
 
-- **Swipeable in FlatList**: Known performance issues with gesture handler; consider custom implementation
-- **Large Bible text**: Virtualize chapter content; don't render entire book at once
-- **Image loading**: Use expo-image or react-native-fast-image with caching
-- **Feed performance**: Use FlashList over FlatList for 10x better recycling
+| Action | Haptic Type | Notes |
+|--------|-------------|-------|
+| Like/bookmark tap | Light impact | Quick confirmation |
+| Complete reading plan day | Success notification | Celebration moment |
+| Error (network, validation) | Error notification | Alert user |
+| Long press menu appears | Selection | Tactile menu opening |
+| Pull-to-refresh threshold | Light impact | Indicate refresh will trigger |
+
+### Navigation
+
+- **Bottom tabs:** Home (feed), Bible, Plans, Notifications, Profile
+- **Stack navigation:** Within each tab for drill-down
+- **Modal sheets:** Quick actions, sharing, verse selection
+- **Floating action button:** Optional for new post (common pattern)
 
 ## Sources
 
-### Bible App UX
-- [YouVersion Support - Highlighting](https://help.youversion.com/l/en/article/ie1gz0nsr7-highlights-ios) (HIGH confidence)
-- [YouVersion Support - Copy/Share](https://help.youversion.com/l/en/article/6nmv44gg2m-sharing) (HIGH confidence)
-- [Mobile Navigation UX Best Practices 2026](https://www.designstudiouiux.com/blog/mobile-navigation-ux/) (MEDIUM confidence)
-- [Unique Bible App Navigation](https://www.uniquebible.app/mobile/navigation) (MEDIUM confidence)
+### Primary Competitors Analyzed
+- [YouVersion Bible App](https://www.youversion.com/bible-app) - 1B+ installs, market leader
+- [Dwell Audio Bible](https://dwellapp.io/) - Premium audio focus
+- [Grow Christian Social App](https://play.google.com/store/apps/details?id=co.growfaith.grow) - Social + devotional
+- [theWell Christian Social Media](https://apps.apple.com/us/app/thewell-christian-social-media/id1370790950) - Privacy-focused social
+- [FaithPod](https://play.google.com/store/apps/details?id=com.faithpod.christiansocial) - Voice rooms, AI chat
 
-### Social Features
-- [React Native Social SDK](https://www.social.plus/social/sdk/react-native) (MEDIUM confidence)
-- [Stream Activity Feeds - React Native](https://getstream.io/activity-feeds/docs/react-native/social_network/) (HIGH confidence)
-- [Building Social Media with React Native](https://www.reactnativeappdeveloper.com/blog/how-to-build-a-social-media-platform-using-react-native/) (MEDIUM confidence)
+### Mobile UX Research
+- [17 Best Bible Apps Reviewed 2026](https://theleadpastor.com/tools/best-bible-apps/) - Feature comparison
+- [7 Best Christian Social Media Apps 2026](https://actssocial.com/blog/best-christian-social-media-apps) - Social app landscape
+- [Push Notification Best Practices 2025](https://upshot-ai.medium.com/push-notifications-best-practices-for-2025-dos-and-don-ts-34f99de4273d) - Engagement patterns
+- [2025 Guide to Haptics](https://saropa-contacts.medium.com/2025-guide-to-haptics-enhancing-mobile-ux-with-tactile-feedback-676dd5937774) - Tactile UX patterns
+- [Font Size for Older Adults](https://pmc.ncbi.nlm.nih.gov/articles/PMC9376262/) - Accessibility research
+- [Deep Linking Guide 2025](https://www.bitcot.com/mobile-application-deep-linking/) - Universal/App Links
 
-### Mobile UX Patterns
-- [Baymard - Autocomplete Best Practices](https://baymard.com/blog/autocomplete-design) (HIGH confidence)
-- [Algolia - Mobile Search UX](https://www.algolia.com/blog/ux/mobile-search-ux-best-practices) (HIGH confidence)
-- [Comment Thread Design Examples](https://www.subframe.com/tips/comment-thread-design-examples) (MEDIUM confidence)
-
-### Push Notifications
-- [Reteno - Push Notification Best Practices 2026](https://reteno.com/blog/push-notification-best-practices-ultimate-guide-for-2026) (MEDIUM confidence)
-- [Appbot - App Push Notifications 2026](https://appbot.co/blog/app-push-notifications-2026-best-practices/) (MEDIUM confidence)
-
-### React Native Implementation
-- [Expo ImagePicker Docs](https://docs.expo.dev/versions/latest/sdk/imagepicker/) (HIGH confidence)
-- [React Navigation TabView](https://reactnavigation.org/docs/7.x/tab-view/) (HIGH confidence)
-- [Mastering Media Uploads 2026](https://dev.to/fasthedeveloper/mastering-media-uploads-in-react-native-images-videos-smart-compression-2026-guide-5g2i) (MEDIUM confidence)
-- [Haptics Design Principles - Android](https://developer.android.com/develop/ui/views/haptics/haptics-principles) (HIGH confidence)
-
-### Offline-First
-- [Building Offline-First React Native Apps 2026](https://javascript.plainenglish.io/building-offline-first-react-native-apps-the-complete-guide-2026-68ff77c7bb06) (MEDIUM confidence)
+### Engagement Statistics
+- [YouVersion 2025 Verse of the Year](https://www.youversion.com/news/youversion-announces-2025-verse-of-the-year) - Usage patterns
+- [Push Notification Benchmarks 2025](https://www.airship.com/resources/benchmark-report/mobile-app-push-notification-benchmarks-for-2025/) - Retention data
 
 ---
-*Feature research for: Selah Mobile - React Native Bible/Social App*
-*Researched: 2026-02-01*
+*Feature research for: Mobile Bible social platform (Selah)*
+*Researched: 2026-02-02*

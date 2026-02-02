@@ -1,214 +1,360 @@
-# Stack Research
+# Stack Research: Selah Mobile
 
-**Domain:** React Native Bible/Social Mobile App (Porting Next.js/Relay Web App)
-**Researched:** 2026-02-01
-**Confidence:** HIGH (verified via official docs and current npm/release data)
+**Domain:** React Native social/Bible mobile app with GraphQL
+**Researched:** 2026-02-02
+**Confidence:** HIGH (core stack) / MEDIUM (rich text editor)
+
+## Executive Summary
+
+The React Native / Expo ecosystem has matured significantly. Expo SDK 54 with React Native 0.81 (New Architecture enabled) provides the foundation. Key decision points:
+
+1. **Relay works identically** - Same version (20.1.1) as web, same patterns
+2. **Rich text is the hardest problem** - No perfect solution; 10tap-editor (Tiptap-based) is the best current option
+3. **Offline sync needs WatermelonDB** - The only battle-tested RN solution for offline-first with sync
+4. **NativeWind v4 for styling** - Tailwind in RN, matches web mental model
+5. **gluestack-ui v3 for components** - Replaced NativeBase, accessible, NativeWind-compatible
+
+---
 
 ## Recommended Stack
 
-### Core Technologies
+### Core Framework (Already Initialized)
 
-| Technology | Version | Purpose | Why Recommended | Confidence |
-|------------|---------|---------|-----------------|------------|
-| Expo SDK | 54.0.0 | App framework | Latest stable SDK with React Native 0.81, React 19.1.0. Managed workflow simplifies builds, OTA updates, push notifications. 3x/year release cadence means active maintenance. | HIGH |
-| React Native | 0.81 | Mobile runtime | Bundled with Expo 54. New Architecture enabled by default. XCFramework precompilation reduces iOS build times by ~90% (120s to 10s). | HIGH |
-| TypeScript | 5.x | Type safety | Matches web app. Required for Relay compiler, React Navigation static API, and NativeWind. | HIGH |
-| Relay | 20.1.1 | GraphQL client | **Same as web app.** Originally created for React Native at Facebook. Suspense-based, type-safe, automatic cache management. Matches existing schema/fragments. | HIGH |
-| React Navigation | 7.x (7.1.28) | Navigation | De facto standard. New static API simplifies TypeScript + deep linking. v8 in alpha but v7 is stable and well-documented. | HIGH |
-| NativeWind | 4.x | Styling | Tailwind CSS for React Native. **v4 is production-ready; v5 is pre-release.** Matches web Tailwind patterns. Supports dark mode, animations via Reanimated. | HIGH |
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| Expo | ~54.0.33 | Development platform | De-facto standard for RN, managed workflow with EAS, OTA updates |
+| React Native | 0.81.5 | Mobile framework | New Architecture enabled by default, excellent performance |
+| React | 19.1.0 | UI library | Matches web, hooks-based architecture |
+| TypeScript | ~5.9.2 | Type safety | Essential for large codebases, matches web |
+| Expo Router | ~6.0.23 | Navigation | File-based routing like Next.js, automatic deep linking |
 
-### Authentication
+**Confidence: HIGH** - Already initialized and verified working.
 
-| Technology | Version | Purpose | Why Recommended | Confidence |
-|------------|---------|---------|-----------------|------------|
-| Better Auth (Expo plugin) | latest | Auth client | **Matches web app backend.** Official Expo integration with SecureStore. Supports idToken sign-in for Apple/Google. Deep link callbacks work natively. | HIGH |
-| expo-apple-authentication | ~7.x | Apple Sign-In | Native SDK integration. Required for App Store if Google sign-in offered. Simple config via `ios.usesAppleSignIn: true`. | HIGH |
-| @react-native-google-signin/google-signin | 14.x | Google Sign-In | Native SDK for both platforms. Works with development builds (not Expo Go). Supports New Architecture. | HIGH |
+### Data Layer
 
-### Push Notifications
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| react-relay | ^20.1.1 | GraphQL client | Matches web exactly, enables code sharing, compiler catches errors at build time |
+| relay-runtime | ^20.1.1 | Relay core | Required peer dependency |
+| relay-compiler | ^20.1.1 | Query compilation | Generates typed artifacts |
+| graphql | ^16.12.0 | GraphQL core | Required peer, matches web version |
 
-| Technology | Version | Purpose | Why Recommended | Confidence |
-|------------|---------|---------|-----------------|------------|
-| expo-notifications | ~0.31.x | Push notifications | Unified API for APNs/FCM. Expo Push Service handles certificate management. Can also use native tokens for direct FCM/APNs if needed. | HIGH |
-| Expo Push Service | N/A (hosted) | Push backend | Free, handles APNs/FCM complexity. Alternative: use `getDevicePushTokenAsync()` for direct integration. | HIGH |
+**Confidence: HIGH** - Identical to web codebase, Relay works great with React Native per official docs.
 
-### Rich Text Editing
+**Setup Note:** Configure babel-plugin-relay in babel.config.js, share schema.graphql from web repo.
 
-| Technology | Version | Purpose | Why Recommended | Confidence |
-|------------|---------|---------|-----------------|------------|
-| @10play/tentap-editor | 1.0.1 | Rich text editor | **Best option for porting Lexical.** Based on Tiptap/ProseMirror (same family as Lexical). WebView-based but designed for mobile UX. TypeScript, customizable, actively maintained. | MEDIUM |
+### Styling & UI Components
 
-**Rich Text Reality Check:** Native rich text editing in React Native is an unsolved problem. No native Lexical port exists. Options are:
-1. **@10play/tentap-editor** (recommended) - Tiptap in WebView, best mobile UX
-2. **react-native-pell-rich-editor** - Simpler WebView editor, less customizable
-3. **Custom WebView + Lexical** - Maximum web parity, more work to integrate
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| NativeWind | ^4.2.1 | Tailwind CSS for RN | Same mental model as web, compiles at build time, works with Expo SDK 54 |
+| tailwindcss | ^3.4.17 | Utility classes | v3.x required for NativeWind v4 (NOT v4.x which is for NativeWind v5) |
+| gluestack-ui | ^3.0.11 | Component library | Modular, accessible, NativeWind-compatible, replaced NativeBase |
 
-### Data & Storage
+**Confidence: HIGH** - gluestack-ui v3 explicitly optimized for Expo SDK 54 and NativeWind.
 
-| Technology | Version | Purpose | Why Recommended | Confidence |
-|------------|---------|---------|-----------------|------------|
-| react-native-mmkv | 3.x (V4 Nitro) | Fast key-value storage | 30x faster than AsyncStorage. Synchronous API. Encrypted storage option. Works with Zustand persist middleware. | HIGH |
-| expo-secure-store | 15.x | Secure credentials | Keychain (iOS) / Keystore (Android). For auth tokens, sensitive data. Used by Better Auth Expo plugin. | HIGH |
-| @tanstack/react-query | 5.x | Server state caching | Complements Relay for non-GraphQL data (local Bible content, cached responses). Optional but useful for offline-first patterns. | MEDIUM |
+**Critical Config (NativeWind v4 + Expo SDK 54):**
+```javascript
+// babel.config.js
+module.exports = function (api) {
+  api.cache(true);
+  return {
+    presets: [
+      ["babel-preset-expo", { jsxImportSource: "nativewind" }],
+      "nativewind/babel",
+    ],
+    plugins: ["react-native-reanimated/plugin"],
+  };
+};
 
-### UI Components
+// metro.config.js
+const { getDefaultConfig } = require("expo/metro-config");
+const { withNativeWind } = require("nativewind/metro");
+const config = getDefaultConfig(__dirname);
+module.exports = withNativeWind(config, { input: "./global.css" });
+```
 
-| Technology | Version | Purpose | Why Recommended | Confidence |
-|------------|---------|---------|-----------------|------------|
-| @shopify/flash-list | 1.7.x | Performant lists | Replaces FlatList. Cell recycling = 60 FPS on low-end Android. 54% FPS improvement, 82% CPU reduction vs FlatList. Essential for Bible chapter lists, feeds. | HIGH |
-| expo-image | ~3.0.11 | Image component | Built on SDWebImage/Glide. BlurHash/ThumbHash placeholders. Disk+memory caching. No flickering on source change. | HIGH |
-| expo-image-picker | ~16.x | Image selection | Native picker UI. SDK 54 returns original HEIC/AVIF without compression by default. | HIGH |
-| react-native-reanimated | ~3.17.x | Animations | Required by NativeWind. Native-driven animations for 60fps. New Architecture compatible. | HIGH |
-| react-native-gesture-handler | ~2.21.x | Gestures | Native gesture handling. Required by React Navigation for gesture-based navigation. | HIGH |
+### Rich Text Editor
+
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| @10play/tentap-editor | ^1.0.1 | Rich text editing | Best current RN option, Tiptap/ProseMirror-based, typed, extensible |
+
+**Confidence: MEDIUM** - This is the hardest problem in RN. No perfect solution exists.
+
+**Why 10tap-editor:**
+- Built on Tiptap/ProseMirror (mature, extensible)
+- TypeScript native
+- Custom toolbar support
+- Dark mode support
+- Active development (v1.0.1 released Nov 2025)
+- Works with Expo (basic mode in Expo Go, full features with dev client)
+
+**Limitations:**
+- WebView-based (inherent performance tradeoff)
+- Cannot use native UI components inside editor
+- Mentions/images require custom implementation
+- May need to serialize differently than Lexical
+
+**Migration Strategy from Lexical:**
+- Web continues using Lexical, stores JSON
+- Mobile uses 10tap-editor with Tiptap JSON
+- Backend normalizes to HTML or portable format for cross-platform rendering
+- Implement custom `RichTextRenderer` component that handles both formats
+
+### Offline & Storage
+
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| @nozbe/watermelondb | ^0.28.0 | Offline database | Lazy loading, SQLite-based, built-in sync primitives, reactive |
+| @morrowdigital/watermelondb-expo-plugin | latest | Expo integration | Enables managed workflow, no ejection needed |
+| react-native-mmkv | ^4.1.2 | Key-value storage | 30x faster than AsyncStorage, encrypted, synchronous |
+
+**Confidence: HIGH** - WatermelonDB is the standard for offline-first RN apps.
+
+**WatermelonDB Use Cases for Selah:**
+- Offline Bible reading (download entire translations)
+- Cache verse posts for offline viewing
+- Queue post creation/edits when offline
+- Sync with GraphQL API when online
+
+**MMKV Use Cases:**
+- User preferences
+- Auth tokens (encrypted)
+- Theme settings
+- Last read position
 
 ### State Management
 
-| Technology | Version | Purpose | Why Recommended | Confidence |
-|------------|---------|---------|-----------------|------------|
-| Zustand | 5.0.10 | Client state | 3KB, minimal boilerplate, subscription-based (no context performance issues). 40% adoption in React ecosystem. Pairs well with Relay (Relay for server state, Zustand for UI state). | HIGH |
-| Relay Store | (via Relay) | GraphQL cache | **Primary data store.** Automatic normalization, cache consistency. UI reads from Relay store, not separate state. | HIGH |
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| zustand | ^5.0.11 | Global app state | Tiny (3KB), no boilerplate, works perfectly with Relay |
+
+**Confidence: HIGH** - Relay handles server state; Zustand only needed for UI state.
+
+**What Zustand Manages (Relay handles server data):**
+- UI state (modals open/closed, current tab)
+- Navigation state not handled by router
+- Temporary form state before submission
+
+### Authentication
+
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| @better-auth/expo | ^1.4.9 | Auth client | Matches web auth, supports native ID token flow |
+| expo-apple-authentication | ^8.0.8 | Apple Sign-In | Required by App Store when offering social login |
+| expo-auth-session | latest | OAuth flows | Google Sign-In with native modal |
+| expo-secure-store | latest | Secure storage | Better Auth session caching |
+
+**Confidence: HIGH** - Better Auth explicitly supports Expo with native ID token flow.
+
+**Auth Flow:**
+1. Native SDK (Apple/Google) returns ID token
+2. Pass to Better Auth: `authClient.signIn.social({ provider, idToken })`
+3. Session cached in SecureStore automatically
+
+### Push Notifications
+
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| expo-notifications | ^0.32.16 | Push handling | Handles FCM/APNs, token management, notification display |
+| expo-device | latest | Device detection | Required for push token generation |
+
+**Confidence: HIGH** - Official Expo solution, well-documented.
+
+**Note:** From SDK 53+, push notifications not supported in Expo Go. Requires development build.
+
+### Deep Linking & Sharing
+
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| expo-linking | ^8.0.11 | URL handling | Built-in, works with Expo Router |
+| expo-sharing | latest | Share OUT | Share verses/posts to other apps |
+| expo-share-intent | ^5.1.1 | Share IN (future) | Receive shares from other apps (post-v1) |
+
+**Confidence: HIGH** - Expo Router auto-enables deep links for all routes.
+
+**Setup:**
+- `scheme: "selah"` in app.json for custom URLs
+- `associatedDomains` for iOS Universal Links
+- `intentFilters` with `autoVerify: true` for Android App Links
+
+### Supporting Libraries
+
+| Library | Version | Purpose | When to Use |
+|---------|---------|---------|-------------|
+| expo-image | ~3.0.11 | Image display | Performant image loading with caching (already included) |
+| expo-image-picker | ^17.0.10 | Image selection | Profile photos, post images |
+| react-native-reanimated | ~4.1.1 | Animations | Complex animations, gestures (already included) |
+| react-native-gesture-handler | ~2.28.0 | Gestures | Swipe navigation for Bible (already included) |
+| lucide-react-native | latest | Icons | Matches web icon set |
+| date-fns | latest | Date formatting | Lightweight, matches web |
 
 ### Development Tools
 
 | Tool | Purpose | Notes |
 |------|---------|-------|
-| Expo Dev Client | Development builds | Required for native modules (Google Sign-In, push notifications). Replaces Expo Go for full functionality. |
-| relay-compiler | GraphQL compilation | Validates queries against schema, generates TypeScript types. Run in watch mode during development. |
-| EAS Build | Cloud builds | iOS builds without Mac. Handles credentials. Free tier available. |
-| EAS Submit | App store submission | Automated submission to App Store Connect and Google Play. |
-| Expo Updates | OTA updates | Push JS updates without app store review. Critical for bug fixes. |
+| EAS Build | Cloud builds | Required for push notifications, production builds |
+| EAS Submit | Store submission | Automated iOS/Android submission |
+| EAS Update | OTA updates | Instant updates without store review |
+| Expo Dev Client | Custom development build | Required for native modules |
 
-## Installation
-
-```bash
-# Create Expo project
-npx create-expo-app@latest selah-app --template tabs
-
-# Core dependencies
-npx expo install expo-image expo-image-picker expo-notifications expo-secure-store expo-apple-authentication @shopify/flash-list react-native-reanimated react-native-gesture-handler react-native-safe-area-context react-native-screens
-
-# Navigation
-npm install @react-navigation/native @react-navigation/native-stack @react-navigation/bottom-tabs
-
-# Relay (matching web versions)
-npm install react-relay relay-runtime graphql
-npm install -D relay-compiler babel-plugin-relay @types/relay-runtime @types/react-relay
-
-# Authentication
-npm install @react-native-google-signin/google-signin
-npm install better-auth @better-auth/expo
-
-# Rich text editor
-npx expo install @10play/tentap-editor react-native-webview
-
-# Styling
-npm install nativewind
-npm install -D tailwindcss@^3.4.17 prettier-plugin-tailwindcss
-
-# State & Storage
-npm install zustand react-native-mmkv
-
-# Dev dependencies
-npm install -D typescript @types/react @types/react-native
-```
+---
 
 ## Alternatives Considered
 
+### UI Components
+
 | Recommended | Alternative | When to Use Alternative |
 |-------------|-------------|-------------------------|
-| Relay | Apollo Client | If not porting existing Relay web app. Apollo has simpler learning curve but lacks Relay's automatic optimizations. |
-| Relay | urql | Smaller bundle, simpler API. Use for new projects without existing Relay infrastructure. |
-| NativeWind | StyleSheet.create | If team unfamiliar with Tailwind. StyleSheet is built-in, zero dependencies, but verbose. |
-| NativeWind | Tamagui | If need cross-platform web+native component library. More opinionated, steeper learning curve. |
-| NativeWind | Gluestack | Copy-paste accessible components with Tailwind. Good if need pre-built component library. |
-| Zustand | Jotai | If need atomic state with fine-grained subscriptions. Better for complex interdependent state. |
-| Zustand | Redux Toolkit | Enterprise apps with large teams needing strict patterns. More boilerplate but battle-tested. |
-| @10play/tentap-editor | react-native-pell-rich-editor | Simpler rich text needs. Less customizable, fewer features. |
-| @10play/tentap-editor | Custom Lexical WebView | Maximum web parity with Lexical. More integration work. |
-| MMKV | AsyncStorage | If minimal storage needs and simplicity preferred. AsyncStorage is built-in but 30x slower. |
-| FlashList | FlatList | Short lists (<50 items) where recycling overhead not worth it. FlatList is simpler. |
+| gluestack-ui v3 | Tamagui | If you need maximum performance optimization and are comfortable with steeper learning curve |
+| gluestack-ui v3 | React Native Paper | If you want Material Design specifically |
+| gluestack-ui v3 | React Native Elements | If you need quick prototyping with less customization |
+
+### Rich Text Editors
+
+| Recommended | Alternative | When to Use Alternative |
+|-------------|-------------|-------------------------|
+| 10tap-editor | react-native-pell-rich-editor | If you only need basic formatting and want smaller bundle |
+| 10tap-editor | WebView + Lexical | If you need exact Lexical compatibility and accept performance hit |
+| 10tap-editor | Native editor (Aztec) | If you need maximum native feel and can handle platform-specific code |
+
+### Offline Storage
+
+| Recommended | Alternative | When to Use Alternative |
+|-------------|-------------|-------------------------|
+| WatermelonDB | Realm | If you need cloud sync built-in (Realm Sync) and are OK with vendor lock-in |
+| WatermelonDB | SQLite directly | If you don't need reactive queries and want full SQL control |
+| MMKV | AsyncStorage | Never - MMKV is strictly better in every dimension |
+
+### State Management
+
+| Recommended | Alternative | When to Use Alternative |
+|-------------|-------------|-------------------------|
+| Zustand | Jotai | If you have complex atomic state relationships with fine-grained reactivity needs |
+| Zustand | Redux Toolkit | If team is deeply familiar with Redux patterns |
+
+---
 
 ## What NOT to Use
 
 | Avoid | Why | Use Instead |
 |-------|-----|-------------|
-| Expo Go | Cannot use native modules (Google Sign-In, push notifications) | Expo Dev Client |
-| AsyncStorage (for hot paths) | 30x slower than MMKV, async-only API | react-native-mmkv |
-| FlatList (for long lists) | Poor performance on Android, no cell recycling | @shopify/flash-list |
-| react-native-firebase (for push only) | Overkill if only need notifications; Expo handles it | expo-notifications + Expo Push Service |
-| Recoil | Discontinued by Facebook | Zustand or Jotai |
-| React Native Paper / UI Kitten | Opinionated styling conflicts with Tailwind approach | NativeWind + custom components |
-| expo-auth-session (alone) | Better Auth Expo plugin provides better integration with existing backend | @better-auth/expo |
-| Tiptap directly | No native React Native support; relies on browser DOM | @10play/tentap-editor (wraps Tiptap properly) |
-| Native Lexical | Does not exist for React Native | @10play/tentap-editor or WebView-based Lexical |
+| AsyncStorage | 30x slower than MMKV, unencrypted | react-native-mmkv |
+| NativeBase | Deprecated in 2023, replaced by gluestack | gluestack-ui v3 |
+| Tailwind CSS v4.x | Incompatible with NativeWind v4 | Tailwind CSS v3.4.x |
+| NativeWind v5 | Newer but less stable, requires Tailwind v4 migration | NativeWind v4.2.x |
+| react-native-webview (for rich text) | Too low-level, need to build everything | 10tap-editor |
+| Expo SecureStore for large data | Size limits, designed for credentials | MMKV with encryption |
+| Apollo Client | Different patterns than web codebase | Relay (matches web) |
 
-## Stack Patterns by Variant
+---
 
-**If building offline-first Bible reading:**
-- Use MMKV for local Bible text storage (fast synchronous reads)
-- Use Relay with @defer/@stream for chapter loading
-- Use TanStack Query for non-GraphQL Bible data APIs
-- Pre-cache Bible books during onboarding
+## Installation
 
-**If social feed is primary:**
-- FlashList is mandatory for smooth scrolling
-- Relay pagination with useLoadMore
-- expo-image with blurhash for image placeholders
-- Consider @tanstack/react-query for optimistic updates
+```bash
+# Core (already installed via create-expo-app)
+# expo, react-native, expo-router, etc.
 
-**If rich text editing is heavy:**
-- @10play/tentap-editor with custom bridge extensions
-- WebView performance monitoring
-- Consider native keyboard avoiding views
-- Test extensively on low-end Android
+# Data Layer (Relay)
+npm install react-relay graphql
+npm install -D relay-compiler babel-plugin-relay @types/react-relay @types/relay-runtime
 
-## Version Compatibility
+# Styling & UI
+npm install nativewind tailwindcss@3.4.17
+npx gluestack-ui init
+
+# Rich Text
+npm install @10play/tentap-editor
+
+# Offline & Storage
+npm install @nozbe/watermelondb react-native-mmkv
+# Add watermelondb-expo-plugin to app.json plugins
+
+# State
+npm install zustand
+
+# Auth
+npm install @better-auth/expo expo-apple-authentication expo-auth-session expo-secure-store expo-crypto
+
+# Push Notifications
+npm install expo-notifications expo-device
+
+# Deep Linking (mostly built-in)
+npm install expo-sharing expo-share-intent
+
+# Supporting
+npm install expo-image-picker lucide-react-native date-fns
+
+# Dev dependencies
+npm install -D @types/react-native
+```
+
+---
+
+## Version Compatibility Matrix
 
 | Package | Compatible With | Notes |
 |---------|-----------------|-------|
-| Expo SDK 54 | React Native 0.81, React 19.1.0 | SDK 54 requires iOS 15.1+, Android 7+ |
-| NativeWind 4.x | Tailwind CSS 3.4.x | v5 is pre-release, not production-ready |
-| Relay 20.x | React 18/19 | Suspense-based, requires React concurrent features |
-| React Navigation 7.x | React Native 0.73+ | react-native-screens 4.x required for native-stack |
-| Better Auth Expo | Expo SDK 50+ | Requires expo-secure-store |
-| @10play/tentap-editor 1.x | React Native 0.73.5+ | Supports New Architecture |
-| react-native-mmkv V4 | React Native 0.74+ | Nitro Module requires New Architecture |
-| FlashList 1.7.x | React Native 0.71+ | RecyclerListView-based |
+| NativeWind 4.2.x | Tailwind 3.4.x, Expo SDK 54, Reanimated 4 | Do NOT use Tailwind v4.x |
+| NativeWind 4.2.x | react-native-reanimated 4.1.x | Reanimated v4 includes worklets internally |
+| gluestack-ui 3.x | NativeWind 4.x, Expo SDK 54 | Optimized for new RN architecture |
+| WatermelonDB 0.28.x | Expo SDK 54 | Requires expo-plugin for managed workflow |
+| MMKV 4.x | Expo SDK 54 | Uses Nitro Modules (new) |
+| 10tap-editor 1.x | Expo SDK 54, RN 0.73.5+ | New architecture compatible |
 
-## Web App Parity Mapping
-
-| Web (Next.js) | Mobile (React Native) | Notes |
-|---------------|----------------------|-------|
-| Relay + graphql-tag | Relay + babel-plugin-relay | Same queries/fragments, different compilation |
-| Lexical | @10play/tentap-editor | Different editor, similar JSON/HTML output format |
-| Tailwind CSS v4 | NativeWind 4.x (Tailwind 3.4) | 95% class compatibility, some CSS features unavailable |
-| Radix UI | Custom + NativeWind | No Radix for RN; build accessible components manually |
-| Better Auth | Better Auth + @better-auth/expo | Same backend, mobile-specific client |
-| next/image | expo-image | Different APIs but similar caching behavior |
-| React 19 | React 19.1.0 | Full compatibility via Expo 54 |
+---
 
 ## Sources
 
-### Official Documentation (HIGH confidence)
-- [Expo SDK 54 Documentation](https://docs.expo.dev/versions/latest/) - Version and feature verification
-- [Expo Push Notifications](https://docs.expo.dev/push-notifications/overview/) - APNs/FCM integration patterns
-- [Expo Rich Text Editing Guide](https://docs.expo.dev/guides/editing-richtext/) - Official editor recommendations
-- [Relay Documentation](https://relay.dev/docs/) - v20.1.0 features and React Native support
-- [React Navigation 7.0 Blog](https://reactnavigation.org/blog/2024/11/06/react-navigation-7.0/) - Static API and features
-- [NativeWind Installation](https://www.nativewind.dev/docs/getting-started/installation) - Version requirements
-- [Better Auth Expo Integration](https://www.better-auth.com/docs/integrations/expo) - Mobile auth setup
+### HIGH Confidence (Official/Context7)
+- [Expo Documentation](https://docs.expo.dev/) - SDK 54, push notifications, deep linking
+- [Relay Tutorial](https://relay.dev/docs/tutorial/intro/) - React Native support
+- [10tap-editor GitHub](https://github.com/10play/10tap-editor) - v1.0.1 features, platform support
+- [gluestack-ui](https://gluestack.io/) - v3 installation, component list
+- [Better Auth Expo Integration](https://www.better-auth.com/docs/integrations/expo) - Native ID token flow
+- npm registry - All version numbers verified 2026-02-02
 
-### GitHub/npm (HIGH confidence)
-- [10tap-editor GitHub](https://github.com/10play/10tap-editor) - v1.0.1, Tiptap-based editor
-- [Zustand GitHub Releases](https://github.com/pmndrs/zustand/releases) - v5.0.10 features
-- [FlashList by Shopify](https://shopify.github.io/flash-list/) - Performance benchmarks
-- [react-native-mmkv](https://github.com/mrousavy/react-native-mmkv) - V4 Nitro Module
+### MEDIUM Confidence (Multiple Sources Agree)
+- [React Native Tech Stack 2025](https://galaxies.dev/article/react-native-tech-stack-2025) - Ecosystem overview
+- [LogRocket: Best RN UI Libraries 2026](https://blog.logrocket.com/best-react-native-ui-component-libraries/) - Component library comparison
+- [NativeWind SDK 54 Issues](https://medium.com/@matthitachi/nativewind-styling-not-working-with-expo-sdk-54-54488c07c20d) - Configuration fixes
+- [Supabase: Offline-first with WatermelonDB](https://supabase.com/blog/react-native-offline-first-watermelon-db) - Architecture patterns
+- [MMKV vs AsyncStorage](https://github.com/mrousavy/react-native-mmkv) - Performance benchmarks
 
-### Verified Articles (MEDIUM confidence)
-- [FlashList vs FlatList 2025 Guide](https://javascript.plainenglish.io/flashlist-vs-flatlist-2025-complete-performance-comparison-guide-for-react-native-developers-f89989547c29) - Performance benchmarks verified against Shopify data
-- [State Management in 2025](https://dev.to/hijazi313/state-management-in-2025-when-to-use-context-redux-zustand-or-jotai-2d2k) - Ecosystem trends
-- [MMKV vs AsyncStorage](https://reactnativeexpert.com/blog/mmkv-vs-asyncstorage-in-react-native/) - Performance comparison
+### LOW Confidence (Needs Validation)
+- Rich text editor comparison - Limited production testimonials for 10tap-editor
+- WatermelonDB + GraphQL sync patterns - May need custom implementation
 
 ---
-*Stack research for: Selah Mobile - React Native Bible/Social App*
-*Researched: 2026-02-01*
+
+## Roadmap Implications
+
+### Phase 1: Foundation
+- Relay setup (HIGH confidence, known patterns)
+- NativeWind + gluestack-ui (HIGH confidence)
+- Basic navigation structure
+
+### Phase 2: Core Features
+- Bible reading with offline (MEDIUM confidence - WatermelonDB new to team)
+- Authentication flows (HIGH confidence)
+
+### Phase 3: Rich Content
+- Rich text editor (MEDIUM confidence - needs prototyping)
+- Image handling
+- Polls
+
+### Phase 4: Social & Polish
+- Push notifications (HIGH confidence)
+- Deep linking (HIGH confidence)
+- Share functionality (HIGH confidence)
+
+**Research Flags:**
+- Rich text editor needs spike/prototype before committing
+- WatermelonDB sync with existing GraphQL API needs architecture design
+- Consider fallback to simpler text input if 10tap-editor proves problematic
+
+---
+
+*Stack research for: Selah Mobile (React Native/Expo)*
+*Researched: 2026-02-02*
