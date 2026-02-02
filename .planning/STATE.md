@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-02-02)
 ## Current Position
 
 Phase: 3 of 8 (Bible Reading)
-Plan: 8 of 8 in current phase
+Plan: 9 of 9 in current phase
 Status: Phase complete
-Last activity: 2026-02-02 - Completed 03-08-PLAN.md (Bible search)
+Last activity: 2026-02-02 - Completed 03-09-PLAN.md (Font size + translation download)
 
-Progress: [############] 50%
+Progress: [#############] 53%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
+- Total plans completed: 17
 - Average duration: 3 min
-- Total execution time: 50 min
+- Total execution time: 54 min
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [############] 50%
 |-------|-------|-------|----------|
 | 1. Foundation | 5/5 | 18 min | 4 min |
 | 2. Authentication | 4/4 | 12 min | 3 min |
-| 3. Bible Reading | 8/8 | 25 min | 3 min |
+| 3. Bible Reading | 9/9 | 29 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-04 (5 min), 03-05 (2 min), 03-06 (2 min), 03-07 (3 min), 03-08 (3 min)
+- Last 5 plans: 03-05 (2 min), 03-06 (2 min), 03-07 (3 min), 03-08 (3 min), 03-09 (4 min)
 - Trend: Good velocity
 
 *Updated after each plan completion*
@@ -90,6 +90,8 @@ Recent decisions affecting current work:
 - Home screen as navigation hub for feature screens (bookmarks, notes)
 - bibleVersesByQuery GraphQL query for server-side full-text search
 - BibleTranslation enum type required by GraphQL schema (cast from string)
+- expo-file-system new API: File.downloadFileAsync + Paths.cache
+- Tabbed settings sheet: Font Size and Translation in same bottom sheet
 
 ### Pending Todos
 
@@ -100,9 +102,10 @@ None yet.
 - MMKV requires native rebuild (`npx expo run:ios` or `npx expo run:android`) before testing on device
 - FlashList requires native rebuild for cell recycling performance
 - PagerView requires native rebuild for swipe navigation
+- expo-file-system requires native rebuild for file download functionality
 
 ## Session Continuity
 
-Last session: 2026-02-02T06:44:37Z
-Stopped at: Completed 03-08-PLAN.md (Phase 3 complete)
+Last session: 2026-02-02T07:00:00Z
+Stopped at: Completed 03-09-PLAN.md (Phase 3 complete with accessibility and offline features)
 Resume file: None
