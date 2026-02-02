@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState } from 'react';
-import { View, ActivityIndicator, Dimensions, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, type GestureResponderEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PagerView, { PagerViewOnPageScrollEvent } from 'react-native-pager-view';
 import Animated, {
@@ -46,9 +46,15 @@ export function BibleReader({
   // Shared values for edge bulge animation
   const scrollOffset = useSharedValue(0);
   const scrollDirection = useSharedValue<'left' | 'right' | null>(null);
+  const fingerY = useSharedValue(300); // Track finger Y position
 
   // Jelly wobble for page content
   const pageWobble = useSharedValue(0);
+
+  // Track finger position on touch move
+  const handleTouchMove = useCallback((e: GestureResponderEvent) => {
+    fingerY.value = e.nativeEvent.pageY;
+  }, []);
 
   // Track current position
   const [currentBook, setCurrentBook] = useState(initialBook);
@@ -163,47 +169,52 @@ export function BibleReader({
     transform: [{ translateX: pageWobble.value }],
   }));
 
-  // Animated style for left edge bulge container
+  // Animated style for left edge bulge container - follows finger Y
   const leftBulgeStyle = useAnimatedStyle(() => {
     const isActive = scrollDirection.value === 'left';
     const opacity = isActive && scrollOffset.value > 0.005 ? 1 : 0;
     return {
       opacity,
-      transform: [{ scaleY: jellyScale.value }],
+      transform: [
+        { translateY: fingerY.value - BULGE_HEIGHT / 2 },
+        { scaleY: jellyScale.value },
+      ],
     };
   });
 
-  // Animated props for left bulge SVG path (bell curve)
+  // Animated props for left bulge SVG path (smooth bell curve)
   const leftBulgePathProps = useAnimatedProps(() => {
-    // Direct mapping with slight amplification
     const progress = Math.min(scrollOffset.value * 3, 1);
     const bulgeWidth = progress * BULGE_MAX_WIDTH;
-    const centerY = BULGE_HEIGHT / 2;
+    const h = BULGE_HEIGHT;
 
-    // Quadratic bezier bell curve
-    const path = `M 0,0 Q ${bulgeWidth},${centerY} 0,${BULGE_HEIGHT}`;
+    // Smooth bell curve using quadratic bezier
+    const path = `M 0,0 Q ${bulgeWidth},${h / 2} 0,${h}`;
     return { d: path };
   });
 
-  // Animated style for right edge bulge container
+  // Animated style for right edge bulge container - follows finger Y
   const rightBulgeStyle = useAnimatedStyle(() => {
     const isActive = scrollDirection.value === 'right';
     const opacity = isActive && scrollOffset.value > 0.005 ? 1 : 0;
     return {
       opacity,
-      transform: [{ scaleY: jellyScale.value }],
+      transform: [
+        { translateY: fingerY.value - BULGE_HEIGHT / 2 },
+        { scaleY: jellyScale.value },
+      ],
     };
   });
 
-  // Animated props for right bulge SVG path (bell curve)
+  // Animated props for right bulge SVG path (smooth bell curve)
   const rightBulgePathProps = useAnimatedProps(() => {
-    // Direct mapping with slight amplification
     const progress = Math.min(scrollOffset.value * 3, 1);
     const bulgeWidth = progress * BULGE_MAX_WIDTH;
-    const centerY = BULGE_HEIGHT / 2;
+    const h = BULGE_HEIGHT;
+    const w = BULGE_MAX_WIDTH;
 
-    // Quadratic bezier bell curve
-    const path = `M ${BULGE_MAX_WIDTH},0 Q ${BULGE_MAX_WIDTH - bulgeWidth},${centerY} ${BULGE_MAX_WIDTH},${BULGE_HEIGHT}`;
+    // Smooth bell curve using quadratic bezier
+    const path = `M ${w},0 Q ${w - bulgeWidth},${h / 2} ${w},${h}`;
     return { d: path };
   });
 
@@ -214,7 +225,11 @@ export function BibleReader({
   );
 
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      onTouchMove={handleTouchMove}
+      onTouchStart={handleTouchMove}
+    >
       <Animated.View style={[styles.pager, pageWobbleStyle]}>
         <PagerView
           ref={pagerRef}
@@ -304,14 +319,14 @@ const styles = StyleSheet.create({
   bulgeLeft: {
     position: 'absolute',
     left: 0,
-    top: '45%', // Centered where finger typically rests
+    top: 0, // Position controlled by translateY to follow finger
     width: BULGE_MAX_WIDTH,
     height: BULGE_HEIGHT,
   },
   bulgeRight: {
     position: 'absolute',
     right: 0,
-    top: '45%',
+    top: 0,
     width: BULGE_MAX_WIDTH,
     height: BULGE_HEIGHT,
   },
