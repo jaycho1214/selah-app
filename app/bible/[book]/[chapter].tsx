@@ -2,11 +2,14 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search } from 'lucide-react-native';
+import { Search, Settings } from 'lucide-react-native';
+import BottomSheet, { BottomSheetView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { BibleReader } from '@/components/bible/bible-reader';
 import { BibleNavigator } from '@/components/bible/bible-navigator';
 import { VerseActions, VerseActionsRef } from '@/components/bible/verse-actions';
 import { NoteEditor, NoteEditorRef } from '@/components/bible/note-editor';
+import { FontSizePicker } from '@/components/bible/font-size-picker';
+import { TranslationPicker } from '@/components/bible/translation-picker';
 import { BIBLE_BOOK_DETAILS } from '@/lib/bible/constants';
 import { useBibleStore } from '@/lib/stores/bible-store';
 import { BibleBook } from '@/lib/bible/types';
@@ -17,6 +20,8 @@ export default function BibleChapterScreen() {
   const [navigatorVisible, setNavigatorVisible] = useState(false);
   const verseActionsRef = useRef<VerseActionsRef>(null);
   const noteEditorRef = useRef<NoteEditorRef>(null);
+  const settingsSheetRef = useRef<BottomSheet>(null);
+  const [settingsTab, setSettingsTab] = useState<'font' | 'translation'>('font');
 
   // Track current position locally for re-renders on navigation
   const [currentBook, setCurrentBook] = useState<BibleBook>(book as BibleBook);
@@ -83,9 +88,14 @@ export default function BibleChapterScreen() {
             </Pressable>
           ),
           headerRight: () => (
-            <Pressable onPress={() => router.push('/search')} className="p-2">
-              <Search size={22} className="text-foreground" />
-            </Pressable>
+            <View className="flex-row">
+              <Pressable onPress={() => router.push('/search')} className="p-2">
+                <Search size={22} className="text-foreground" />
+              </Pressable>
+              <Pressable onPress={() => settingsSheetRef.current?.expand()} className="p-2">
+                <Settings size={22} className="text-foreground" />
+              </Pressable>
+            </View>
           ),
         }}
       />
@@ -113,6 +123,54 @@ export default function BibleChapterScreen() {
       />
 
       <NoteEditor ref={noteEditorRef} />
+
+      {/* Settings bottom sheet */}
+      <BottomSheet
+        ref={settingsSheetRef}
+        index={-1}
+        snapPoints={['50%']}
+        enablePanDownToClose
+        backdropComponent={(props) => (
+          <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />
+        )}
+      >
+        <BottomSheetView>
+          {/* Tab buttons */}
+          <View className="flex-row border-b border-border">
+            <Pressable
+              onPress={() => setSettingsTab('font')}
+              className={`flex-1 py-3 items-center ${
+                settingsTab === 'font' ? 'border-b-2 border-primary' : ''
+              }`}
+            >
+              <Text
+                className={settingsTab === 'font' ? 'text-primary font-medium' : 'text-muted-foreground'}
+              >
+                Font Size
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setSettingsTab('translation')}
+              className={`flex-1 py-3 items-center ${
+                settingsTab === 'translation' ? 'border-b-2 border-primary' : ''
+              }`}
+            >
+              <Text
+                className={settingsTab === 'translation' ? 'text-primary font-medium' : 'text-muted-foreground'}
+              >
+                Translation
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* Tab content */}
+          {settingsTab === 'font' ? (
+            <FontSizePicker onClose={() => settingsSheetRef.current?.close()} />
+          ) : (
+            <TranslationPicker onClose={() => settingsSheetRef.current?.close()} />
+          )}
+        </BottomSheetView>
+      </BottomSheet>
     </SafeAreaView>
   );
 }
