@@ -1,78 +1,114 @@
-import { View, Pressable } from 'react-native';
+import { useState, useCallback, useRef } from 'react';
+import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-import { Bookmark, Search, FileText } from 'lucide-react-native';
-
-import { Text } from '@/components/ui/text';
+import { BibleReader } from '@/components/bible/bible-reader';
+import { BibleNavigator } from '@/components/bible/bible-navigator';
+import { BibleNavigatorBar } from '@/components/bible/bible-navigator-bar';
+import { VerseActions, VerseActionsRef } from '@/components/bible/verse-actions';
+import { NoteEditor, NoteEditorRef } from '@/components/bible/note-editor';
 import { useBibleStore } from '@/lib/stores/bible-store';
-import { useAnnotationsStore } from '@/lib/stores/annotations-store';
-import { BIBLE_BOOK_DETAILS } from '@/lib/bible/constants';
-import { BibleBook } from '@/lib/bible/types';
+import { BIBLE_BOOK_DETAILS, BIBLE_BOOKS } from '@/lib/bible/constants';
+import type { BibleBook } from '@/lib/bible/types';
 
 export default function HomeScreen() {
-  const { currentBook, currentChapter, currentTranslation } = useBibleStore();
-  const { bookmarks, notes } = useAnnotationsStore();
+  const { currentBook, currentChapter, setPosition } = useBibleStore();
+  const [navigatorVisible, setNavigatorVisible] = useState(false);
+  const verseActionsRef = useRef<VerseActionsRef>(null);
+  const noteEditorRef = useRef<NoteEditorRef>(null);
 
-  // Get book details for display name
-  const bookDetails = BIBLE_BOOK_DETAILS[currentBook as BibleBook];
-  const bookName = bookDetails?.name ?? currentBook;
+  // Key to force BibleReader remount on position change
+  const [readerKey, setReaderKey] = useState(0);
 
-  const handleContinueReading = () => {
-    router.push(`/bible/${currentBook}/${currentChapter}`);
-  };
+  const handlePositionChange = useCallback(
+    (book: BibleBook, chapter: number) => {
+      setPosition(book, chapter);
+    },
+    [setPosition]
+  );
+
+  const handleNavigatorSelect = useCallback(
+    (book: BibleBook, chapter: number) => {
+      setPosition(book, chapter);
+      setNavigatorVisible(false);
+      setReaderKey((k) => k + 1); // Force remount
+    },
+    [setPosition]
+  );
+
+  const handlePrevChapter = useCallback(() => {
+    const bookIndex = BIBLE_BOOKS.indexOf(currentBook as BibleBook);
+    const bookDetails = BIBLE_BOOK_DETAILS[currentBook as BibleBook];
+
+    if (currentChapter > 1) {
+      setPosition(currentBook as BibleBook, currentChapter - 1);
+    } else if (bookIndex > 0) {
+      const prevBook = BIBLE_BOOKS[bookIndex - 1];
+      const prevBookChapters = BIBLE_BOOK_DETAILS[prevBook].chapters;
+      setPosition(prevBook, prevBookChapters);
+    }
+    setReaderKey((k) => k + 1);
+  }, [currentBook, currentChapter, setPosition]);
+
+  const handleNextChapter = useCallback(() => {
+    const bookIndex = BIBLE_BOOKS.indexOf(currentBook as BibleBook);
+    const bookDetails = BIBLE_BOOK_DETAILS[currentBook as BibleBook];
+
+    if (currentChapter < bookDetails.chapters) {
+      setPosition(currentBook as BibleBook, currentChapter + 1);
+    } else if (bookIndex < BIBLE_BOOKS.length - 1) {
+      const nextBook = BIBLE_BOOKS[bookIndex + 1];
+      setPosition(nextBook, 1);
+    }
+    setReaderKey((k) => k + 1);
+  }, [currentBook, currentChapter, setPosition]);
+
+  const handleVersePress = useCallback((verseId: string, verseText?: string) => {
+    verseActionsRef.current?.open(verseId, verseText ?? '');
+  }, []);
+
+  const handleNotePress = useCallback((verseId: string, verseText: string) => {
+    verseActionsRef.current?.close();
+    noteEditorRef.current?.open(verseId, verseText);
+  }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <View className="flex-1 p-4">
-        <Text className="text-2xl font-bold mb-6">Selah</Text>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+      {/* Navigator bar at top */}
+      <BibleNavigatorBar
+        onOpenNavigator={() => setNavigatorVisible(true)}
+        onPrevChapter={handlePrevChapter}
+        onNextChapter={handleNextChapter}
+      />
 
-        {/* Continue Reading Card */}
-        <Pressable
-          onPress={handleContinueReading}
-          className="bg-card rounded-xl p-4 border border-border active:opacity-70"
-        >
-          <Text className="text-muted-foreground text-sm mb-1">Continue Reading</Text>
-          <Text className="text-foreground text-xl font-semibold">
-            {bookName} {currentChapter}
-          </Text>
-          <Text className="text-muted-foreground text-sm">{currentTranslation}</Text>
-        </Pressable>
-
-        {/* Search Bible Card */}
-        <Pressable
-          onPress={() => router.push('/search')}
-          className="flex-row items-center justify-between bg-card rounded-xl p-4 border border-border mt-4 active:opacity-70"
-        >
-          <View className="flex-row items-center gap-3">
-            <Search size={20} className="text-primary" />
-            <Text className="text-foreground text-base">Search Bible</Text>
-          </View>
-        </Pressable>
-
-        {/* Bookmarks Card */}
-        <Pressable
-          onPress={() => router.push('/bookmarks')}
-          className="flex-row items-center justify-between bg-card rounded-xl p-4 border border-border mt-4 active:opacity-70"
-        >
-          <View className="flex-row items-center gap-3">
-            <Bookmark size={20} className="text-primary" />
-            <Text className="text-foreground text-base">Bookmarks</Text>
-          </View>
-          <Text className="text-muted-foreground">{Object.keys(bookmarks).length}</Text>
-        </Pressable>
-
-        {/* Notes Card */}
-        <Pressable
-          onPress={() => router.push('/notes')}
-          className="flex-row items-center justify-between bg-card rounded-xl p-4 border border-border mt-4 active:opacity-70"
-        >
-          <View className="flex-row items-center gap-3">
-            <FileText size={20} className="text-primary" />
-            <Text className="text-foreground text-base">Notes</Text>
-          </View>
-          <Text className="text-muted-foreground">{Object.keys(notes).length}</Text>
-        </Pressable>
+      {/* Bible reader fills remaining space */}
+      <View className="flex-1">
+        <BibleReader
+          key={readerKey}
+          initialBook={currentBook as BibleBook}
+          initialChapter={currentChapter}
+          onPositionChange={handlePositionChange}
+          onVersePress={handleVersePress}
+          onVerseLongPress={handleVersePress}
+        />
       </View>
+
+      {/* Book/chapter picker modal */}
+      <BibleNavigator
+        currentBook={currentBook as BibleBook}
+        currentChapter={currentChapter}
+        onSelect={handleNavigatorSelect}
+        visible={navigatorVisible}
+        onClose={() => setNavigatorVisible(false)}
+      />
+
+      {/* Verse actions bottom sheet */}
+      <VerseActions
+        ref={verseActionsRef}
+        onNote={handleNotePress}
+      />
+
+      {/* Note editor modal */}
+      <NoteEditor ref={noteEditorRef} />
     </SafeAreaView>
   );
 }
