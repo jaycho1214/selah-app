@@ -19,8 +19,8 @@ import { BIBLE_BOOKS, BIBLE_BOOK_DETAILS } from '@/lib/bible/constants';
 import { BibleBook } from '@/lib/bible/types';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-const BULGE_MAX_WIDTH = 28;
-const BULGE_HEIGHT = SCREEN_HEIGHT * 0.35;
+const BULGE_MAX_WIDTH = 16; // Narrower bulge
+const BULGE_HEIGHT = SCREEN_HEIGHT * 0.3; // Height of the bell curve
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
@@ -116,8 +116,12 @@ export function BibleReader({
       // Trigger haptic feedback on page change
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-      // Reset bulge animation
-      scrollOffset.value = withSpring(0, { damping: 15, stiffness: 150 });
+      // Reset bulge with sticky spring physics - snaps back with slight overshoot
+      scrollOffset.value = withSpring(0, {
+        damping: 12,
+        stiffness: 180,
+        mass: 0.5,
+      });
 
       if (position === 0 && prev) {
         setCurrentBook(prev.book);
@@ -139,23 +143,33 @@ export function BibleReader({
   // Animated style for left edge bulge container
   const leftBulgeStyle = useAnimatedStyle(() => {
     const isActive = scrollDirection.value === 'left';
+    // Quick fade in, follows finger directly
     const opacity = isActive
-      ? interpolate(scrollOffset.value, [0, 0.05, 0.3], [0, 0.8, 1], Extrapolation.CLAMP)
+      ? interpolate(scrollOffset.value, [0, 0.02], [0, 1], Extrapolation.CLAMP)
       : 0;
 
     return { opacity };
   });
 
-  // Animated props for left bulge SVG path (bell curve)
+  // Animated props for left bulge SVG path (bell curve with expanding center)
   const leftBulgePathProps = useAnimatedProps(() => {
-    const bulgeWidth = interpolate(
-      scrollOffset.value,
-      [0, 0.15, 0.5, 1],
-      [0, BULGE_MAX_WIDTH * 0.5, BULGE_MAX_WIDTH * 0.85, BULGE_MAX_WIDTH],
-      Extrapolation.CLAMP
-    );
-    // Bell curve on left edge: starts at (0,0), curves out to (width, height/2), back to (0, height)
-    const path = `M 0,0 Q ${bulgeWidth},${BULGE_HEIGHT / 2} 0,${BULGE_HEIGHT}`;
+    // Direct mapping - bulge follows finger more closely
+    // Use cubic easing for more natural "sticky" feel at the start
+    const progress = Math.min(scrollOffset.value * 1.5, 1); // Amplify slightly
+    const easedProgress = progress * progress * (3 - 2 * progress); // Smoothstep easing
+
+    const bulgeWidth = easedProgress * BULGE_MAX_WIDTH;
+
+    // Bell curve: use cubic bezier for smoother bell shape
+    // The center point moves out as you scroll more
+    const centerY = BULGE_HEIGHT / 2;
+
+    // Bell curve on left edge using cubic bezier for smoother shape
+    // Control points create the bell shape with expanding center
+    const cp1y = centerY * 0.3; // Upper control point
+    const cp2y = centerY * 1.7; // Lower control point
+    const path = `M 0,0 C ${bulgeWidth * 0.2},${cp1y} ${bulgeWidth},${centerY * 0.5} ${bulgeWidth},${centerY} C ${bulgeWidth},${centerY * 1.5} ${bulgeWidth * 0.2},${cp2y} 0,${BULGE_HEIGHT}`;
+
     return { d: path };
   });
 
@@ -163,22 +177,27 @@ export function BibleReader({
   const rightBulgeStyle = useAnimatedStyle(() => {
     const isActive = scrollDirection.value === 'right';
     const opacity = isActive
-      ? interpolate(scrollOffset.value, [0, 0.05, 0.3], [0, 0.8, 1], Extrapolation.CLAMP)
+      ? interpolate(scrollOffset.value, [0, 0.02], [0, 1], Extrapolation.CLAMP)
       : 0;
 
     return { opacity };
   });
 
-  // Animated props for right bulge SVG path (bell curve)
+  // Animated props for right bulge SVG path (bell curve with expanding center)
   const rightBulgePathProps = useAnimatedProps(() => {
-    const bulgeWidth = interpolate(
-      scrollOffset.value,
-      [0, 0.15, 0.5, 1],
-      [0, BULGE_MAX_WIDTH * 0.5, BULGE_MAX_WIDTH * 0.85, BULGE_MAX_WIDTH],
-      Extrapolation.CLAMP
-    );
-    // Bell curve on right edge: starts at (width,0), curves out to (0, height/2), back to (width, height)
-    const path = `M ${BULGE_MAX_WIDTH},0 Q ${BULGE_MAX_WIDTH - bulgeWidth},${BULGE_HEIGHT / 2} ${BULGE_MAX_WIDTH},${BULGE_HEIGHT}`;
+    const progress = Math.min(scrollOffset.value * 1.5, 1);
+    const easedProgress = progress * progress * (3 - 2 * progress);
+
+    const bulgeWidth = easedProgress * BULGE_MAX_WIDTH;
+    const centerY = BULGE_HEIGHT / 2;
+
+    // Bell curve on right edge using cubic bezier
+    const cp1y = centerY * 0.3;
+    const cp2y = centerY * 1.7;
+    const startX = BULGE_MAX_WIDTH;
+    const apexX = startX - bulgeWidth;
+    const path = `M ${startX},0 C ${startX - bulgeWidth * 0.2},${cp1y} ${apexX},${centerY * 0.5} ${apexX},${centerY} C ${apexX},${centerY * 1.5} ${startX - bulgeWidth * 0.2},${cp2y} ${startX},${BULGE_HEIGHT}`;
+
     return { d: path };
   });
 
