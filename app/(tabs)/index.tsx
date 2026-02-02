@@ -1,31 +1,21 @@
-import { StyleSheet } from 'react-native';
+import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { Text } from '@/components/ui/text';
+import { Button } from '@/components/ui/button';
 
 export default function HomeScreen() {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ThemedView style={styles.container}>
-        <ThemedText type="title">Home</ThemedText>
-        <ThemedText style={styles.subtitle}>Your feed will appear here</ThemedText>
-      </ThemedView>
+    <SafeAreaView className="flex-1">
+      <View className="flex-1 items-center justify-center bg-background p-4">
+        <Text className="text-2xl font-bold mb-2">Home</Text>
+        <Text className="text-muted-foreground mb-4">
+          Your feed will appear here
+        </Text>
+        <Button variant="outline" onPress={() => {}}>
+          Get Started
+        </Button>
+      </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  subtitle: {
-    marginTop: 8,
-    opacity: 0.7,
-  },
-});
