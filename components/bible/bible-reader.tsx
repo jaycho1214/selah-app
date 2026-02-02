@@ -1,13 +1,16 @@
 import { useRef, useCallback, useState } from 'react';
-import { View, ActivityIndicator, Dimensions, StyleSheet, useColorScheme } from 'react-native';
+import { View, ActivityIndicator, Dimensions, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PagerView, { PagerViewOnPageScrollEvent } from 'react-native-pager-view';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
+  useAnimatedProps,
   withSpring,
   interpolate,
   Extrapolation,
 } from 'react-native-reanimated';
+import Svg, { Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { Suspense } from 'react';
 import { ChapterView } from './chapter-view';
@@ -15,9 +18,11 @@ import { useBibleStore } from '@/lib/stores/bible-store';
 import { BIBLE_BOOKS, BIBLE_BOOK_DETAILS } from '@/lib/bible/constants';
 import { BibleBook } from '@/lib/bible/types';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const BULGE_MAX_WIDTH = 48;
-const BULGE_HEIGHT = SCREEN_HEIGHT * 0.4;
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const BULGE_MAX_WIDTH = 28;
+const BULGE_HEIGHT = SCREEN_HEIGHT * 0.35;
+
+const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 interface BibleReaderProps {
   initialBook: BibleBook;
@@ -35,9 +40,8 @@ export function BibleReader({
   onVerseLongPress,
 }: BibleReaderProps) {
   const pagerRef = useRef<PagerView>(null);
+  const insets = useSafeAreaInsets();
   const { setPosition } = useBibleStore();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
 
   // Shared values for edge bulge animation
   const scrollOffset = useSharedValue(0);
@@ -85,14 +89,18 @@ export function BibleReader({
       const progress = position + offset;
 
       // Determine scroll direction and amount
+      // When dragging RIGHT-to-LEFT (going forward/next), progress goes 1 -> 2
+      // The bulge should appear on the RIGHT edge (where finger started)
       if (progress < 1) {
-        // Scrolling towards previous (left edge bulge appears on right side of screen)
+        // Scrolling towards previous - finger dragging left-to-right
+        // Bulge appears on LEFT edge
         scrollDirection.value = 'left';
-        scrollOffset.value = 1 - progress; // 0 to 1 as we scroll left
+        scrollOffset.value = 1 - progress;
       } else if (progress > 1) {
-        // Scrolling towards next (right edge bulge appears on left side)
+        // Scrolling towards next - finger dragging right-to-left
+        // Bulge appears on RIGHT edge
         scrollDirection.value = 'right';
-        scrollOffset.value = progress - 1; // 0 to 1 as we scroll right
+        scrollOffset.value = progress - 1;
       } else {
         scrollOffset.value = 0;
         scrollDirection.value = null;
@@ -128,51 +136,51 @@ export function BibleReader({
     [prev, next, setPosition, onPositionChange]
   );
 
-  // Animated style for left edge bulge (appears when swiping right to go back)
+  // Animated style for left edge bulge container
   const leftBulgeStyle = useAnimatedStyle(() => {
-    const isActive = scrollDirection.value === 'right';
-    const bulgeWidth = interpolate(
-      scrollOffset.value,
-      [0, 0.3, 1],
-      [0, BULGE_MAX_WIDTH * 0.8, BULGE_MAX_WIDTH],
-      Extrapolation.CLAMP
-    );
-    const opacity = interpolate(
-      scrollOffset.value,
-      [0, 0.1, 0.5],
-      [0, 0.6, 0.8],
-      Extrapolation.CLAMP
-    );
-
-    return {
-      width: isActive ? bulgeWidth : 0,
-      opacity: isActive ? opacity : 0,
-    };
-  });
-
-  // Animated style for right edge bulge (appears when swiping left to go forward)
-  const rightBulgeStyle = useAnimatedStyle(() => {
     const isActive = scrollDirection.value === 'left';
-    const bulgeWidth = interpolate(
-      scrollOffset.value,
-      [0, 0.3, 1],
-      [0, BULGE_MAX_WIDTH * 0.8, BULGE_MAX_WIDTH],
-      Extrapolation.CLAMP
-    );
-    const opacity = interpolate(
-      scrollOffset.value,
-      [0, 0.1, 0.5],
-      [0, 0.6, 0.8],
-      Extrapolation.CLAMP
-    );
+    const opacity = isActive
+      ? interpolate(scrollOffset.value, [0, 0.05, 0.3], [0, 0.8, 1], Extrapolation.CLAMP)
+      : 0;
 
-    return {
-      width: isActive ? bulgeWidth : 0,
-      opacity: isActive ? opacity : 0,
-    };
+    return { opacity };
   });
 
-  const bulgeColor = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)';
+  // Animated props for left bulge SVG path (bell curve)
+  const leftBulgePathProps = useAnimatedProps(() => {
+    const bulgeWidth = interpolate(
+      scrollOffset.value,
+      [0, 0.15, 0.5, 1],
+      [0, BULGE_MAX_WIDTH * 0.5, BULGE_MAX_WIDTH * 0.85, BULGE_MAX_WIDTH],
+      Extrapolation.CLAMP
+    );
+    // Bell curve on left edge: starts at (0,0), curves out to (width, height/2), back to (0, height)
+    const path = `M 0,0 Q ${bulgeWidth},${BULGE_HEIGHT / 2} 0,${BULGE_HEIGHT}`;
+    return { d: path };
+  });
+
+  // Animated style for right edge bulge container
+  const rightBulgeStyle = useAnimatedStyle(() => {
+    const isActive = scrollDirection.value === 'right';
+    const opacity = isActive
+      ? interpolate(scrollOffset.value, [0, 0.05, 0.3], [0, 0.8, 1], Extrapolation.CLAMP)
+      : 0;
+
+    return { opacity };
+  });
+
+  // Animated props for right bulge SVG path (bell curve)
+  const rightBulgePathProps = useAnimatedProps(() => {
+    const bulgeWidth = interpolate(
+      scrollOffset.value,
+      [0, 0.15, 0.5, 1],
+      [0, BULGE_MAX_WIDTH * 0.5, BULGE_MAX_WIDTH * 0.85, BULGE_MAX_WIDTH],
+      Extrapolation.CLAMP
+    );
+    // Bell curve on right edge: starts at (width,0), curves out to (0, height/2), back to (width, height)
+    const path = `M ${BULGE_MAX_WIDTH},0 Q ${BULGE_MAX_WIDTH - bulgeWidth},${BULGE_HEIGHT / 2} ${BULGE_MAX_WIDTH},${BULGE_HEIGHT}`;
+    return { d: path };
+  });
 
   const ChapterFallback = () => (
     <View className="flex-1 items-center justify-center">
@@ -198,6 +206,7 @@ export function BibleReader({
               <ChapterView
                 book={prev.book}
                 chapter={prev.chapter}
+                topInset={insets.top}
                 onVersePress={onVersePress}
                 onVerseLongPress={onVerseLongPress}
               />
@@ -213,6 +222,7 @@ export function BibleReader({
             <ChapterView
               book={currentBook}
               chapter={currentChapter}
+              topInset={insets.top}
               onVersePress={onVersePress}
               onVerseLongPress={onVerseLongPress}
             />
@@ -226,6 +236,7 @@ export function BibleReader({
               <ChapterView
                 book={next.book}
                 chapter={next.chapter}
+                topInset={insets.top}
                 onVersePress={onVersePress}
                 onVerseLongPress={onVerseLongPress}
               />
@@ -236,25 +247,19 @@ export function BibleReader({
         </View>
       </PagerView>
 
-      {/* Left edge bulge indicator */}
-      <Animated.View
-        style={[
-          styles.bulgeLeft,
-          leftBulgeStyle,
-          { backgroundColor: bulgeColor },
-        ]}
-        pointerEvents="none"
-      />
+      {/* Left edge bulge indicator - bell curve */}
+      <Animated.View style={[styles.bulgeLeft, leftBulgeStyle]} pointerEvents="none">
+        <Svg width={BULGE_MAX_WIDTH} height={BULGE_HEIGHT}>
+          <AnimatedPath animatedProps={leftBulgePathProps} fill="#000" />
+        </Svg>
+      </Animated.View>
 
-      {/* Right edge bulge indicator */}
-      <Animated.View
-        style={[
-          styles.bulgeRight,
-          rightBulgeStyle,
-          { backgroundColor: bulgeColor },
-        ]}
-        pointerEvents="none"
-      />
+      {/* Right edge bulge indicator - bell curve */}
+      <Animated.View style={[styles.bulgeRight, rightBulgeStyle]} pointerEvents="none">
+        <Svg width={BULGE_MAX_WIDTH} height={BULGE_HEIGHT}>
+          <AnimatedPath animatedProps={rightBulgePathProps} fill="#000" />
+        </Svg>
+      </Animated.View>
     </View>
   );
 }
@@ -272,17 +277,15 @@ const styles = StyleSheet.create({
   bulgeLeft: {
     position: 'absolute',
     left: 0,
-    top: '30%',
+    top: '32.5%',
+    width: BULGE_MAX_WIDTH,
     height: BULGE_HEIGHT,
-    borderTopRightRadius: BULGE_MAX_WIDTH,
-    borderBottomRightRadius: BULGE_MAX_WIDTH,
   },
   bulgeRight: {
     position: 'absolute',
     right: 0,
-    top: '30%',
+    top: '32.5%',
+    width: BULGE_MAX_WIDTH,
     height: BULGE_HEIGHT,
-    borderTopLeftRadius: BULGE_MAX_WIDTH,
-    borderBottomLeftRadius: BULGE_MAX_WIDTH,
   },
 });

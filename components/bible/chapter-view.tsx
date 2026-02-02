@@ -29,6 +29,7 @@ interface Verse {
 interface ChapterViewProps {
   book: BibleBook;
   chapter: number;
+  topInset?: number;
   onVersePress?: (verseId: string, verseText?: string) => void;
   onVerseLongPress?: (verseId: string, verseText?: string) => void;
 }
@@ -36,6 +37,7 @@ interface ChapterViewProps {
 export function ChapterView({
   book,
   chapter,
+  topInset = 0,
   onVersePress,
   onVerseLongPress,
 }: ChapterViewProps) {
@@ -86,6 +88,7 @@ export function ChapterView({
         verses={offlineVerses}
         highlights={highlights}
         bookmarks={bookmarks}
+        topInset={topInset}
         onVersePress={onVersePress}
         onVerseLongPress={onVerseLongPress}
       />
@@ -100,6 +103,7 @@ export function ChapterView({
       currentTranslation={currentTranslation}
       highlights={highlights}
       bookmarks={bookmarks}
+      topInset={topInset}
       onVersePress={onVersePress}
       onVerseLongPress={onVerseLongPress}
     />
@@ -113,6 +117,7 @@ function ChapterViewRelay({
   currentTranslation,
   highlights,
   bookmarks,
+  topInset,
   onVersePress,
   onVerseLongPress,
 }: {
@@ -121,6 +126,7 @@ function ChapterViewRelay({
   currentTranslation: string;
   highlights: Record<string, { color: string }>;
   bookmarks: Record<string, { createdAt: number }>;
+  topInset?: number;
   onVersePress?: (verseId: string, verseText?: string) => void;
   onVerseLongPress?: (verseId: string, verseText?: string) => void;
 }) {
@@ -141,6 +147,7 @@ function ChapterViewRelay({
       verses={verses as Verse[]}
       highlights={highlights}
       bookmarks={bookmarks}
+      topInset={topInset}
       onVersePress={onVersePress}
       onVerseLongPress={onVerseLongPress}
     />
@@ -152,12 +159,14 @@ function ChapterViewContent({
   verses,
   highlights,
   bookmarks,
+  topInset = 0,
   onVersePress,
   onVerseLongPress,
 }: {
   verses: Verse[];
   highlights: Record<string, { color: string }>;
   bookmarks: Record<string, { createdAt: number }>;
+  topInset?: number;
   onVersePress?: (verseId: string, verseText?: string) => void;
   onVerseLongPress?: (verseId: string, verseText?: string) => void;
 }) {
@@ -195,7 +204,10 @@ function ChapterViewContent({
         data={verses}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
-        contentContainerStyle={{ paddingVertical: 16 }}
+        contentContainerStyle={{
+          paddingTop: topInset + 16,
+          paddingBottom: 16,
+        }}
       />
     </View>
   );
