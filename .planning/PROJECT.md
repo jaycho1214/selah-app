@@ -16,14 +16,15 @@ Bible reading with community sharing around verses — the intersection of perso
 
 ### Active
 
-- [ ] Bible reading with multi-translation support and swipe navigation
+See `.planning/REQUIREMENTS.md` for detailed requirements (42 total).
+
+Summary:
+- [ ] Bible reading with multi-translation support, offline, highlights, notes
 - [ ] Verse posts with rich text, images, and polls
 - [ ] Social features: likes, replies, follows, user profiles
-- [ ] Notifications feed
-- [ ] Reading plans (browse, create, track)
+- [ ] Notifications (in-app feed + push)
 - [ ] User settings (theme, language, font size, notifications)
-- [ ] Google Sign-In authentication
-- [ ] Apple Sign-In authentication (required for iOS)
+- [ ] Google + Apple Sign-In authentication
 - [ ] Native push notifications (FCM for Android, APNs for iOS)
 - [ ] Offline Bible reading (downloadable translations)
 - [ ] Share out (verses/posts to other apps via share sheet)
@@ -35,6 +36,12 @@ Bible reading with community sharing around verses — the intersection of perso
 - Widgets (home screen verse of the day) — deferred to post-v1
 - Biometric auth — not required for v1
 - Web push migration — mobile uses native push instead
+- Reading plans — deferred to v2
+
+## Working Practices
+
+- **Fetch docs aggressively**: Always check Context7/official docs before implementing. Training data may be stale.
+- **Use frontend design skills**: Apply strong visual design sense. Match selah-web aesthetic, optimize for mobile UX.
 
 ## Context
 
@@ -69,4 +76,4 @@ Bible reading with community sharing around verses — the intersection of perso
 | Native push over web push | Better reliability and UX on mobile, platform expectations | — Pending |
 
 ---
-*Last updated: 2025-02-02 after initialization*
+*Last updated: 2026-02-02 after requirements definition*

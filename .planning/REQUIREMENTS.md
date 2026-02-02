@@ -127,13 +127,60 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (Populated by roadmapper) | | |
+| AUTH-01 | Phase 2 | Pending |
+| AUTH-02 | Phase 2 | Pending |
+| AUTH-03 | Phase 2 | Pending |
+| AUTH-04 | Phase 2 | Pending |
+| BIBL-01 | Phase 3 | Pending |
+| BIBL-02 | Phase 3 | Pending |
+| BIBL-03 | Phase 3 | Pending |
+| BIBL-04 | Phase 3 | Pending |
+| BIBL-05 | Phase 3 | Pending |
+| BIBL-06 | Phase 3 | Pending |
+| BIBL-07 | Phase 3 | Pending |
+| BIBL-08 | Phase 3 | Pending |
+| BIBL-09 | Phase 3 | Pending |
+| PROF-01 | Phase 4 | Pending |
+| PROF-02 | Phase 4 | Pending |
+| PROF-03 | Phase 4 | Pending |
+| PROF-04 | Phase 4 | Pending |
+| CONN-01 | Phase 4 | Pending |
+| CONN-02 | Phase 4 | Pending |
+| CONN-03 | Phase 4 | Pending |
+| CONN-04 | Phase 4 | Pending |
+| FEED-01 | Phase 5 | Pending |
+| FEED-02 | Phase 5 | Pending |
+| FEED-03 | Phase 5 | Pending |
+| FEED-04 | Phase 5 | Pending |
+| ENGM-01 | Phase 5 | Pending |
+| ENGM-02 | Phase 5 | Pending |
+| ENGM-03 | Phase 5 | Pending |
+| ENGM-04 | Phase 5 | Pending |
+| ENGM-05 | Phase 5 | Pending |
+| POST-01 | Phase 6 | Pending |
+| POST-02 | Phase 6 | Pending |
+| POST-03 | Phase 6 | Pending |
+| POST-04 | Phase 6 | Pending |
+| POST-05 | Phase 6 | Pending |
+| POST-06 | Phase 6 | Pending |
+| NOTF-01 | Phase 7 | Pending |
+| NOTF-02 | Phase 7 | Pending |
+| NOTF-03 | Phase 7 | Pending |
+| NOTF-04 | Phase 7 | Pending |
+| NOTF-05 | Phase 7 | Pending |
+| MOBL-01 | Phase 8 | Pending |
+| MOBL-02 | Phase 8 | Pending |
+| MOBL-03 | Phase 8 | Pending |
+| MOBL-04 | Phase 8 | Pending |
+| SETT-01 | Phase 8 | Pending |
+| SETT-02 | Phase 8 | Pending |
+| SETT-03 | Phase 8 | Pending |
 
 **Coverage:**
-- v1 requirements: 42 total
-- Mapped to phases: 0
-- Unmapped: 42 (pending roadmap)
+- v1 requirements: 48 total
+- Mapped to phases: 48
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-02*
-*Last updated: 2026-02-02 after initial definition*
+*Last updated: 2025-02-02 after roadmap creation*
