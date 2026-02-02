@@ -7,8 +7,9 @@ import Animated, {
   useAnimatedStyle,
   useAnimatedProps,
   withSpring,
-  interpolate,
-  Extrapolation,
+  withSequence,
+  withTiming,
+  Easing,
 } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
@@ -18,9 +19,8 @@ import { useBibleStore } from '@/lib/stores/bible-store';
 import { BIBLE_BOOKS, BIBLE_BOOK_DETAILS } from '@/lib/bible/constants';
 import { BibleBook } from '@/lib/bible/types';
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-const BULGE_MAX_WIDTH = 10; // Narrow bulge
-const BULGE_HEIGHT = SCREEN_HEIGHT * 0.5; // Taller bell curve
+const BULGE_MAX_WIDTH = 12;
+const BULGE_HEIGHT = 80; // Small - just where finger touches
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
@@ -46,6 +46,9 @@ export function BibleReader({
   // Shared values for edge bulge animation
   const scrollOffset = useSharedValue(0);
   const scrollDirection = useSharedValue<'left' | 'right' | null>(null);
+
+  // Jelly wobble for page content
+  const pageWobble = useSharedValue(0);
 
   // Track current position
   const [currentBook, setCurrentBook] = useState(initialBook);
@@ -116,11 +119,23 @@ export function BibleReader({
       // Trigger haptic feedback on page change
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-      // Reset bulge with snappy spring - quick snap back
+      // Jelly wobble effect on bulge
+      jellyScale.value = withSequence(
+        withTiming(1.3, { duration: 80, easing: Easing.out(Easing.quad) }),
+        withSpring(1, { damping: 3, stiffness: 200, mass: 0.5 })
+      );
+
+      // Jelly wobble for page - horizontal shake
+      pageWobble.value = withSequence(
+        withTiming(8, { duration: 50 }),
+        withSpring(0, { damping: 4, stiffness: 300, mass: 0.3 })
+      );
+
+      // Reset bulge with jelly spring - bouncy snap back
       scrollOffset.value = withSpring(0, {
-        damping: 20,
-        stiffness: 400,
-        mass: 0.3,
+        damping: 8,
+        stiffness: 300,
+        mass: 0.4,
       });
 
       if (position === 0 && prev) {
@@ -140,17 +155,29 @@ export function BibleReader({
     [prev, next, setPosition, onPositionChange]
   );
 
+  // Shared value for jelly wobble effect
+  const jellyScale = useSharedValue(1);
+
+  // Animated style for page jelly wobble
+  const pageWobbleStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: pageWobble.value }],
+  }));
+
   // Animated style for left edge bulge container
   const leftBulgeStyle = useAnimatedStyle(() => {
     const isActive = scrollDirection.value === 'left';
-    const opacity = isActive && scrollOffset.value > 0.01 ? 1 : 0;
-    return { opacity };
+    const opacity = isActive && scrollOffset.value > 0.005 ? 1 : 0;
+    return {
+      opacity,
+      transform: [{ scaleY: jellyScale.value }],
+    };
   });
 
   // Animated props for left bulge SVG path (bell curve)
   const leftBulgePathProps = useAnimatedProps(() => {
-    // Direct 1:1 mapping - bulge follows finger drag directly
-    const bulgeWidth = Math.min(scrollOffset.value * 2, 1) * BULGE_MAX_WIDTH;
+    // Direct mapping with slight amplification
+    const progress = Math.min(scrollOffset.value * 3, 1);
+    const bulgeWidth = progress * BULGE_MAX_WIDTH;
     const centerY = BULGE_HEIGHT / 2;
 
     // Quadratic bezier bell curve
@@ -161,14 +188,18 @@ export function BibleReader({
   // Animated style for right edge bulge container
   const rightBulgeStyle = useAnimatedStyle(() => {
     const isActive = scrollDirection.value === 'right';
-    const opacity = isActive && scrollOffset.value > 0.01 ? 1 : 0;
-    return { opacity };
+    const opacity = isActive && scrollOffset.value > 0.005 ? 1 : 0;
+    return {
+      opacity,
+      transform: [{ scaleY: jellyScale.value }],
+    };
   });
 
   // Animated props for right bulge SVG path (bell curve)
   const rightBulgePathProps = useAnimatedProps(() => {
-    // Direct 1:1 mapping - bulge follows finger drag directly
-    const bulgeWidth = Math.min(scrollOffset.value * 2, 1) * BULGE_MAX_WIDTH;
+    // Direct mapping with slight amplification
+    const progress = Math.min(scrollOffset.value * 3, 1);
+    const bulgeWidth = progress * BULGE_MAX_WIDTH;
     const centerY = BULGE_HEIGHT / 2;
 
     // Quadratic bezier bell curve
@@ -184,15 +215,16 @@ export function BibleReader({
 
   return (
     <View style={styles.container}>
-      <PagerView
-        ref={pagerRef}
-        style={styles.pager}
-        initialPage={1}
-        onPageSelected={handlePageSelected}
-        onPageScroll={handlePageScroll}
-        offscreenPageLimit={1}
-        overdrag={true}
-      >
+      <Animated.View style={[styles.pager, pageWobbleStyle]}>
+        <PagerView
+          ref={pagerRef}
+          style={styles.pager}
+          initialPage={1}
+          onPageSelected={handlePageSelected}
+          onPageScroll={handlePageScroll}
+          offscreenPageLimit={1}
+          overdrag={true}
+        >
         {/* Page 0: Previous chapter */}
         <View key="prev" style={styles.page}>
           {prev ? (
@@ -239,7 +271,8 @@ export function BibleReader({
             <View style={styles.page} />
           )}
         </View>
-      </PagerView>
+        </PagerView>
+      </Animated.View>
 
       {/* Left edge bulge indicator - bell curve */}
       <Animated.View style={[styles.bulgeLeft, leftBulgeStyle]} pointerEvents="none">
@@ -271,14 +304,14 @@ const styles = StyleSheet.create({
   bulgeLeft: {
     position: 'absolute',
     left: 0,
-    top: '25%', // Centered vertically where fingers typically drag
+    top: '45%', // Centered where finger typically rests
     width: BULGE_MAX_WIDTH,
     height: BULGE_HEIGHT,
   },
   bulgeRight: {
     position: 'absolute',
     right: 0,
-    top: '25%',
+    top: '45%',
     width: BULGE_MAX_WIDTH,
     height: BULGE_HEIGHT,
   },
