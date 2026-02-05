@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-02-02)
 ## Current Position
 
 Phase: 4 of 8 (Profiles & Connections)
-Plan: 3 of ? in current phase
+Plan: 4 of ? in current phase
 Status: In progress
-Last activity: 2026-02-05 - Completed 04-03-PLAN.md (Edit Profile Screen)
+Last activity: 2026-02-05 - Completed 04-04-PLAN.md (User Profile Screen)
 
-Progress: [##################] 64%  (Phase 4 in progress)
+Progress: [##################] 68%  (Phase 4 in progress)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22
+- Total plans completed: 23
 - Average duration: 3 min
-- Total execution time: 68 min
+- Total execution time: 71 min
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: [##################] 64%  (Phase 4 in progress)
 | 1. Foundation | 5/5 | 18 min | 4 min |
 | 2. Authentication | 4/4 | 12 min | 3 min |
 | 3. Bible Reading | 11/11 | 33 min | 3 min |
-| 4. Profiles & Connections | 3/? | 10 min | 3 min |
+| 4. Profiles & Connections | 4/? | 13 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-10 (2 min), 03-11 (2 min), 04-01 (2 min), 04-02 (4 min), 04-03 (4 min)
+- Last 5 plans: 03-11 (2 min), 04-01 (2 min), 04-02 (4 min), 04-03 (4 min), 04-04 (3 min)
 - Trend: Good velocity
 
 *Updated after each plan completion*
@@ -105,6 +105,7 @@ Recent decisions affecting current work:
 - Relay mutation naming must match file prefix pattern (userEditMutation for user-edit.tsx)
 - ActionSheetIOS on iOS, Alert.alert on Android for cross-platform action sheets
 - BackHandler for Android hardware back button protection
+- UsernameQuery prefix for [username].tsx dynamic route (capital U required by Relay)
 
 ### Pending Todos
 
@@ -121,5 +122,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-05
-Stopped at: Completed 04-03-PLAN.md (Edit Profile Screen)
+Stopped at: Completed 04-04-PLAN.md (User Profile Screen)
 Resume file: None
