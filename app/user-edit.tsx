@@ -7,15 +7,21 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActionSheetIOS,
+  Alert,
 } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { useLazyLoadQuery } from 'react-relay';
 import { graphql } from 'relay-runtime';
+import * as ImagePicker from 'expo-image-picker';
 
 import { Text } from '@/components/ui/text';
 import { UserAvatar } from '@/components/user/user-avatar';
 import { useColors } from '@/hooks/use-colors';
+import { useSession } from '@/components/providers/session-provider';
 import type { userEditQuery } from '@/lib/relay/__generated__/userEditQuery.graphql';
+
+const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://www.selah.kr';
 
 const query = graphql`
   query userEditQuery {
@@ -34,6 +40,7 @@ const query = graphql`
 
 export default function UserEditScreen() {
   const colors = useColors();
+  const { session } = useSession();
   const data = useLazyLoadQuery<userEditQuery>(query, {});
 
   // Form state
@@ -62,8 +69,102 @@ export default function UserEditScreen() {
     // TODO: Implement save mutation in Task 3
   };
 
+  // Avatar action sheet and image handling
+  const showAvatarOptions = () => {
+    const options = ['Take Photo', 'Choose from Library', 'Remove Photo', 'Cancel'];
+
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options,
+          cancelButtonIndex: 3,
+          destructiveButtonIndex: 2,
+        },
+        handleAvatarAction
+      );
+    } else {
+      Alert.alert('Change Photo', undefined, [
+        { text: 'Take Photo', onPress: () => handleAvatarAction(0) },
+        { text: 'Choose from Library', onPress: () => handleAvatarAction(1) },
+        { text: 'Remove Photo', onPress: () => handleAvatarAction(2), style: 'destructive' },
+        { text: 'Cancel', style: 'cancel' },
+      ]);
+    }
+  };
+
+  const handleAvatarAction = async (buttonIndex: number) => {
+    if (buttonIndex === 0) await launchCamera();
+    if (buttonIndex === 1) await launchLibrary();
+    if (buttonIndex === 2) removeAvatar();
+  };
+
+  const launchCamera = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'Camera access is needed to take photos');
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (!result.canceled) {
+      await uploadImage(result.assets[0]);
+    }
+  };
+
+  const launchLibrary = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+      mediaTypes: ['images'],
+    });
+    if (!result.canceled) {
+      await uploadImage(result.assets[0]);
+    }
+  };
+
+  const uploadImage = async (asset: ImagePicker.ImagePickerAsset) => {
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', {
+        uri: asset.uri,
+        type: 'image/jpeg',
+        name: 'avatar.jpg',
+      } as any);
+
+      const response = await fetch(`${API_URL}/api/upload`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Authorization: `Bearer ${session?.session?.token}`,
+        },
+      });
+
+      const responseData = await response.json();
+      if (responseData.ok) {
+        setImageId(responseData.data.id);
+        setImageUrl(responseData.data.url);
+      } else {
+        Alert.alert('Upload Failed', 'Could not upload image. Please try again.');
+      }
+    } catch (error) {
+      Alert.alert('Upload Failed', 'Could not upload image. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removeAvatar = () => {
+    setImageId(null);
+    setImageUrl(null);
+  };
+
   const handleAvatarPress = () => {
-    // TODO: Implement action sheet in Task 2
+    showAvatarOptions();
   };
 
   const isDoneDisabled = !hasChanges || isSaving || isUploading;
