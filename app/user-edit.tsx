@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   View,
   TextInput,
@@ -9,9 +9,10 @@ import {
   ScrollView,
   ActionSheetIOS,
   Alert,
+  BackHandler,
 } from 'react-native';
 import { Stack, router } from 'expo-router';
-import { useLazyLoadQuery } from 'react-relay';
+import { useLazyLoadQuery, useMutation } from 'react-relay';
 import { graphql } from 'relay-runtime';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -20,6 +21,7 @@ import { UserAvatar } from '@/components/user/user-avatar';
 import { useColors } from '@/hooks/use-colors';
 import { useSession } from '@/components/providers/session-provider';
 import type { userEditQuery } from '@/lib/relay/__generated__/userEditQuery.graphql';
+import type { userEditMutation } from '@/lib/relay/__generated__/userEditMutation.graphql';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://www.selah.kr';
 
@@ -33,6 +35,22 @@ const query = graphql`
       image {
         id
         url
+      }
+    }
+  }
+`;
+
+const mutation = graphql`
+  mutation userEditMutation($input: UserUpdateInput!) {
+    userUpdate(input: $input) {
+      user {
+        id
+        name
+        bio
+        image {
+          id
+          url
+        }
       }
     }
   }
@@ -60,14 +78,69 @@ export default function UserEditScreen() {
     );
   }, [name, bio, imageId, data.user]);
 
+  // Save mutation
+  const [commitUpdate, isUpdating] = useMutation<userEditMutation>(mutation);
+
+  // Discard changes confirmation
+  const showDiscardConfirmation = (onDiscard: () => void) => {
+    Alert.alert(
+      'Discard Changes?',
+      'You have unsaved changes. Are you sure you want to discard them?',
+      [
+        { text: 'Keep Editing', style: 'cancel' },
+        { text: 'Discard', style: 'destructive', onPress: onDiscard },
+      ]
+    );
+  };
+
   const handleCancel = () => {
-    // TODO: Add discard confirmation in Task 3
-    router.back();
+    if (hasChanges) {
+      showDiscardConfirmation(() => router.back());
+    } else {
+      router.back();
+    }
   };
 
   const handleSave = () => {
-    // TODO: Implement save mutation in Task 3
+    if (!data.user?.username) {
+      Alert.alert('Error', 'Username is required');
+      return;
+    }
+
+    setIsSaving(true);
+    commitUpdate({
+      variables: {
+        input: {
+          name: name.trim(),
+          username: data.user.username, // Keep existing username
+          bio: bio.trim() || undefined,
+          imageId: imageId,
+        },
+      },
+      onCompleted: () => {
+        setIsSaving(false);
+        router.back();
+      },
+      onError: (error) => {
+        setIsSaving(false);
+        Alert.alert('Error', 'Failed to save profile. Please try again.');
+        console.error('Save error:', error);
+      },
+    });
   };
+
+  // Handle Android back button
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (hasChanges && !isSaving) {
+        showDiscardConfirmation(() => router.back());
+        return true; // Prevent default back behavior
+      }
+      return false; // Allow default back behavior
+    });
+
+    return () => backHandler.remove();
+  }, [hasChanges, isSaving]);
 
   // Avatar action sheet and image handling
   const showAvatarOptions = () => {
