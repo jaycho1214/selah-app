@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-02-02)
 ## Current Position
 
 Phase: 4 of 8 (Profiles & Connections)
-Plan: 2 of ? in current phase
+Plan: 3 of ? in current phase
 Status: In progress
-Last activity: 2026-02-05 - Completed 04-02-PLAN.md (Own Profile Screen)
+Last activity: 2026-02-05 - Completed 04-03-PLAN.md (Edit Profile Screen)
 
-Progress: [#################] 61%  (Phase 4 in progress)
+Progress: [##################] 64%  (Phase 4 in progress)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 21
+- Total plans completed: 22
 - Average duration: 3 min
-- Total execution time: 64 min
+- Total execution time: 68 min
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: [#################] 61%  (Phase 4 in progress)
 | 1. Foundation | 5/5 | 18 min | 4 min |
 | 2. Authentication | 4/4 | 12 min | 3 min |
 | 3. Bible Reading | 11/11 | 33 min | 3 min |
-| 4. Profiles & Connections | 2/? | 6 min | 3 min |
+| 4. Profiles & Connections | 3/? | 10 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-09 (4 min), 03-10 (2 min), 03-11 (2 min), 04-01 (2 min), 04-02 (4 min)
+- Last 5 plans: 03-10 (2 min), 03-11 (2 min), 04-01 (2 min), 04-02 (4 min), 04-03 (4 min)
 - Trend: Good velocity
 
 *Updated after each plan completion*
@@ -102,6 +102,9 @@ Recent decisions affecting current work:
 - Skeleton animation: Animated API with opacity loop 0.3-1.0, native driver
 - Server exposes current user via `user` query (not `me`)
 - FlashList v2 no longer requires estimatedItemSize property
+- Relay mutation naming must match file prefix pattern (userEditMutation for user-edit.tsx)
+- ActionSheetIOS on iOS, Alert.alert on Android for cross-platform action sheets
+- BackHandler for Android hardware back button protection
 
 ### Pending Todos
 
@@ -113,9 +116,10 @@ None yet.
 - FlashList requires native rebuild for cell recycling performance
 - PagerView requires native rebuild for swipe navigation
 - expo-file-system requires native rebuild for file download functionality
+- expo-image-picker requires native rebuild for camera/library functionality
 
 ## Session Continuity
 
 Last session: 2026-02-05
-Stopped at: Completed 04-02-PLAN.md (Own Profile Screen)
+Stopped at: Completed 04-03-PLAN.md (Edit Profile Screen)
 Resume file: None
