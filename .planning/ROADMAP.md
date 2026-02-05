@@ -98,14 +98,15 @@ Plans:
   6. User can unfollow a user and see their count decrement
   7. User can view their list of followers
   8. User can view their list of users they follow
-**Plans**: TBD
+**Plans**: 6 plans
 
 Plans:
-- [ ] 04-01: Own profile screen with Relay fragments
-- [ ] 04-02: Profile editing flow
-- [ ] 04-03: Other user profile viewing
-- [ ] 04-04: Follow/unfollow functionality
-- [ ] 04-05: Follower and following lists
+- [ ] 04-01-PLAN.md — Profile UI components (avatar, header, stats row, skeleton)
+- [ ] 04-02-PLAN.md — Own profile screen with posts list
+- [ ] 04-03-PLAN.md — Edit profile screen with avatar upload
+- [ ] 04-04-PLAN.md — Other user profile viewing
+- [ ] 04-05-PLAN.md — Follow/unfollow functionality with optimistic updates
+- [ ] 04-06-PLAN.md — Followers and following list screens
 
 ### Phase 5: Feed & Engagement
 **Goal**: Users can browse social content and engage with posts
@@ -204,7 +205,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 1. Foundation | 5/5 | Complete | 2026-02-02 |
 | 2. Authentication | 4/4 | Complete | 2026-02-02 |
 | 3. Bible Reading | 0/9 | Not started | - |
-| 4. Profiles & Connections | 0/5 | Not started | - |
+| 4. Profiles & Connections | 0/6 | Not started | - |
 | 5. Feed & Engagement | 0/6 | Not started | - |
 | 6. Verse Posts | 0/7 | Not started | - |
 | 7. Notifications | 0/5 | Not started | - |
@@ -215,5 +216,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 *Phase 1 planned: 2026-02-02*
 *Phase 2 planned: 2026-02-02*
 *Phase 3 planned: 2026-02-02*
+*Phase 4 planned: 2026-02-05*
 *Depth: comprehensive (8 phases, 47 plans estimated)*
 *Coverage: 48/48 v1 requirements mapped*
