@@ -13,6 +13,7 @@ import {
 } from "@/components/profile/profile-posts-list";
 import { ProfileSkeleton } from "@/components/profile/profile-skeleton";
 import { ProfileStatsRow } from "@/components/profile/profile-stats-row";
+import { FollowButton } from "@/components/user/follow-button";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { useColors } from "@/hooks/use-colors";
@@ -35,6 +36,7 @@ const userProfileQuery = graphql`
       followerCount
       followingCount
       followedAt
+      ...followButton_user
       ...profilePostsListFragment
     }
   }
@@ -92,35 +94,9 @@ export default function UserProfileScreen() {
   );
 }
 
-// Placeholder FollowButton until 04-05
-function FollowButtonPlaceholder({
-  followedAt,
-  colors,
-}: {
-  followedAt: string | null | undefined;
-  colors: { text: string };
-}) {
-  const isFollowing = !!followedAt;
-  return (
-    <Button
-      variant={isFollowing ? "outline" : "default"}
-      style={styles.actionButton}
-    >
-      <Text
-        style={[
-          styles.actionButtonText,
-          isFollowing ? { color: colors.text } : { color: "#fff" },
-        ]}
-      >
-        {isFollowing ? "Following" : "Follow"}
-      </Text>
-    </Button>
-  );
-}
-
 function UserProfileContent() {
   const { username } = useLocalSearchParams<{ username: string }>();
-  const { session } = useSession();
+  const { session, presentSignIn } = useSession();
   const colors = useColors();
   const router = useRouter();
   const postsListRef = useRef<ProfilePostsListRef>(null);
@@ -229,8 +205,12 @@ function UserProfileContent() {
               Edit Profile
             </Text>
           </Button>
+        ) : session?.user ? (
+          <FollowButton userRef={user} />
         ) : (
-          <FollowButtonPlaceholder followedAt={user.followedAt} colors={colors} />
+          <Button style={styles.actionButton} onPress={presentSignIn}>
+            <Text style={styles.signInButtonText}>Sign in to Follow</Text>
+          </Button>
         )}
       </ProfileHeader>
 
@@ -280,6 +260,11 @@ const styles = StyleSheet.create({
   actionButtonText: {
     fontSize: 14,
     fontWeight: "600",
+  },
+  signInButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#fff",
   },
   divider: {
     height: StyleSheet.hairlineWidth,

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<82de17ec4b509510f95dccf6d905d6bb>>
+ * @generated SignedSource<<733cdf94b2ceab2bf6494638e1e9308d>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -25,7 +25,7 @@ export type UsernameQuery$data = {
     } | null | undefined;
     readonly name: string | null | undefined;
     readonly username: string | null | undefined;
-    readonly " $fragmentSpreads": FragmentRefs<"profilePostsListFragment">;
+    readonly " $fragmentSpreads": FragmentRefs<"followButton_user" | "profilePostsListFragment">;
   } | null | undefined;
 };
 export type UsernameQuery = {
@@ -165,6 +165,11 @@ return {
           (v7/*: any*/),
           (v8/*: any*/),
           (v9/*: any*/),
+          {
+            "args": null,
+            "kind": "FragmentSpread",
+            "name": "followButton_user"
+          },
           {
             "args": null,
             "kind": "FragmentSpread",
@@ -482,16 +487,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "56337d826f038ffb3f636bede69ce175",
+    "cacheID": "74704bf792356c763413f891cf3502c3",
     "id": null,
     "metadata": {},
     "name": "UsernameQuery",
     "operationKind": "query",
-    "text": "query UsernameQuery(\n  $username: String!\n) {\n  userByUsername(username: $username) {\n    id\n    username\n    name\n    bio\n    image {\n      url\n      id\n    }\n    followerCount\n    followingCount\n    followedAt\n    ...profilePostsListFragment\n  }\n}\n\nfragment profilePostsListFragment on User {\n  bibleVersePosts(first: 20) {\n    edges {\n      node {\n        id\n        content\n        createdAt\n        likesCount\n        childPostsCount\n        likedAt\n        user {\n          id\n          name\n          username\n          image {\n            url\n            id\n          }\n        }\n        images {\n          url\n          width\n          height\n          id\n        }\n        poll {\n          id\n          totalVotes\n          isExpired\n          userVote {\n            id\n            text\n          }\n          options {\n            id\n            text\n            voteCount\n            votePercentage\n          }\n        }\n        verse {\n          id\n          book\n          chapter\n          verse\n          translation\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
+    "text": "query UsernameQuery(\n  $username: String!\n) {\n  userByUsername(username: $username) {\n    id\n    username\n    name\n    bio\n    image {\n      url\n      id\n    }\n    followerCount\n    followingCount\n    followedAt\n    ...followButton_user\n    ...profilePostsListFragment\n  }\n}\n\nfragment followButton_user on User {\n  id\n  followedAt\n  followerCount\n}\n\nfragment profilePostsListFragment on User {\n  bibleVersePosts(first: 20) {\n    edges {\n      node {\n        id\n        content\n        createdAt\n        likesCount\n        childPostsCount\n        likedAt\n        user {\n          id\n          name\n          username\n          image {\n            url\n            id\n          }\n        }\n        images {\n          url\n          width\n          height\n          id\n        }\n        poll {\n          id\n          totalVotes\n          isExpired\n          userVote {\n            id\n            text\n          }\n          options {\n            id\n            text\n            voteCount\n            votePercentage\n          }\n        }\n        verse {\n          id\n          book\n          chapter\n          verse\n          translation\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
   }
 };
 })();
 
-(node as any).hash = "f2b29db10f42756155ddca2eb62508a3";
+(node as any).hash = "c3da0fde2dd99c2b00cfd079e6ffabb5";
 
 export default node;
