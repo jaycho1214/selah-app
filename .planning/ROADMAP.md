@@ -112,6 +112,9 @@ Plans:
 **Goal**: Users can browse social content and engage with posts
 **Depends on**: Phase 4
 **Requirements**: FEED-01, FEED-02, FEED-03, FEED-04, ENGM-01, ENGM-02, ENGM-03, ENGM-04, ENGM-05
+**Pre-satisfied requirements:**
+  - ENGM-03 (reply to posts): Already implemented in `app/post/[id].tsx` — createReplyMutation with ReflectionComposer
+  - ENGM-04 (threaded replies): Already implemented in `app/post/[id].tsx` — childPostsFragment with pagination, tapping reply navigates to `/post/{id}`
 **Success Criteria** (what must be TRUE):
   1. User can view feed of posts from users they follow
   2. User can pull down to refresh and see new posts appear
@@ -119,8 +122,8 @@ Plans:
   4. User can view explore feed showing all verse posts
   5. User can like a post and see like count increment
   6. User can unlike a post and see like count decrement
-  7. User can reply to a post and see their reply appear
-  8. User can view threaded replies on a post
+  7. User can reply to a post and see their reply appear *(pre-satisfied)*
+  8. User can view threaded replies on a post *(pre-satisfied)*
   9. User can vote on a poll and see results update
 **Plans**: 3 plans
 
