@@ -85,6 +85,8 @@ interface FeedListProps {
   /** Custom empty state component rendered when posts array is empty */
   emptyState?: React.ReactNode;
   contentContainerStyle?: { paddingTop?: number; paddingBottom?: number };
+  /** Offset for pull-to-refresh indicator (e.g. behind a tab bar) */
+  progressViewOffset?: number;
 }
 
 // ---------- Component ----------
@@ -107,6 +109,7 @@ function FeedList({
   currentUserId,
   emptyState,
   contentContainerStyle,
+  progressViewOffset,
 }: FeedListProps) {
   const colors = useColors();
 
@@ -192,6 +195,7 @@ function FeedList({
             onRefresh={onRefresh}
             tintColor={colors.textMuted}
             colors={[colors.accent]}
+            progressViewOffset={progressViewOffset}
           />
         }
       />

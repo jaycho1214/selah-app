@@ -350,6 +350,7 @@ function ForYouFeed() {
         paddingTop: TAB_BAR_HEIGHT + insets.top,
         paddingBottom: insets.bottom + 100,
       }}
+      progressViewOffset={TAB_BAR_HEIGHT + insets.top}
     />
   );
 }
