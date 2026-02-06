@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Authentication** - Google and Apple Sign-In with session persistence
 - [ ] **Phase 3: Bible Reading** - Multi-translation Bible with offline support, highlights, notes, bookmarks
 - [ ] **Phase 4: Profiles & Connections** - User profiles, following, and follower lists
-- [ ] **Phase 5: Feed & Engagement** - Social feed with likes, replies, and poll voting
+- [x] **Phase 5: Feed & Engagement** - Social feed with likes, replies, and poll voting
 - [ ] **Phase 6: Verse Posts** - Rich text post creation with images and polls
 - [ ] **Phase 7: Notifications** - In-app notification feed and push notifications
 - [ ] **Phase 8: Mobile Native & Settings** - Deep links, share sheet, theme and language settings
@@ -128,9 +128,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Feed skeleton cards and shared feed list component
-- [ ] 05-02-PLAN.md — Dual-tab feed with PagerView (For You + Following)
-- [ ] 05-03-PLAN.md — Poll voting mutation with optimistic updates
+- [x] 05-01-PLAN.md — Feed skeleton cards and shared feed list component
+- [x] 05-02-PLAN.md — Dual-tab feed with PagerView (For You + Following)
+- [x] 05-03-PLAN.md — Poll voting mutation with optimistic updates
 
 ### Phase 6: Verse Posts
 **Goal**: Users can create and manage verse-based posts with rich content
@@ -206,7 +206,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 2. Authentication | 4/4 | Complete | 2026-02-02 |
 | 3. Bible Reading | 0/9 | Not started | - |
 | 4. Profiles & Connections | 0/6 | Not started | - |
-| 5. Feed & Engagement | 0/3 | Not started | - |
+| 5. Feed & Engagement | 3/3 | Complete | 2026-02-06 |
 | 6. Verse Posts | 0/7 | Not started | - |
 | 7. Notifications | 0/5 | Not started | - |
 | 8. Mobile Native & Settings | 0/6 | Not started | - |

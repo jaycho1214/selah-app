@@ -42,10 +42,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Social - Feed
 
-- [ ] **FEED-01**: User can view feed of posts from followed users
-- [ ] **FEED-02**: User can pull-to-refresh to load new posts
-- [ ] **FEED-03**: User can scroll infinitely through feed (pagination)
-- [ ] **FEED-04**: User can view all verse posts (explore feed)
+- [x] **FEED-01**: User can view feed of posts from followed users
+- [x] **FEED-02**: User can pull-to-refresh to load new posts
+- [x] **FEED-03**: User can scroll infinitely through feed (pagination)
+- [x] **FEED-04**: User can view all verse posts (explore feed)
 
 ### Verse Posts
 
@@ -58,11 +58,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Engagement
 
-- [ ] **ENGM-01**: User can like posts
-- [ ] **ENGM-02**: User can unlike posts
-- [ ] **ENGM-03**: User can reply to posts
-- [ ] **ENGM-04**: User can view replies on a post (threaded)
-- [ ] **ENGM-05**: User can vote on polls
+- [x] **ENGM-01**: User can like posts
+- [x] **ENGM-02**: User can unlike posts
+- [x] **ENGM-03**: User can reply to posts
+- [x] **ENGM-04**: User can view replies on a post (threaded)
+- [x] **ENGM-05**: User can vote on polls
 
 ### Notifications
 
@@ -148,15 +148,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CONN-02 | Phase 4 | Pending |
 | CONN-03 | Phase 4 | Pending |
 | CONN-04 | Phase 4 | Pending |
-| FEED-01 | Phase 5 | Pending |
-| FEED-02 | Phase 5 | Pending |
-| FEED-03 | Phase 5 | Pending |
-| FEED-04 | Phase 5 | Pending |
-| ENGM-01 | Phase 5 | Pending |
-| ENGM-02 | Phase 5 | Pending |
-| ENGM-03 | Phase 5 | Pending |
-| ENGM-04 | Phase 5 | Pending |
-| ENGM-05 | Phase 5 | Pending |
+| FEED-01 | Phase 5 | Complete |
+| FEED-02 | Phase 5 | Complete |
+| FEED-03 | Phase 5 | Complete |
+| FEED-04 | Phase 5 | Complete |
+| ENGM-01 | Phase 5 | Complete |
+| ENGM-02 | Phase 5 | Complete |
+| ENGM-03 | Phase 5 | Complete |
+| ENGM-04 | Phase 5 | Complete |
+| ENGM-05 | Phase 5 | Complete |
 | POST-01 | Phase 6 | Pending |
 | POST-02 | Phase 6 | Pending |
 | POST-03 | Phase 6 | Pending |

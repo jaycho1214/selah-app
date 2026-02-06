@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2025-02-02)
 
 **Core value:** Bible reading with community sharing around verses - the intersection of personal devotion and social connection must feel seamless and meaningful.
-**Current focus:** Phase 5 - Feed & Engagement
+**Current focus:** Phase 5 complete — ready for Phase 6 (Verse Posts)
 
 ## Current Position
 
