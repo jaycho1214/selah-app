@@ -122,15 +122,12 @@ Plans:
   7. User can reply to a post and see their reply appear
   8. User can view threaded replies on a post
   9. User can vote on a poll and see results update
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 05-01: Home feed with FlashList and pagination
-- [ ] 05-02: Pull-to-refresh implementation
-- [ ] 05-03: Explore feed (all verse posts)
-- [ ] 05-04: Like/unlike functionality with optimistic updates
-- [ ] 05-05: Reply creation and threaded display
-- [ ] 05-06: Poll voting
+- [ ] 05-01-PLAN.md — Feed skeleton cards and shared feed list component
+- [ ] 05-02-PLAN.md — Dual-tab feed with PagerView (For You + Following)
+- [ ] 05-03-PLAN.md — Poll voting mutation with optimistic updates
 
 ### Phase 6: Verse Posts
 **Goal**: Users can create and manage verse-based posts with rich content
@@ -206,7 +203,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 2. Authentication | 4/4 | Complete | 2026-02-02 |
 | 3. Bible Reading | 0/9 | Not started | - |
 | 4. Profiles & Connections | 0/6 | Not started | - |
-| 5. Feed & Engagement | 0/6 | Not started | - |
+| 5. Feed & Engagement | 0/3 | Not started | - |
 | 6. Verse Posts | 0/7 | Not started | - |
 | 7. Notifications | 0/5 | Not started | - |
 | 8. Mobile Native & Settings | 0/6 | Not started | - |
@@ -217,5 +214,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 *Phase 2 planned: 2026-02-02*
 *Phase 3 planned: 2026-02-02*
 *Phase 4 planned: 2026-02-05*
+*Phase 5 planned: 2026-02-06*
 *Depth: comprehensive (8 phases, 47 plans estimated)*
 *Coverage: 48/48 v1 requirements mapped*
