@@ -2,6 +2,7 @@ import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import {
+  BookOpen,
   Heart,
   MessageCircle,
   Share as ShareIcon,
@@ -10,9 +11,35 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import { Alert, Pressable, Share, StyleSheet, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
+import { graphql, useMutation } from "react-relay";
 
 import { Text } from "@/components/ui/text";
+import { createVerseId } from "@/lib/bible/utils";
+import type { BibleBook } from "@/lib/bible/types";
 import { getPostShareUrl } from "@/lib/utils";
+import type { reflectionItemPollVoteMutation } from "@/lib/relay/__generated__/reflectionItemPollVoteMutation.graphql";
+
+// Poll vote mutation
+const PollVoteMutation = graphql`
+  mutation reflectionItemPollVoteMutation($optionId: ID!, $pollId: ID!) {
+    pollVote(optionId: $optionId, pollId: $pollId) {
+      poll {
+        id
+        totalVotes
+        userVote {
+          id
+          text
+        }
+        options {
+          id
+          text
+          voteCount
+          votePercentage
+        }
+      }
+    }
+  }
+`;
 
 // Spoiler component for tap-to-reveal
 function SpoilerText({
@@ -118,6 +145,14 @@ interface Poll {
   } | null;
 }
 
+interface VerseInfo {
+  readonly id?: string | null;
+  readonly book?: string | null;
+  readonly chapter?: number | null;
+  readonly verse?: number | null;
+  readonly translation?: string | null;
+}
+
 interface ReflectionItemProps {
   id: string;
   content?: string | null;
@@ -125,6 +160,8 @@ interface ReflectionItemProps {
   createdAt: string;
   images: readonly ReflectionImage[];
   poll?: Poll | null;
+  verse?: VerseInfo | null;
+  verseReference?: string | null;
   likesCount: number;
   childPostsCount: number;
   likedAt?: string | null;
@@ -153,6 +190,8 @@ export function ReflectionItem({
   createdAt,
   images,
   poll,
+  verse,
+  verseReference,
   likesCount,
   childPostsCount,
   likedAt,
@@ -167,6 +206,61 @@ export function ReflectionItem({
   const router = useRouter();
   const isLiked = !!likedAt;
   const isOwner = currentUserId === user.id;
+  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
+  const [commitPollVote, isPollVoting] = useMutation<reflectionItemPollVoteMutation>(PollVoteMutation);
+
+  const handlePollVote = useCallback(
+    (optionId: string) => {
+      if (!poll) return;
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      setSelectedOptionId(optionId);
+
+      const selectedOption = poll.options?.find((opt) => opt.id === optionId);
+
+      // Short delay for the "confirm" visual, then execute mutation
+      setTimeout(() => {
+        commitPollVote({
+          variables: { optionId, pollId: poll.id },
+          optimisticUpdater: (store) => {
+            const pollRecord = store.get(poll.id);
+            if (pollRecord) {
+              // Set userVote
+              const userVoteRecord = store.create(
+                `client:userVote:${optionId}`,
+                "PollUserVote",
+              );
+              userVoteRecord.setValue(optionId, "id");
+              userVoteRecord.setValue(selectedOption?.text ?? "", "text");
+              pollRecord.setLinkedRecord(userVoteRecord, "userVote");
+
+              // Increment totalVotes
+              const currentTotal =
+                (pollRecord.getValue("totalVotes") as number) ?? 0;
+              pollRecord.setValue(currentTotal + 1, "totalVotes");
+
+              // Update the voted option's voteCount
+              const options = pollRecord.getLinkedRecords("options");
+              if (options) {
+                for (const opt of options) {
+                  const optId = opt.getValue("id");
+                  if (optId === optionId) {
+                    const currentVotes =
+                      (opt.getValue("voteCount") as number) ?? 0;
+                    opt.setValue(currentVotes + 1, "voteCount");
+                  }
+                }
+              }
+            }
+          },
+          onError: (error) => {
+            console.error("Poll vote failed:", error);
+            setSelectedOptionId(null); // Reset on error
+          },
+        });
+      }, 200);
+    },
+    [poll, commitPollVote],
+  );
 
   const handleLikeToggle = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -211,6 +305,19 @@ export function ReflectionItem({
       ],
     );
   }, [id, onDelete]);
+
+  const handleVersePress = useCallback(() => {
+    if (verse?.book && verse?.chapter && verse?.verse && verse?.translation) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      const verseId = createVerseId(
+        verse.translation,
+        verse.book as BibleBook,
+        verse.chapter,
+        verse.verse
+      );
+      router.push(`/verse/${verseId}`);
+    }
+  }, [verse, router]);
 
   const formattedDate = useMemo(() => {
     const date = new Date(createdAt);
@@ -342,19 +449,22 @@ export function ReflectionItem({
     }
   }, [user.username, router]);
 
+  // Derive accent colors for visual interest
+  const accentLight = colors.accent + "12";
+  const accentMedium = colors.accent + "20";
+
   return (
     <Animated.View
-      entering={FadeIn.duration(200).delay(index * 30)}
+      entering={FadeIn.duration(200).delay(index * 25)}
       style={[styles.container, { borderBottomColor: colors.border }]}
     >
-      {/* Twitter-style horizontal layout */}
-      <View style={styles.row}>
-        {/* Avatar - tappable to navigate to user profile */}
+      <Pressable style={styles.row} onPress={handleCardPress}>
+        {/* Avatar */}
         <Pressable
           onPress={handleUserPress}
           style={({ pressed }) => [
             styles.avatarContainer,
-            { opacity: pressed ? 0.7 : 1 },
+            { opacity: pressed ? 0.8 : 1 },
           ]}
         >
           {user.image?.url ? (
@@ -362,13 +472,13 @@ export function ReflectionItem({
               source={{ uri: user.image.url }}
               style={styles.avatar}
               contentFit="cover"
-              transition={150}
+              transition={200}
             />
           ) : (
             <View
               style={[
                 styles.avatarPlaceholder,
-                { backgroundColor: colors.accent + "18" },
+                { backgroundColor: accentLight },
               ]}
             >
               <Text style={[styles.avatarInitial, { color: colors.accent }]}>
@@ -378,42 +488,43 @@ export function ReflectionItem({
           )}
         </Pressable>
 
-        {/* Content Column */}
-        <Pressable style={styles.contentColumn} onPress={handleCardPress}>
-          {/* Header Row: Name, Username, Time */}
-          <View style={styles.header}>
+          {/* Content Column */}
+          <View style={styles.contentColumn}>
+            {/* Header: Name + @username • time */}
             <Pressable
               onPress={handleUserPress}
-              style={({ pressed }) => [
-                styles.headerLeft,
-                { opacity: pressed ? 0.7 : 1 },
-              ]}
+              style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
             >
-              <Text
-                style={[styles.displayName, { color: colors.text }]}
-                numberOfLines={1}
-              >
-                {user.name || user.username || "Anonymous"}
-              </Text>
-              <Text
-                style={[styles.username, { color: colors.textMuted }]}
-                numberOfLines={1}
-              >
-                @{user.username || "user"}
-              </Text>
-              <Text style={[styles.dot, { color: colors.textMuted }]}>·</Text>
-              <Text style={[styles.time, { color: colors.textMuted }]}>
-                {formattedDate}
-              </Text>
+              <View style={styles.headerRow}>
+                <Text
+                  style={[styles.displayName, { color: colors.text }]}
+                  numberOfLines={1}
+                >
+                  {user.name || user.username || "Anonymous"}
+                </Text>
+                <Text style={[styles.headerDot, { color: colors.textMuted }]}>·</Text>
+                <Text
+                  style={[styles.username, { color: colors.textMuted }]}
+                  numberOfLines={1}
+                >
+                  @{user.username || "user"}
+                </Text>
+                <Text style={[styles.headerDot, { color: colors.textMuted }]}>·</Text>
+                <Text
+                  style={[styles.headerMeta, { color: colors.textMuted }]}
+                  numberOfLines={1}
+                >
+                  {formattedDate}
+                </Text>
+              </View>
             </Pressable>
-          </View>
 
-          {/* Content */}
+          {/* Post Content */}
           {contentElements && (
             <View style={styles.contentContainer}>{contentElements}</View>
           )}
 
-          {/* Images - Twitter-style grid */}
+          {/* Images */}
           {images.length > 0 && (
             <View
               style={[
@@ -452,154 +563,191 @@ export function ReflectionItem({
             </View>
           )}
 
-          {/* Poll - Twitter style */}
-          {poll && poll.options && (
-            <View
-              style={[styles.pollContainer, { borderColor: colors.border }]}
-            >
-              {poll.options.map((option) => {
-                const isVoted = poll.userVote?.id === option.id;
-                const percentage = option.votePercentage || 0;
-                const showResults = poll.isExpired || !!poll.userVote;
+          {/* Poll */}
+          {poll && poll.options && (() => {
+            const showResults =
+              poll.isExpired || !!poll.userVote || selectedOptionId !== null;
 
-                return (
-                  <Pressable
-                    key={option.id}
-                    style={[styles.pollOption, { borderColor: colors.border }]}
-                  >
-                    {showResults && (
-                      <View
-                        style={[
-                          styles.pollBar,
-                          {
-                            width: `${percentage}%`,
-                            backgroundColor: isVoted
-                              ? colors.accent + "25"
-                              : colors.surfaceElevated,
-                          },
-                        ]}
-                      />
-                    )}
-                    <Text
+            return (
+              <View
+                style={[styles.pollContainer, { borderColor: colors.border }]}
+              >
+                {poll.options.map((option) => {
+                  const isVoted =
+                    poll.userVote?.id === option.id ||
+                    selectedOptionId === option.id;
+                  const percentage = option.votePercentage || 0;
+                  const isSelected =
+                    selectedOptionId === option.id && !poll.userVote;
+
+                  return (
+                    <Pressable
+                      key={option.id}
+                      onPress={() => {
+                        if (!showResults && !isPollVoting) {
+                          handlePollVote(option.id);
+                        }
+                      }}
+                      disabled={showResults || isPollVoting}
                       style={[
-                        styles.pollOptionText,
-                        { color: colors.text },
-                        isVoted && { fontWeight: "600" },
+                        styles.pollOption,
+                        { borderColor: colors.border },
+                        isSelected && {
+                          backgroundColor: colors.accent + "15",
+                        },
                       ]}
                     >
-                      {option.text}
-                    </Text>
-                    {showResults && (
+                      {showResults && (
+                        <View
+                          style={[
+                            styles.pollBar,
+                            {
+                              width: `${percentage}%`,
+                              backgroundColor: isVoted
+                                ? colors.accent + "25"
+                                : colors.surfaceElevated,
+                            },
+                          ]}
+                        />
+                      )}
                       <Text
                         style={[
-                          styles.pollPercentage,
-                          { color: colors.textMuted },
+                          styles.pollOptionText,
+                          { color: colors.text },
+                          isVoted && { fontWeight: "600" },
                         ]}
                       >
-                        {Math.round(percentage)}%
+                        {option.text}
+                      </Text>
+                      {showResults && (
+                        <Text
+                          style={[
+                            styles.pollPercentage,
+                            { color: colors.textMuted },
+                          ]}
+                        >
+                          {Math.round(percentage)}%
+                        </Text>
+                      )}
+                    </Pressable>
+                  );
+                })}
+                <Text style={[styles.pollMeta, { color: colors.textMuted }]}>
+                  {poll.totalVotes || 0} vote
+                  {(poll.totalVotes || 0) !== 1 ? "s" : ""}
+                  {poll.isExpired ? " · Final results" : ""}
+                </Text>
+              </View>
+            );
+          })()}
+
+          {/* Footer: Verse Badge + Action Buttons */}
+          <View style={styles.footer}>
+            {/* Verse Badge */}
+            {verseReference && (
+              <Pressable
+                onPress={handleVersePress}
+                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+              >
+                <View
+                  style={[
+                    styles.verseBadge,
+                    { backgroundColor: accentLight, borderColor: accentMedium },
+                  ]}
+                >
+                  <BookOpen size={14} color={colors.accent} strokeWidth={2} />
+                  <View style={styles.verseBadgeTextContainer}>
+                    {verse?.translation && (
+                      <Text style={[styles.verseBadgeTranslation, { color: colors.textMuted }]}>
+                        {verse.translation}
                       </Text>
                     )}
-                  </Pressable>
-                );
-              })}
-              <Text style={[styles.pollMeta, { color: colors.textMuted }]}>
-                {poll.totalVotes || 0} vote
-                {(poll.totalVotes || 0) !== 1 ? "s" : ""}
-                {poll.isExpired ? " · Final results" : ""}
-              </Text>
-            </View>
-          )}
-
-          {/* Action Bar - wrapped to prevent touch bubbling */}
-          <Pressable style={styles.actionBar} onPress={() => {}}>
-            {/* Comment */}
-            <Pressable
-              onPress={handleComment}
-              style={({ pressed }) => [
-                styles.actionItem,
-                { opacity: pressed ? 0.5 : 1 },
-              ]}
-              hitSlop={8}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <MessageCircle
-                  size={18}
-                  color={colors.textMuted}
-                  strokeWidth={1.5}
-                />
-                {childPostsCount > 0 && (
-                  <Text
-                    style={[
-                      styles.actionCount,
-                      { color: colors.textMuted, marginLeft: 6 },
-                    ]}
-                  >
-                    {childPostsCount}
-                  </Text>
-                )}
-              </View>
-            </Pressable>
-
-            {/* Like */}
-            <Pressable
-              onPress={handleLikeToggle}
-              style={({ pressed }) => [
-                styles.actionItem,
-                { opacity: pressed ? 0.5 : 1 },
-              ]}
-              hitSlop={8}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Heart
-                  size={18}
-                  color={isLiked ? "#f91880" : colors.textMuted}
-                  fill={isLiked ? "#f91880" : "transparent"}
-                  strokeWidth={1.5}
-                />
-                {likesCount > 0 && (
-                  <Text
-                    style={[
-                      styles.actionCount,
-                      {
-                        color: isLiked ? "#f91880" : colors.textMuted,
-                        marginLeft: 6,
-                      },
-                    ]}
-                  >
-                    {likesCount}
-                  </Text>
-                )}
-              </View>
-            </Pressable>
-
-            {/* Share */}
-            <Pressable
-              onPress={handleShare}
-              style={({ pressed }) => [
-                styles.actionItem,
-                { opacity: pressed ? 0.5 : 1 },
-              ]}
-              hitSlop={8}
-            >
-              <ShareIcon size={17} color={colors.textMuted} strokeWidth={1.5} />
-            </Pressable>
-
-            {/* Delete - only for owner */}
-            {isOwner && onDelete && (
-              <Pressable
-                onPress={handleDelete}
-                style={({ pressed }) => [
-                  styles.actionItem,
-                  { opacity: pressed ? 0.5 : 1 },
-                ]}
-                hitSlop={8}
-              >
-                <Trash2 size={17} color={colors.textMuted} strokeWidth={1.5} />
+                    <Text style={[styles.verseBadgeReference, { color: colors.text }]}>
+                      {verseReference}
+                    </Text>
+                  </View>
+                </View>
               </Pressable>
             )}
-          </Pressable>
-        </Pressable>
-      </View>
+
+            {/* Action Buttons Row - Refined with better spacing */}
+            <View style={styles.actionBar}>
+              {/* Like */}
+              <Pressable
+                onPress={handleLikeToggle}
+                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+                hitSlop={12}
+              >
+                <View style={styles.actionItem}>
+                  <Heart
+                    size={18}
+                    color={isLiked ? "#f91880" : colors.textMuted}
+                    fill={isLiked ? "#f91880" : "transparent"}
+                    strokeWidth={1.5}
+                  />
+                  {likesCount > 0 && (
+                    <Text
+                      style={[
+                        styles.actionCount,
+                        { color: isLiked ? "#f91880" : colors.textMuted },
+                      ]}
+                    >
+                      {likesCount}
+                    </Text>
+                  )}
+                </View>
+              </Pressable>
+
+              {/* Comment */}
+              <Pressable
+                onPress={handleComment}
+                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+                hitSlop={12}
+              >
+                <View style={styles.actionItem}>
+                  <MessageCircle
+                    size={18}
+                    color={colors.textMuted}
+                    strokeWidth={1.5}
+                  />
+                  {childPostsCount > 0 && (
+                    <Text style={[styles.actionCount, { color: colors.textMuted }]}>
+                      {childPostsCount}
+                    </Text>
+                  )}
+                </View>
+              </Pressable>
+
+              {/* Share */}
+              <Pressable
+                onPress={handleShare}
+                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+                hitSlop={12}
+              >
+                <View style={styles.actionItem}>
+                  <ShareIcon size={17} color={colors.textMuted} strokeWidth={1.5} />
+                </View>
+              </Pressable>
+
+              {/* Spacer */}
+              <View style={styles.spacer} />
+
+              {/* Delete - only for owner */}
+              {isOwner && onDelete && (
+                <Pressable
+                  onPress={handleDelete}
+                  style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+                  hitSlop={12}
+                >
+                  <View style={styles.actionItem}>
+                    <Trash2 size={17} color={colors.textMuted} strokeWidth={1.5} />
+                  </View>
+                </Pressable>
+              )}
+            </View>
+          </View>
+        </View>
+      </Pressable>
     </Animated.View>
   );
 }
@@ -607,69 +755,61 @@ export function ReflectionItem({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 4,
+    paddingVertical: 14,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   row: {
     flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
   },
-  avatarContainer: {
-    marginRight: 12,
-  },
+  avatarContainer: {},
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
   },
   avatarPlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
   },
   avatarInitial: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 17,
+    fontWeight: "700",
   },
   contentColumn: {
     flex: 1,
+    gap: 4,
   },
-  header: {
+  headerRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 2,
-  },
-  headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
     gap: 4,
   },
   displayName: {
     fontSize: 15,
-    fontWeight: "700",
-    flexShrink: 1,
+    fontWeight: "600",
+    letterSpacing: -0.2,
+  },
+  headerDot: {
+    fontSize: 14,
+    opacity: 0.5,
+  },
+  headerMeta: {
+    fontSize: 13,
   },
   username: {
-    fontSize: 14,
-    flexShrink: 1,
-  },
-  dot: {
-    fontSize: 14,
-  },
-  time: {
-    fontSize: 14,
+    fontSize: 13,
   },
   contentContainer: {
-    marginBottom: 10,
+    marginTop: 4,
   },
   content: {
     fontSize: 15,
-    lineHeight: 20,
-    letterSpacing: 0.1,
+    lineHeight: 22,
   },
   spoilerText: {
     paddingHorizontal: 4,
@@ -677,11 +817,11 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     overflow: "hidden",
   },
-  // Image Grid - Twitter style
+  // Image Grid
   imageGrid: {
-    borderRadius: 16,
+    borderRadius: 12,
     overflow: "hidden",
-    marginBottom: 10,
+    marginTop: 8,
     borderWidth: StyleSheet.hairlineWidth,
   },
   singleImageGrid: {
@@ -725,12 +865,12 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-  // Poll styles
+  // Poll
   pollContainer: {
     borderWidth: 1,
     borderRadius: 12,
     overflow: "hidden",
-    marginBottom: 10,
+    marginTop: 8,
   },
   pollOption: {
     position: "relative",
@@ -761,20 +901,54 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
+  // Footer
+  footer: {
+    marginTop: 12,
+    gap: 12,
+  },
+  // Verse Badge - Enhanced
+  verseBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 8,
+  },
+  verseBadgeTextContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  verseBadgeTranslation: {
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+    opacity: 0.7,
+  },
+  verseBadgeReference: {
+    fontSize: 14,
+    fontWeight: "600",
+    letterSpacing: -0.2,
+  },
   // Action Bar
   actionBar: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 24,
-    paddingVertical: 8,
+    gap: 20,
   },
   actionItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    paddingVertical: 4,
+    gap: 5,
   },
   actionCount: {
     fontSize: 13,
+  },
+  spacer: {
+    flex: 1,
   },
 });
