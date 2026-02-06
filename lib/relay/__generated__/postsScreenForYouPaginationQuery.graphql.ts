@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<2bedb1b23aa31307c45c08402f1709ef>>
+ * @generated SignedSource<<064f5659de254f0c600c05fbd79a43d3>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,16 +10,16 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type postsScreenPaginationQuery$variables = {
+export type postsScreenForYouPaginationQuery$variables = {
   count?: number | null | undefined;
   cursor?: string | null | undefined;
 };
-export type postsScreenPaginationQuery$data = {
-  readonly " $fragmentSpreads": FragmentRefs<"postsScreenFragment">;
+export type postsScreenForYouPaginationQuery$data = {
+  readonly " $fragmentSpreads": FragmentRefs<"postsScreenForYouFragment">;
 };
-export type postsScreenPaginationQuery = {
-  response: postsScreenPaginationQuery$data;
-  variables: postsScreenPaginationQuery$variables;
+export type postsScreenForYouPaginationQuery = {
+  response: postsScreenForYouPaginationQuery$data;
+  variables: postsScreenForYouPaginationQuery$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -73,7 +73,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "postsScreenPaginationQuery",
+    "name": "postsScreenForYouPaginationQuery",
     "selections": [
       {
         "args": [
@@ -89,7 +89,7 @@ return {
           }
         ],
         "kind": "FragmentSpread",
-        "name": "postsScreenFragment"
+        "name": "postsScreenForYouFragment"
       }
     ],
     "type": "Query",
@@ -99,7 +99,7 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "postsScreenPaginationQuery",
+    "name": "postsScreenForYouPaginationQuery",
     "selections": [
       {
         "alias": null,
@@ -398,23 +398,23 @@ return {
         "args": (v1/*: any*/),
         "filters": null,
         "handle": "connection",
-        "key": "postsScreen_bibleVersePosts",
+        "key": "forYouFeed_bibleVersePosts",
         "kind": "LinkedHandle",
         "name": "bibleVersePosts"
       }
     ]
   },
   "params": {
-    "cacheID": "265107ff26e79fee44a5759dde5cdce5",
+    "cacheID": "dbefa18c1fa4c303fbe727288b8506b5",
     "id": null,
     "metadata": {},
-    "name": "postsScreenPaginationQuery",
+    "name": "postsScreenForYouPaginationQuery",
     "operationKind": "query",
-    "text": "query postsScreenPaginationQuery(\n  $count: Int = 20\n  $cursor: String\n) {\n  ...postsScreenFragment_1G22uz\n}\n\nfragment postsScreenFragment_1G22uz on Query {\n  bibleVersePosts(first: $count, after: $cursor) {\n    edges {\n      node {\n        id\n        content\n        createdAt\n        likesCount\n        childPostsCount\n        likedAt\n        user {\n          id\n          name\n          username\n          image {\n            url\n            id\n          }\n        }\n        images {\n          url\n          width\n          height\n          id\n        }\n        poll {\n          id\n          totalVotes\n          isExpired\n          userVote {\n            id\n            text\n          }\n          options {\n            id\n            text\n            voteCount\n            votePercentage\n          }\n        }\n        verse {\n          id\n          book\n          chapter\n          verse\n          translation\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n"
+    "text": "query postsScreenForYouPaginationQuery(\n  $count: Int = 20\n  $cursor: String\n) {\n  ...postsScreenForYouFragment_1G22uz\n}\n\nfragment postsScreenForYouFragment_1G22uz on Query {\n  bibleVersePosts(first: $count, after: $cursor) {\n    edges {\n      node {\n        id\n        content\n        createdAt\n        likesCount\n        childPostsCount\n        likedAt\n        user {\n          id\n          name\n          username\n          image {\n            url\n            id\n          }\n        }\n        images {\n          url\n          width\n          height\n          id\n        }\n        poll {\n          id\n          totalVotes\n          isExpired\n          userVote {\n            id\n            text\n          }\n          options {\n            id\n            text\n            voteCount\n            votePercentage\n          }\n        }\n        verse {\n          id\n          book\n          chapter\n          verse\n          translation\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "f6ea77013340d46dc32e66d1e5a1dd04";
+(node as any).hash = "47265bd3fecb82cc3309188287b534a7";
 
 export default node;

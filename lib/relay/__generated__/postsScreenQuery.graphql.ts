@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<a6bda252b19daa997f483a0854cb70f3>>
+ * @generated SignedSource<<86a5eba88a2b8be7b7744c26a2ff1024>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,7 +12,7 @@ import { ConcreteRequest } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type postsScreenQuery$variables = Record<PropertyKey, never>;
 export type postsScreenQuery$data = {
-  readonly " $fragmentSpreads": FragmentRefs<"postsScreenFragment">;
+  readonly " $fragmentSpreads": FragmentRefs<"postsScreenForYouFragment">;
 };
 export type postsScreenQuery = {
   response: postsScreenQuery$data;
@@ -58,7 +58,7 @@ return {
       {
         "args": null,
         "kind": "FragmentSpread",
-        "name": "postsScreenFragment"
+        "name": "postsScreenForYouFragment"
       }
     ],
     "type": "Query",
@@ -367,23 +367,23 @@ return {
         "args": (v0/*: any*/),
         "filters": null,
         "handle": "connection",
-        "key": "postsScreen_bibleVersePosts",
+        "key": "forYouFeed_bibleVersePosts",
         "kind": "LinkedHandle",
         "name": "bibleVersePosts"
       }
     ]
   },
   "params": {
-    "cacheID": "7f89634e95e3892aa28628be1e5d92a7",
+    "cacheID": "fd32189d45ffc0cc7b817ebb89d32a51",
     "id": null,
     "metadata": {},
     "name": "postsScreenQuery",
     "operationKind": "query",
-    "text": "query postsScreenQuery {\n  ...postsScreenFragment\n}\n\nfragment postsScreenFragment on Query {\n  bibleVersePosts(first: 20) {\n    edges {\n      node {\n        id\n        content\n        createdAt\n        likesCount\n        childPostsCount\n        likedAt\n        user {\n          id\n          name\n          username\n          image {\n            url\n            id\n          }\n        }\n        images {\n          url\n          width\n          height\n          id\n        }\n        poll {\n          id\n          totalVotes\n          isExpired\n          userVote {\n            id\n            text\n          }\n          options {\n            id\n            text\n            voteCount\n            votePercentage\n          }\n        }\n        verse {\n          id\n          book\n          chapter\n          verse\n          translation\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n"
+    "text": "query postsScreenQuery {\n  ...postsScreenForYouFragment\n}\n\nfragment postsScreenForYouFragment on Query {\n  bibleVersePosts(first: 20) {\n    edges {\n      node {\n        id\n        content\n        createdAt\n        likesCount\n        childPostsCount\n        likedAt\n        user {\n          id\n          name\n          username\n          image {\n            url\n            id\n          }\n        }\n        images {\n          url\n          width\n          height\n          id\n        }\n        poll {\n          id\n          totalVotes\n          isExpired\n          userVote {\n            id\n            text\n          }\n          options {\n            id\n            text\n            voteCount\n            votePercentage\n          }\n        }\n        verse {\n          id\n          book\n          chapter\n          verse\n          translation\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "5210346574194a44b79f7a33c3dcce36";
+(node as any).hash = "3c48cde3dbd2ef63b882a3f72aec8292";
 
 export default node;

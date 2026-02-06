@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<017230fd6c1e22eaf54c55d3784c5986>>
+ * @generated SignedSource<<1dcb52c8c72a88ebdd8016f5218f8e1c>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,7 +12,7 @@ import { ReaderFragment } from 'relay-runtime';
 export type BibleBook = "ACTS" | "AMOS" | "COLOSSIANS" | "DANIEL" | "DEUTERONOMY" | "ECCLESIASTES" | "EPHESIANS" | "ESTHER" | "EXODUS" | "EZEKIEL" | "EZRA" | "FIRST_CHRONICLES" | "FIRST_CORINTHIANS" | "FIRST_JOHN" | "FIRST_KINGS" | "FIRST_PETER" | "FIRST_SAMUEL" | "FIRST_THESSALONIANS" | "FIRST_TIMOTHY" | "GALATIANS" | "GENESIS" | "HABAKKUK" | "HAGGAI" | "HEBREWS" | "HOSEA" | "ISAIAH" | "JAMES" | "JEREMIAH" | "JOB" | "JOEL" | "JOHN" | "JONAH" | "JOSHUA" | "JUDE" | "JUDGES" | "LAMENTATIONS" | "LEVITICUS" | "LUKE" | "MALACHI" | "MARK" | "MATTHEW" | "MICAH" | "NAHUM" | "NEHEMIAH" | "NUMBERS" | "OBADIAH" | "PHILEMON" | "PHILIPPIANS" | "PROVERBS" | "PSALMS" | "REVELATION" | "ROMANS" | "RUTH" | "SECOND_CHRONICLES" | "SECOND_CORINTHIANS" | "SECOND_JOHN" | "SECOND_KINGS" | "SECOND_PETER" | "SECOND_SAMUEL" | "SECOND_THESSALONIANS" | "SECOND_TIMOTHY" | "SONG_OF_SONGS" | "THIRD_JOHN" | "TITUS" | "ZECHARIAH" | "ZEPHANIAH" | "%future added value";
 export type BibleTranslation = "ASV" | "KJV" | "%future added value";
 import { FragmentRefs } from "relay-runtime";
-export type postsScreenFragment$data = {
+export type postsScreenForYouFragment$data = {
   readonly bibleVersePosts: {
     readonly __id: string;
     readonly edges: ReadonlyArray<{
@@ -61,14 +61,14 @@ export type postsScreenFragment$data = {
       };
     }>;
   };
-  readonly " $fragmentType": "postsScreenFragment";
+  readonly " $fragmentType": "postsScreenForYouFragment";
 };
-export type postsScreenFragment$key = {
-  readonly " $data"?: postsScreenFragment$data;
-  readonly " $fragmentSpreads": FragmentRefs<"postsScreenFragment">;
+export type postsScreenForYouFragment$key = {
+  readonly " $data"?: postsScreenForYouFragment$data;
+  readonly " $fragmentSpreads": FragmentRefs<"postsScreenForYouFragment">;
 };
 
-import postsScreenPaginationQuery_graphql from './postsScreenPaginationQuery.graphql';
+import postsScreenForYouPaginationQuery_graphql from './postsScreenForYouPaginationQuery.graphql';
 
 const node: ReaderFragment = (function(){
 var v0 = [
@@ -128,17 +128,17 @@ return {
         "path": (v0/*: any*/)
       },
       "fragmentPathInResult": [],
-      "operation": postsScreenPaginationQuery_graphql
+      "operation": postsScreenForYouPaginationQuery_graphql
     }
   },
-  "name": "postsScreenFragment",
+  "name": "postsScreenForYouFragment",
   "selections": [
     {
       "alias": "bibleVersePosts",
       "args": null,
       "concreteType": "BibleVersePostConnection",
       "kind": "LinkedField",
-      "name": "__postsScreen_bibleVersePosts_connection",
+      "name": "__forYouFeed_bibleVersePosts_connection",
       "plural": false,
       "selections": [
         {
@@ -429,6 +429,6 @@ return {
 };
 })();
 
-(node as any).hash = "f6ea77013340d46dc32e66d1e5a1dd04";
+(node as any).hash = "47265bd3fecb82cc3309188287b534a7";
 
 export default node;
