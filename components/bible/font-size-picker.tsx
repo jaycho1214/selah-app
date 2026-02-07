@@ -16,7 +16,8 @@ interface FontSizePickerProps {
 }
 
 export function FontSizePicker({ onClose }: FontSizePickerProps) {
-  const { fontSize, setFontSize } = useSettingsStore();
+  const fontSize = useSettingsStore((s) => s.fontSize);
+  const setFontSize = useSettingsStore((s) => s.setFontSize);
 
   const handleSelect = (size: FontSize) => {
     setFontSize(size);

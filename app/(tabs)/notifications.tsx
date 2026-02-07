@@ -1,5 +1,5 @@
 import { Bell, LogIn } from "lucide-react-native";
-import { Suspense, useCallback, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, RefreshControl, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeIn } from "react-native-reanimated";
@@ -66,6 +66,7 @@ function NotificationList() {
   const insets = useSafeAreaInsets();
   const environment = useRelayEnvironment();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const refreshSubRef = useRef<{ unsubscribe: () => void } | null>(null);
 
   const queryData = useLazyLoadQuery<notificationsScreenQuery>(
     NotificationsQuery,
@@ -94,9 +95,20 @@ function NotificationList() {
     }, [queryData.user?.unreadNotificationCount, commitMarkAsRead]),
   );
 
+  useEffect(() => {
+    return () => {
+      refreshSubRef.current?.unsubscribe();
+    };
+  }, []);
+
   const handleRefresh = useCallback(() => {
+    refreshSubRef.current?.unsubscribe();
     setIsRefreshing(true);
-    fetchQuery(environment, NotificationsQuery, {}).subscribe({
+    refreshSubRef.current = fetchQuery(
+      environment,
+      NotificationsQuery,
+      {},
+    ).subscribe({
       complete: () => setIsRefreshing(false),
       error: () => setIsRefreshing(false),
     });
@@ -107,6 +119,18 @@ function NotificationList() {
       loadNext(20);
     }
   }, [hasNext, isLoadingNext, loadNext]);
+
+  const renderItem = useCallback(
+    ({ item }: { item: (typeof notifications)[number] }) => (
+      <NotificationItem notificationRef={item.node} />
+    ),
+    [],
+  );
+
+  const keyExtractor = useCallback(
+    (item: (typeof notifications)[number]) => item.node.id,
+    [],
+  );
 
   if (notifications.length === 0) {
     return (
@@ -143,10 +167,8 @@ function NotificationList() {
   return (
     <FlashList
       data={notifications}
-      keyExtractor={(item) => item.node.id}
-      renderItem={({ item }) => (
-        <NotificationItem notificationRef={item.node} />
-      )}
+      keyExtractor={keyExtractor}
+      renderItem={renderItem}
       onEndReached={handleLoadMore}
       onEndReachedThreshold={0.5}
       refreshControl={

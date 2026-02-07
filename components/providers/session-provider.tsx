@@ -3,6 +3,7 @@ import {
   useContext,
   useRef,
   useCallback,
+  useMemo,
   PropsWithChildren,
 } from "react";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
@@ -36,9 +37,9 @@ export function SessionProvider({ children }: PropsWithChildren) {
 
   const isAuthenticated = !!session;
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     await authClient.signOut();
-  };
+  }, []);
 
   const presentSignIn = useCallback(() => {
     signInSheetRef.current?.present();
@@ -64,17 +65,20 @@ export function SessionProvider({ children }: PropsWithChildren) {
     }
   }, []);
 
+  const contextValue = useMemo(
+    () => ({
+      session,
+      isLoading: isPending,
+      signOut,
+      presentSignIn,
+      isAuthenticated,
+      requireAuth,
+    }),
+    [session, isPending, signOut, presentSignIn, isAuthenticated, requireAuth],
+  );
+
   return (
-    <SessionContext.Provider
-      value={{
-        session,
-        isLoading: isPending,
-        signOut,
-        presentSignIn,
-        isAuthenticated,
-        requireAuth,
-      }}
-    >
+    <SessionContext.Provider value={contextValue}>
       {children}
       <SignInSheet ref={signInSheetRef} onSignInSuccess={handleSignInSuccess} />
     </SessionContext.Provider>

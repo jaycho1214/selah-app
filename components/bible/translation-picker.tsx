@@ -24,7 +24,8 @@ interface LocalTranslation {
 }
 
 export function TranslationPicker({ onClose }: TranslationPickerProps) {
-  const { currentTranslation, setTranslation } = useBibleStore();
+  const currentTranslation = useBibleStore((s) => s.currentTranslation);
+  const setTranslation = useBibleStore((s) => s.setTranslation);
   const [remoteTranslations, setRemoteTranslations] = useState<
     RemoteTranslation[]
   >([]);

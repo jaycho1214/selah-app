@@ -1,7 +1,9 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
   ReactNode,
 } from "react";
@@ -40,19 +42,22 @@ export function ThemeProvider({
     setColorScheme(resolvedTheme);
   }, [resolvedTheme, setColorScheme]);
 
-  const setTheme = (newTheme: Theme) => {
+  const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);
-  };
+  }, []);
 
-  const toggleTheme = () => {
+  const toggleTheme = useCallback(() => {
     const nextTheme = resolvedTheme === "light" ? "dark" : "light";
     setThemeState(nextTheme);
-  };
+  }, [resolvedTheme]);
+
+  const contextValue = useMemo(
+    () => ({ theme, resolvedTheme, setTheme, toggleTheme }),
+    [theme, resolvedTheme, setTheme, toggleTheme],
+  );
 
   return (
-    <ThemeContext.Provider
-      value={{ theme, resolvedTheme, setTheme, toggleTheme }}
-    >
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   );

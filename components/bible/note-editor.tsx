@@ -49,7 +49,9 @@ export const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(
     const [noteContent, setNoteContent] = useState("");
     const inputRef = useRef<TextInput>(null);
 
-    const { notes, setNote, removeNote } = useAnnotationsStore();
+    const notes = useAnnotationsStore((s) => s.notes);
+    const setNote = useAnnotationsStore((s) => s.setNote);
+    const removeNote = useAnnotationsStore((s) => s.removeNote);
 
     useImperativeHandle(ref, () => ({
       open: (id: string, text: string) => {

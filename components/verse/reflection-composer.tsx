@@ -721,13 +721,7 @@ export const ReflectionComposer = forwardRef<
                     key={user.id}
                     onPress={() => selectMention(user)}
                     style={[
-                      {
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: 12,
-                        paddingVertical: 12,
-                        paddingHorizontal: 14,
-                      },
+                      styles.mentionItem,
                       index < mentionUsers.length - 1 && {
                         borderBottomWidth: StyleSheet.hairlineWidth,
                         borderBottomColor: colors.border,
@@ -737,48 +731,38 @@ export const ReflectionComposer = forwardRef<
                     {user.imageUrl ? (
                       <Image
                         source={{ uri: user.imageUrl }}
-                        style={{ width: 40, height: 40, borderRadius: 20 }}
+                        style={styles.mentionAvatar}
                         contentFit="cover"
                       />
                     ) : (
                       <View
-                        style={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: 20,
-                          backgroundColor: colors.accent + "20",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
+                        style={[
+                          styles.mentionAvatarPlaceholder,
+                          { backgroundColor: colors.accent + "20" },
+                        ]}
                       >
                         <Text
-                          style={{
-                            fontSize: 16,
-                            fontWeight: "700",
-                            color: colors.accent,
-                          }}
+                          style={[
+                            styles.mentionAvatarInitial,
+                            { color: colors.accent },
+                          ]}
                         >
                           {(user.name || user.username || "?")[0].toUpperCase()}
                         </Text>
                       </View>
                     )}
-                    <View style={{ flex: 1 }}>
+                    <View style={styles.mentionInfo}>
                       <Text
-                        style={{
-                          fontSize: 15,
-                          fontWeight: "600",
-                          color: colors.text,
-                        }}
+                        style={[styles.mentionName, { color: colors.text }]}
                         numberOfLines={1}
                       >
                         {user.name || user.username}
                       </Text>
                       <Text
-                        style={{
-                          fontSize: 13,
-                          color: colors.textMuted,
-                          marginTop: 2,
-                        }}
+                        style={[
+                          styles.mentionUsername,
+                          { color: colors.textMuted },
+                        ]}
                         numberOfLines={1}
                       >
                         @{user.username}
@@ -1166,23 +1150,18 @@ export const ReflectionComposer = forwardRef<
                           </Text>
                         </View>
                       )}
-                      <View style={{ flex: 1 }}>
+                      <View style={styles.mentionInfo}>
                         <Text
-                          style={{
-                            fontSize: 15,
-                            fontWeight: "600",
-                            color: colors.text,
-                          }}
+                          style={[styles.mentionName, { color: colors.text }]}
                           numberOfLines={1}
                         >
                           {user.name || user.username}
                         </Text>
                         <Text
-                          style={{
-                            fontSize: 13,
-                            color: colors.textMuted,
-                            marginTop: 2,
-                          }}
+                          style={[
+                            styles.mentionUsername,
+                            { color: colors.textMuted },
+                          ]}
                           numberOfLines={1}
                         >
                           @{user.username}
@@ -1519,7 +1498,22 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    alignItems: "center",
     justifyContent: "center",
+    alignItems: "center",
+  },
+  mentionInfo: {
+    flex: 1,
+  },
+  mentionName: {
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  mentionUsername: {
+    fontSize: 13,
+    marginTop: 2,
+  },
+  mentionAvatarInitial: {
+    fontSize: 16,
+    fontWeight: "700",
   },
 });

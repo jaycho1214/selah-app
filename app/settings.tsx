@@ -187,7 +187,8 @@ const FONT_SIZE_OPTIONS: { id: FontSize; label: string }[] = [
 ];
 
 function FontSizeSelector() {
-  const { fontSize, setFontSize } = useSettingsStore();
+  const fontSize = useSettingsStore((s) => s.fontSize);
+  const setFontSize = useSettingsStore((s) => s.setFontSize);
   const colors = useColors();
 
   return (
@@ -238,7 +239,10 @@ function FontSizeSelector() {
 // ---------------------------------------------------------------------------
 
 function VerseHighlightSettings() {
-  const { enabled, color, setEnabled, setColor } = useVerseHighlightStore();
+  const enabled = useVerseHighlightStore((s) => s.enabled);
+  const color = useVerseHighlightStore((s) => s.color);
+  const setEnabled = useVerseHighlightStore((s) => s.setEnabled);
+  const setColor = useVerseHighlightStore((s) => s.setColor);
   const colors = useColors();
 
   return (

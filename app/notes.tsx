@@ -78,7 +78,8 @@ function NoteItem({
 }
 
 export default function NotesScreen() {
-  const { notes, removeNote } = useAnnotationsStore();
+  const notes = useAnnotationsStore((s) => s.notes);
+  const removeNote = useAnnotationsStore((s) => s.removeNote);
   const noteEditorRef = useRef<NoteEditorRef>(null);
 
   // Convert Record to sorted array (newest first)

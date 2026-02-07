@@ -9,7 +9,7 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useCallback, useMemo } from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { graphql, useFragment } from "react-relay";
 
 import { Text } from "@/components/ui/text";
@@ -203,10 +203,12 @@ export function NotificationItem({ notificationRef }: NotificationItemProps) {
   }, [verse, router]);
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.7}
+    <Pressable
       onPress={handlePress}
-      style={[styles.container, { borderBottomColor: colors.border }]}
+      style={({ pressed }) => [
+        styles.container,
+        { borderBottomColor: colors.border, opacity: pressed ? 0.7 : 1 },
+      ]}
     >
       {/* Type icon — small inline, matching web */}
       <View style={styles.iconWrap}>
@@ -269,10 +271,12 @@ export function NotificationItem({ notificationRef }: NotificationItemProps) {
               </Text>
             ) : null}
             {verseRef && (
-              <TouchableOpacity
-                activeOpacity={0.7}
+              <Pressable
                 onPress={handleVersePress}
-                style={[styles.verseButton, { borderColor: colors.border }]}
+                style={({ pressed }) => [
+                  styles.verseButton,
+                  { borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
+                ]}
               >
                 <Text
                   style={[
@@ -282,12 +286,12 @@ export function NotificationItem({ notificationRef }: NotificationItemProps) {
                 >
                   {verseRef}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             )}
           </View>
         )}
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 

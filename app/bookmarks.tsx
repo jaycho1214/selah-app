@@ -30,7 +30,8 @@ function parseVerseId(verseId: string) {
  * Users can delete bookmarks directly from this list.
  */
 export default function BookmarksScreen() {
-  const { bookmarks, removeBookmark } = useAnnotationsStore();
+  const bookmarks = useAnnotationsStore((s) => s.bookmarks);
+  const removeBookmark = useAnnotationsStore((s) => s.removeBookmark);
 
   // Convert Record to sorted array (newest first)
   const bookmarkList = useMemo(() => {

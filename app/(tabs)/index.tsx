@@ -30,13 +30,11 @@ export default function HomeScreen() {
   const isDark = colorScheme === "dark";
   const themeColors = useColors();
 
-  const {
-    currentBook,
-    currentChapter,
-    currentTranslation,
-    setPosition,
-    scrollToVerse,
-  } = useBibleStore();
+  const currentBook = useBibleStore((s) => s.currentBook);
+  const currentChapter = useBibleStore((s) => s.currentChapter);
+  const currentTranslation = useBibleStore((s) => s.currentTranslation);
+  const setPosition = useBibleStore((s) => s.setPosition);
+  const scrollToVerse = useBibleStore((s) => s.scrollToVerse);
   const isSelecting = useVerseSelectionStore((s) => s.isSelecting);
   const toggleVerse = useVerseSelectionStore((s) => s.toggleVerse);
   const clearSelection = useVerseSelectionStore((s) => s.clearSelection);

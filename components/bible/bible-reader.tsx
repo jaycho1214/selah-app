@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { View, StyleSheet, Dimensions, useColorScheme } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -60,7 +60,16 @@ export function BibleReader({
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-  const { setPosition } = useBibleStore();
+  const setPosition = useBibleStore((s) => s.setPosition);
+
+  // Timer ref for transition cleanup
+  const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+    },
+    [],
+  );
 
   // Page position (0 = current, negative = going to prev, positive = going to next)
   const translateX = useSharedValue(0);
@@ -111,7 +120,10 @@ export function BibleReader({
       setPosition(prev.book, prev.chapter);
       onPositionChange?.(prev.book, prev.chapter);
       // Brief delay to let new content load
-      setTimeout(() => setIsTransitioning(false), 100);
+      transitionTimerRef.current = setTimeout(
+        () => setIsTransitioning(false),
+        100,
+      );
     }
   }, [prev, setPosition, onPositionChange]);
 
@@ -122,7 +134,10 @@ export function BibleReader({
       setCurrentChapter(next.chapter);
       setPosition(next.book, next.chapter);
       onPositionChange?.(next.book, next.chapter);
-      setTimeout(() => setIsTransitioning(false), 100);
+      transitionTimerRef.current = setTimeout(
+        () => setIsTransitioning(false),
+        100,
+      );
     }
   }, [next, setPosition, onPositionChange]);
 

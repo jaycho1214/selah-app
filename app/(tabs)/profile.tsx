@@ -1,7 +1,14 @@
 import * as Haptics from "expo-haptics";
 import { RelativePathString, router } from "expo-router";
 import { Settings, Share2 } from "lucide-react-native";
-import { Suspense, useCallback, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -143,6 +150,8 @@ function AuthenticatedProfile() {
   const likesListRef = useRef<ProfileLikesListRef>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<ProfileTab>("posts");
+  const [isPending, startTransition] = useTransition();
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const data = useLazyLoadQuery<profileOwnProfileQuery>(ownProfileQuery, {});
   const user = data.user;
@@ -209,12 +218,20 @@ function AuthenticatedProfile() {
     [commitDelete],
   );
 
+  useEffect(() => {
+    return () => {
+      if (refreshTimerRef.current) {
+        clearTimeout(refreshTimerRef.current);
+      }
+    };
+  }, []);
+
   const handleRefresh = useCallback(() => {
     setIsRefreshing(true);
     postsListRef.current?.refetch();
     repliesListRef.current?.refetch();
     likesListRef.current?.refetch();
-    setTimeout(() => setIsRefreshing(false), 500);
+    refreshTimerRef.current = setTimeout(() => setIsRefreshing(false), 500);
   }, []);
 
   const handleEditProfile = () => {
@@ -232,10 +249,12 @@ function AuthenticatedProfile() {
     }
   };
 
-  const handleTabPress = (tab: ProfileTab) => {
+  const handleTabPress = useCallback((tab: ProfileTab) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setActiveTab(tab);
-  };
+    startTransition(() => {
+      setActiveTab(tab);
+    });
+  }, []);
 
   if (!user) {
     return (

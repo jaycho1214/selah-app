@@ -23,7 +23,8 @@ export default function BibleChapterScreen() {
     book: string;
     chapter: string;
   }>();
-  const { currentTranslation, setPosition } = useBibleStore();
+  const currentTranslation = useBibleStore((s) => s.currentTranslation);
+  const setPosition = useBibleStore((s) => s.setPosition);
   const toggleVerse = useVerseSelectionStore((s) => s.toggleVerse);
   const clearSelection = useVerseSelectionStore((s) => s.clearSelection);
 

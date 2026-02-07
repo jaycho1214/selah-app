@@ -28,7 +28,7 @@ export function VerseItem({
   onPress,
   onLongPress,
 }: VerseItemProps) {
-  const { fontSize } = useSettingsStore();
+  const fontSize = useSettingsStore((s) => s.fontSize);
   const sizes = FONT_SIZES[fontSize];
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";

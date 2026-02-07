@@ -220,6 +220,7 @@ function ForYouFeed() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const environment = useRelayEnvironment();
   const connectionIdRef = useRef<string | null>(null);
+  const refreshSubRef = useRef<{ unsubscribe: () => void } | null>(null);
 
   // Fetch initial data
   const queryData = useLazyLoadQuery<postsScreenQuery>(PostsQuery, {});
@@ -291,9 +292,16 @@ function ForYouFeed() {
     [commitDelete],
   );
 
+  useEffect(() => {
+    return () => {
+      refreshSubRef.current?.unsubscribe();
+    };
+  }, []);
+
   const handleRefresh = useCallback(() => {
+    refreshSubRef.current?.unsubscribe();
     setIsRefreshing(true);
-    fetchQuery(environment, PostsQuery, {}).subscribe({
+    refreshSubRef.current = fetchQuery(environment, PostsQuery, {}).subscribe({
       complete: () => setIsRefreshing(false),
       error: () => setIsRefreshing(false),
     });
@@ -462,7 +470,8 @@ function FollowingFeed({ onSwitchToForYou }: { onSwitchToForYou: () => void }) {
 export default function PostsScreen() {
   const colors = useColors();
   const pagerRef = useRef<PagerView>(null);
-  const { activeTab, setActiveTab } = useFeedStore();
+  const activeTab = useFeedStore((s) => s.activeTab);
+  const setActiveTab = useFeedStore((s) => s.setActiveTab);
   const [currentTab, setCurrentTab] = useState(activeTab);
 
   const handlePageSelected = useCallback(

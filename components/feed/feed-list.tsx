@@ -117,6 +117,47 @@ function FeedList({
     }
   }, [hasNext, isLoadingNext, onLoadMore]);
 
+  const keyExtractor = useCallback((item: PostEdge) => item.node.id, []);
+
+  const renderItem = useCallback(
+    ({ item, index }: { item: PostEdge; index: number }) => {
+      const post = item.node;
+      const verse = post.verse;
+
+      // Get book name for verse reference
+      const bookName = verse?.book
+        ? (BIBLE_BOOK_DETAILS[verse.book as BibleBook]?.name ?? verse.book)
+        : null;
+      const verseReference =
+        bookName && verse
+          ? `${bookName} ${verse.chapter}:${verse.verse}`
+          : null;
+
+      return (
+        <ReflectionItem
+          id={post.id}
+          content={post.content}
+          user={post.user}
+          createdAt={post.createdAt}
+          images={post.images ?? []}
+          poll={post.poll}
+          verse={verse}
+          verseReference={verseReference}
+          likesCount={post.likesCount}
+          childPostsCount={post.childPostsCount}
+          likedAt={post.likedAt}
+          colors={colors}
+          index={index}
+          currentUserId={currentUserId}
+          onLike={onLike}
+          onUnlike={onUnlike}
+          onDelete={onDelete}
+        />
+      );
+    },
+    [colors, currentUserId, onLike, onUnlike, onDelete],
+  );
+
   // Empty state
   if (posts.length === 0) {
     if (emptyState) {
@@ -131,40 +172,6 @@ function FeedList({
     );
   }
 
-  const renderItem = ({ item, index }: { item: PostEdge; index: number }) => {
-    const post = item.node;
-    const verse = post.verse;
-
-    // Get book name for verse reference
-    const bookName = verse?.book
-      ? (BIBLE_BOOK_DETAILS[verse.book as BibleBook]?.name ?? verse.book)
-      : null;
-    const verseReference =
-      bookName && verse ? `${bookName} ${verse.chapter}:${verse.verse}` : null;
-
-    return (
-      <ReflectionItem
-        id={post.id}
-        content={post.content}
-        user={post.user}
-        createdAt={post.createdAt}
-        images={post.images ?? []}
-        poll={post.poll}
-        verse={verse}
-        verseReference={verseReference}
-        likesCount={post.likesCount}
-        childPostsCount={post.childPostsCount}
-        likedAt={post.likedAt}
-        colors={colors}
-        index={index}
-        currentUserId={currentUserId}
-        onLike={onLike}
-        onUnlike={onUnlike}
-        onDelete={onDelete}
-      />
-    );
-  };
-
   const ListFooter = isLoadingNext ? (
     <View style={styles.loadingMore}>
       <ActivityIndicator size="small" color={colors.textMuted} />
@@ -172,11 +179,11 @@ function FeedList({
   ) : null;
 
   return (
-    <View style={styles.container} collapsable={false}>
+    <View style={styles.container}>
       <FlashList
         data={posts}
         renderItem={renderItem}
-        keyExtractor={(item) => item.node.id}
+        keyExtractor={keyExtractor}
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.5}
         ListFooterComponent={ListFooter}

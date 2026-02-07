@@ -293,6 +293,7 @@ function PostContent({
   const composerRef = useRef<ReflectionComposerRef>(null);
   const signInSheetRef = useRef<BottomSheetModal>(null);
   const childPostsRef = useRef<ChildPostsListRef>(null);
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [connectionId, setConnectionId] = useState<string | null>(null);
 
@@ -313,7 +314,15 @@ function PostContent({
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     childPostsRef.current?.refetch();
-    setTimeout(() => setIsRefreshing(false), 500);
+    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    refreshTimerRef.current = setTimeout(() => setIsRefreshing(false), 500);
+  }, []);
+
+  // Cleanup refresh timer on unmount
+  useEffect(() => {
+    return () => {
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    };
   }, []);
 
   const handleSubmitReply = useCallback(

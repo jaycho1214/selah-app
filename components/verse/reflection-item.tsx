@@ -469,7 +469,7 @@ export function ReflectionItem({
 
   return (
     <Animated.View
-      entering={FadeIn.duration(200).delay(index * 25)}
+      entering={FadeIn.duration(200).delay(Math.min(index, 10) * 25)}
       style={[styles.container, { borderBottomColor: colors.border }]}
     >
       <Pressable style={styles.row} onPress={handleCardPress}>

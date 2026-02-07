@@ -136,7 +136,7 @@ function SearchResults({
 }
 
 export default function SearchScreen() {
-  const { currentTranslation } = useBibleStore();
+  const currentTranslation = useBibleStore((s) => s.currentTranslation);
   const [searchText, setSearchText] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
 

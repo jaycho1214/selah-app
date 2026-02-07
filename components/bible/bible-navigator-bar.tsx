@@ -16,7 +16,9 @@ export function BibleNavigatorBar({
   onPrevChapter,
   onNextChapter,
 }: BibleNavigatorBarProps) {
-  const { currentBook, currentChapter, currentTranslation } = useBibleStore();
+  const currentBook = useBibleStore((s) => s.currentBook);
+  const currentChapter = useBibleStore((s) => s.currentChapter);
+  const currentTranslation = useBibleStore((s) => s.currentTranslation);
 
   const bookDetails = BIBLE_BOOK_DETAILS[currentBook as BibleBook];
   const bookName = bookDetails?.name ?? currentBook;

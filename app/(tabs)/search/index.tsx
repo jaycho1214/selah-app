@@ -1,7 +1,6 @@
-import React, { Suspense, useMemo, useState } from "react";
+import React, { Suspense, useDeferredValue, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -20,7 +19,7 @@ import Animated, { FadeIn } from "react-native-reanimated";
 
 import { Text } from "@/components/ui/text";
 import { useColors } from "@/hooks/use-colors";
-import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { Image } from "expo-image";
 import { useBibleStore } from "@/lib/stores/bible-store";
 import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
 import { Fonts } from "@/constants/theme";
@@ -168,7 +167,9 @@ function BibleVerseResultItem({
   const reference = `${bookDetails?.name ?? String(verse.book)} ${verse.chapter}:${verse.verse}`;
 
   return (
-    <Animated.View entering={FadeIn.duration(250).delay(index * 40)}>
+    <Animated.View
+      entering={FadeIn.duration(250).delay(Math.min(index, 10) * 40)}
+    >
       <Pressable
         onPress={onPress}
         style={[styles.verseResultRow, { borderBottomColor: colors.border }]}
@@ -244,7 +245,9 @@ function UserResultItem({
   if (!user.username) return null;
 
   return (
-    <Animated.View entering={FadeIn.duration(250).delay(index * 40)}>
+    <Animated.View
+      entering={FadeIn.duration(250).delay(Math.min(index, 10) * 40)}
+    >
       <Pressable
         onPress={() => router.push(`/user/${user.username}`)}
         style={[styles.userRow, { borderBottomColor: colors.border }]}
@@ -259,6 +262,7 @@ function UserResultItem({
             <Image
               source={{ uri: user.image.url }}
               style={styles.userAvatarImage}
+              contentFit="cover"
             />
           ) : (
             <UserIcon size={18} color={colors.textMuted} strokeWidth={1.5} />
@@ -366,18 +370,18 @@ function SearchEmptyState({ topInset }: { topInset: number }) {
 export default function SearchScreen() {
   const colors = useColors();
   const headerHeight = useHeaderHeight();
-  const { currentTranslation } = useBibleStore();
+  const currentTranslation = useBibleStore((s) => s.currentTranslation);
 
   const [searchText, setSearchText] = useState("");
-  const debouncedQuery = useDebouncedValue(searchText.trim(), 350);
+  const deferredSearchText = useDeferredValue(searchText.trim());
 
   const parsedRef = useMemo(
     () => parseBibleReference(searchText.trim()),
     [searchText],
   );
 
-  const showBibleResults = debouncedQuery.length >= 3;
-  const showUserResults = debouncedQuery.length >= 2;
+  const showBibleResults = deferredSearchText.length >= 3;
+  const showUserResults = deferredSearchText.length >= 2;
   const hasAnyQuery = showBibleResults || showUserResults || parsedRef != null;
 
   return (
@@ -404,15 +408,19 @@ export default function SearchScreen() {
         >
           {parsedRef && <ReferenceCard parsed={parsedRef} />}
 
-          <Suspense fallback={<SearchSectionLoading />}>
-            {showBibleResults && (
+          {showBibleResults && (
+            <Suspense fallback={<SearchSectionLoading />}>
               <BibleVerseResults
-                query={debouncedQuery}
+                query={deferredSearchText}
                 translation={currentTranslation}
               />
-            )}
-            {showUserResults && <UserResults query={debouncedQuery} />}
-          </Suspense>
+            </Suspense>
+          )}
+          {showUserResults && (
+            <Suspense fallback={<SearchSectionLoading />}>
+              <UserResults query={deferredSearchText} />
+            </Suspense>
+          )}
 
           <View style={styles.scrollBottomSpacer} />
         </ScrollView>

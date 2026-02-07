@@ -182,6 +182,14 @@ export function BibleNavigator({
     [selectedBook],
   );
 
+  const chapters = useMemo(
+    () =>
+      bookDetails
+        ? Array.from({ length: bookDetails.chapters }, (_, i) => i + 1)
+        : [],
+    [bookDetails],
+  );
+
   const handleDismiss = useCallback(() => {
     setSelectedBook(null);
     onClose();
@@ -334,42 +342,40 @@ export function BibleNavigator({
 
           {/* Chapter Grid */}
           <View style={styles.chapterGrid}>
-            {Array.from({ length: bookDetails.chapters }, (_, i) => i + 1).map(
-              (chapter) => {
-                const isCurrent =
-                  selectedBook === currentBook && chapter === currentChapter;
-                return (
-                  <Pressable
-                    key={chapter}
-                    onPress={() => handleChapterSelect(chapter)}
+            {chapters.map((chapter) => {
+              const isCurrent =
+                selectedBook === currentBook && chapter === currentChapter;
+              return (
+                <Pressable
+                  key={chapter}
+                  onPress={() => handleChapterSelect(chapter)}
+                  style={[
+                    styles.chapterItem,
+                    {
+                      backgroundColor: isCurrent
+                        ? colors.currentBg
+                        : colors.surface,
+                      borderColor: isCurrent
+                        ? colors.currentBorder
+                        : "transparent",
+                      borderWidth: isCurrent ? 1.5 : 0,
+                    },
+                  ]}
+                >
+                  <Text
                     style={[
-                      styles.chapterItem,
+                      styles.chapterNumber,
                       {
-                        backgroundColor: isCurrent
-                          ? colors.currentBg
-                          : colors.surface,
-                        borderColor: isCurrent
-                          ? colors.currentBorder
-                          : "transparent",
-                        borderWidth: isCurrent ? 1.5 : 0,
+                        color: isCurrent ? colors.accent : colors.text,
+                        fontWeight: isCurrent ? "700" : "500",
                       },
                     ]}
                   >
-                    <Text
-                      style={[
-                        styles.chapterNumber,
-                        {
-                          color: isCurrent ? colors.accent : colors.text,
-                          fontWeight: isCurrent ? "700" : "500",
-                        },
-                      ]}
-                    >
-                      {chapter}
-                    </Text>
-                  </Pressable>
-                );
-              },
-            )}
+                    {chapter}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </View>
         </BottomSheetView>
       ) : (
@@ -425,7 +431,9 @@ export function BibleNavigator({
             {sections.map((section, sectionIndex) => (
               <Animated.View
                 key={section.title}
-                entering={FadeIn.delay(sectionIndex * 50).duration(200)}
+                entering={FadeIn.delay(Math.min(sectionIndex, 8) * 50).duration(
+                  200,
+                )}
                 style={styles.bookSection}
               >
                 {/* Section Header */}

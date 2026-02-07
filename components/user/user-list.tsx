@@ -1,4 +1,5 @@
 import { FlashList } from "@shopify/flash-list";
+import { useCallback } from "react";
 import { View, StyleSheet, ActivityIndicator } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { Users } from "lucide-react-native";
@@ -37,6 +38,26 @@ export function UserList({
       edge !== null && edge.node !== null,
   );
 
+  const renderItem = useCallback(
+    ({ item }: { item: { readonly node: userRow_user$key } }) => (
+      <UserRow userRef={item.node} />
+    ),
+    [],
+  );
+
+  const keyExtractor = useCallback(
+    (_item: { readonly node: userRow_user$key }, index: number) => {
+      return String(index);
+    },
+    [],
+  );
+
+  const onEndReached = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext();
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
   if (validUsers.length === 0) {
     return (
       <Animated.View
@@ -66,17 +87,9 @@ export function UserList({
   return (
     <FlashList
       data={validUsers}
-      renderItem={({ item }) => <UserRow userRef={item.node} />}
-      keyExtractor={(item, index) => {
-        // Use index as fallback since we can't access node.id directly
-        // (it's hidden in the fragment)
-        return String(index);
-      }}
-      onEndReached={() => {
-        if (hasNext && !isLoadingNext) {
-          loadNext();
-        }
-      }}
+      renderItem={renderItem}
+      keyExtractor={keyExtractor}
+      onEndReached={onEndReached}
       onEndReachedThreshold={0.5}
       ListFooterComponent={
         isLoadingNext ? (

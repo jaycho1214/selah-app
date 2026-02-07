@@ -3,7 +3,7 @@ import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import * as Haptics from "expo-haptics";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { Share2 } from "lucide-react-native";
-import { Suspense, useCallback, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Keyboard,
@@ -241,6 +241,7 @@ function VerseContent({
   const composerRef = useRef<ReflectionComposerRef>(null);
   const postsListRef = useRef<PostsListRef>(null);
   const signInSheetRef = useRef<BottomSheetModal>(null);
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const isAuthenticated = !!session?.user;
@@ -260,7 +261,15 @@ function VerseContent({
     setIsRefreshing(true);
     postsListRef.current?.refetch();
     // Small delay to show the refresh indicator
-    setTimeout(() => setIsRefreshing(false), 500);
+    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    refreshTimerRef.current = setTimeout(() => setIsRefreshing(false), 500);
+  }, []);
+
+  // Cleanup refresh timer on unmount
+  useEffect(() => {
+    return () => {
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    };
   }, []);
 
   // Mutations

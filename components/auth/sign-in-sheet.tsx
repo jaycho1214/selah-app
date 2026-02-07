@@ -1,5 +1,6 @@
 import React, { forwardRef, useCallback } from "react";
-import { Image, useColorScheme, StyleSheet, Platform } from "react-native";
+import { useColorScheme, StyleSheet, Platform } from "react-native";
+import { Image } from "expo-image";
 import {
   BottomSheetModal,
   BottomSheetView,
@@ -100,7 +101,7 @@ export const SignInSheet = forwardRef<BottomSheetModal, SignInSheetProps>(
             <Image
               source={require("@/assets/images/logo.png")}
               style={styles.logo}
-              resizeMode="contain"
+              contentFit="contain"
             />
           </Animated.View>
 

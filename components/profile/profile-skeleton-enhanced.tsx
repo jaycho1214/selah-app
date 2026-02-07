@@ -1,30 +1,26 @@
-import { useEffect, useRef } from "react";
-import { Animated, StyleSheet, View } from "react-native";
+import { useEffect } from "react";
+import { StyleSheet, View } from "react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+  interpolate,
+} from "react-native-reanimated";
 
 import { useColors } from "@/hooks/use-colors";
 
 export function ProfileSkeletonEnhanced() {
   const colors = useColors();
-  const pulseAnim = useRef(new Animated.Value(0.4)).current;
+  const shimmer = useSharedValue(0);
 
   useEffect(() => {
-    const pulse = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 0.7,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 0.4,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-    pulse.start();
-    return () => pulse.stop();
-  }, [pulseAnim]);
+    shimmer.value = withRepeat(withTiming(1, { duration: 1200 }), -1, false);
+  }, [shimmer]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(shimmer.value, [0, 1], [0.4, 0.7]),
+  }));
 
   const skeletonColor = colors.border;
 
@@ -36,20 +32,23 @@ export function ProfileSkeletonEnhanced() {
           <Animated.View
             style={[
               styles.nameSkeleton,
-              { backgroundColor: skeletonColor, opacity: pulseAnim },
+              { backgroundColor: skeletonColor },
+              animatedStyle,
             ]}
           />
           <Animated.View
             style={[
               styles.usernameSkeleton,
-              { backgroundColor: skeletonColor, opacity: pulseAnim },
+              { backgroundColor: skeletonColor },
+              animatedStyle,
             ]}
           />
         </View>
         <Animated.View
           style={[
             styles.avatarSkeleton,
-            { backgroundColor: skeletonColor, opacity: pulseAnim },
+            { backgroundColor: skeletonColor },
+            animatedStyle,
           ]}
         />
       </View>
@@ -58,7 +57,8 @@ export function ProfileSkeletonEnhanced() {
       <Animated.View
         style={[
           styles.bioSkeleton,
-          { backgroundColor: skeletonColor, opacity: pulseAnim },
+          { backgroundColor: skeletonColor },
+          animatedStyle,
         ]}
       />
 
@@ -67,13 +67,15 @@ export function ProfileSkeletonEnhanced() {
         <Animated.View
           style={[
             styles.statSkeleton,
-            { backgroundColor: skeletonColor, opacity: pulseAnim },
+            { backgroundColor: skeletonColor },
+            animatedStyle,
           ]}
         />
         <Animated.View
           style={[
             styles.statSkeleton,
-            { backgroundColor: skeletonColor, opacity: pulseAnim },
+            { backgroundColor: skeletonColor },
+            animatedStyle,
           ]}
         />
       </View>

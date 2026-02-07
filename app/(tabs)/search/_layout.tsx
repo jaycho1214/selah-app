@@ -5,7 +5,6 @@ export default function SearchLayout() {
     <Stack
       screenOptions={{
         headerTransparent: true,
-        // headerBlurEffect: "systemMaterial",
       }}
     />
   );

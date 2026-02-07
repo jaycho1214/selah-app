@@ -67,7 +67,7 @@ export function ChapterView({
   onVersePress,
   onVerseLongPress,
 }: ChapterViewProps) {
-  const { currentTranslation } = useBibleStore();
+  const currentTranslation = useBibleStore((s) => s.currentTranslation);
 
   // Track offline state and availability
   const [isOffline, setIsOffline] = useState(false);

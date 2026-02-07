@@ -31,7 +31,8 @@ export function TranslationSelector({
   const hasGlass = isLiquidGlassAvailable();
   const bottomSheetRef = useRef<BottomSheetModal>(null);
 
-  const { currentTranslation, setTranslation } = useBibleStore();
+  const currentTranslation = useBibleStore((s) => s.currentTranslation);
+  const setTranslation = useBibleStore((s) => s.setTranslation);
 
   useEffect(() => {
     if (visible) {
