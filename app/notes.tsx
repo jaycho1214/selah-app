@@ -2,9 +2,13 @@ import { useCallback, useMemo, useRef } from "react";
 import { View, Text, Pressable } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { Stack, router } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Trash2, FileText } from "lucide-react-native";
 import { NoteEditor, NoteEditorRef } from "@/components/bible/note-editor";
+import { useColors } from "@/hooks/use-colors";
+import {
+  IS_LIQUID_GLASS,
+  useTransparentHeaderPadding,
+} from "@/hooks/use-transparent-header";
 import { useAnnotationsStore } from "@/lib/stores/annotations-store";
 import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
 import type { BibleBook } from "@/lib/bible/types";
@@ -78,6 +82,8 @@ function NoteItem({
 }
 
 export default function NotesScreen() {
+  const colors = useColors();
+  const contentPaddingTop = useTransparentHeaderPadding();
   const notes = useAnnotationsStore((s) => s.notes);
   const removeNote = useAnnotationsStore((s) => s.removeNote);
   const noteEditorRef = useRef<NoteEditorRef>(null);
@@ -121,16 +127,22 @@ export default function NotesScreen() {
   const keyExtractor = useCallback((item: Note) => item.verseId, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
+    <View className="flex-1 bg-background">
       <Stack.Screen
         options={{
           title: "Notes",
           headerLargeTitle: true,
+          headerTransparent: IS_LIQUID_GLASS,
+          headerStyle: { backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg },
+          headerShadowVisible: false,
         }}
       />
 
       {notesList.length === 0 ? (
-        <View className="flex-1 items-center justify-center p-8">
+        <View
+          className="flex-1 items-center justify-center p-8"
+          style={{ paddingTop: contentPaddingTop }}
+        >
           <FileText size={48} className="text-muted-foreground mb-4" />
           <Text className="text-muted-foreground text-center text-lg">
             No notes yet
@@ -144,10 +156,11 @@ export default function NotesScreen() {
           data={notesList}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
+          contentContainerStyle={{ paddingTop: contentPaddingTop }}
         />
       )}
 
       <NoteEditor ref={noteEditorRef} />
-    </SafeAreaView>
+    </View>
   );
 }

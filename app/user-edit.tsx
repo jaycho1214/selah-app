@@ -1,34 +1,34 @@
-import { useState, useMemo, useEffect, useCallback, useRef } from "react";
-import {
-  View,
-  TextInput,
-  Pressable,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Alert,
-  BackHandler,
-  StyleSheet,
-  Text as RNText,
-} from "react-native";
-import { Stack, router } from "expo-router";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
+import * as ImagePicker from "expo-image-picker";
+import { Stack, router } from "expo-router";
 import { Camera, ImageIcon, Trash2 } from "lucide-react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  BackHandler,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  Text as RNText,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLazyLoadQuery, useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
-import * as ImagePicker from "expo-image-picker";
 
+import { useSession } from "@/components/providers/session-provider";
 import { Text } from "@/components/ui/text";
 import { UserAvatar } from "@/components/user/user-avatar";
 import { useColors } from "@/hooks/use-colors";
-import { useSession } from "@/components/providers/session-provider";
-import type { userEditQuery } from "@/lib/relay/__generated__/userEditQuery.graphql";
 import type { userEditMutation } from "@/lib/relay/__generated__/userEditMutation.graphql";
+import type { userEditQuery } from "@/lib/relay/__generated__/userEditQuery.graphql";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "https://www.selah.kr";
 
@@ -301,43 +301,39 @@ export default function UserEditScreen() {
           headerShadowVisible: false,
           headerTitleStyle: { color: colors.text },
           headerLeft: () => (
-            <View style={{ paddingHorizontal: 8 }}>
-              <Pressable
-                onPress={handleCancel}
-                style={{ paddingHorizontal: 8, paddingVertical: 8 }}
-              >
-                <RNText style={{ color: colors.accent, fontSize: 17 }}>
-                  Cancel
-                </RNText>
-              </Pressable>
-            </View>
+            <Pressable
+              onPress={handleCancel}
+              style={{ paddingHorizontal: 8, paddingVertical: 8 }}
+            >
+              <RNText style={{ color: colors.accent, fontSize: 17 }}>
+                Cancel
+              </RNText>
+            </Pressable>
           ),
           headerRight: () => (
-            <View style={{ paddingHorizontal: 8 }}>
-              <Pressable
-                onPress={handleSave}
-                disabled={isDoneDisabled}
-                style={{
-                  opacity: isDoneDisabled ? 0.5 : 1,
-                  paddingHorizontal: 8,
-                  paddingVertical: 8,
-                }}
-              >
-                {isSaving ? (
-                  <ActivityIndicator size="small" color={colors.accent} />
-                ) : (
-                  <RNText
-                    style={{
-                      fontSize: 17,
-                      fontWeight: "600",
-                      color: isDoneDisabled ? colors.textMuted : colors.accent,
-                    }}
-                  >
-                    Done
-                  </RNText>
-                )}
-              </Pressable>
-            </View>
+            <Pressable
+              onPress={handleSave}
+              disabled={isDoneDisabled}
+              style={{
+                opacity: isDoneDisabled ? 0.5 : 1,
+                paddingHorizontal: 8,
+                paddingVertical: 8,
+              }}
+            >
+              {isSaving ? (
+                <ActivityIndicator size="small" color={colors.accent} />
+              ) : (
+                <RNText
+                  style={{
+                    fontSize: 17,
+                    fontWeight: "600",
+                    color: isDoneDisabled ? colors.textMuted : colors.accent,
+                  }}
+                >
+                  Done
+                </RNText>
+              )}
+            </Pressable>
           ),
         }}
       />

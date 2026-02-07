@@ -18,7 +18,10 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  IS_LIQUID_GLASS,
+  useTransparentHeaderPadding,
+} from "@/hooks/use-transparent-header";
 import {
   graphql,
   useLazyLoadQuery,
@@ -181,7 +184,8 @@ export default function PostDetailPage() {
         <Stack.Screen
           options={{
             title: "Post",
-            headerStyle: { backgroundColor: colors.bg },
+            headerTransparent: IS_LIQUID_GLASS,
+            headerStyle: { backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg },
             headerTintColor: colors.text,
             headerShadowVisible: false,
             headerBackButtonDisplayMode: "minimal",
@@ -197,7 +201,8 @@ export default function PostDetailPage() {
       <Stack.Screen
         options={{
           title: "Post",
-          headerStyle: { backgroundColor: colors.bg },
+          headerTransparent: IS_LIQUID_GLASS,
+          headerStyle: { backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg },
           headerTintColor: colors.text,
           headerShadowVisible: false,
           headerBackTitle: "",
@@ -288,7 +293,7 @@ function PostContent({
     accent: string;
   };
 }) {
-  const insets = useSafeAreaInsets();
+  const contentPaddingTop = useTransparentHeaderPadding();
   const { session } = useSession();
   const composerRef = useRef<ReflectionComposerRef>(null);
   const signInSheetRef = useRef<BottomSheetModal>(null);
@@ -467,7 +472,7 @@ function PostContent({
     <View style={styles.contentContainer}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{ paddingTop: contentPaddingTop }}
         showsVerticalScrollIndicator={false}
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
@@ -649,9 +654,6 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-  },
-  scrollContent: {
-    paddingTop: 8,
   },
   divider: {
     height: StyleSheet.hairlineWidth,

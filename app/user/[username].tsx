@@ -7,7 +7,7 @@ import {
 } from "expo-router";
 import React, { Suspense, useCallback, useRef } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 
 import { ProfileHeader } from "@/components/profile/profile-header";
@@ -22,6 +22,10 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { FollowButton } from "@/components/user/follow-button";
 import { useColors } from "@/hooks/use-colors";
+import {
+  IS_LIQUID_GLASS,
+  useTransparentHeaderPadding,
+} from "@/hooks/use-transparent-header";
 import type { UsernameDeleteMutation } from "@/lib/relay/__generated__/UsernameDeleteMutation.graphql";
 import type { UsernameLikeMutation } from "@/lib/relay/__generated__/UsernameLikeMutation.graphql";
 import type { UsernameQuery } from "@/lib/relay/__generated__/UsernameQuery.graphql";
@@ -78,25 +82,22 @@ export default function UserProfileScreen() {
   const colors = useColors();
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.bg }]}
-      edges={["bottom"]}
-    >
+    <View style={styles.container}>
       <Stack.Screen
         options={{
           headerShown: true,
           headerTitle: "Profile",
-          headerStyle: { backgroundColor: "transparent" },
+          headerTransparent: IS_LIQUID_GLASS,
+          headerStyle: { backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg },
           headerTintColor: colors.text,
           headerShadowVisible: false,
           headerBackButtonDisplayMode: "minimal",
-          headerTransparent: true,
         }}
       />
       <Suspense fallback={<ProfileSkeleton />}>
         <UserProfileContent />
       </Suspense>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -105,6 +106,8 @@ function UserProfileContent() {
   const { session, presentSignIn } = useSession();
   const colors = useColors();
   const router = useRouter();
+  const contentPaddingTop = useTransparentHeaderPadding();
+  const insets = useSafeAreaInsets();
   const postsListRef = useRef<ProfilePostsListRef>(null);
 
   // Fetch profile data
@@ -196,7 +199,11 @@ function UserProfileContent() {
   const isOwnProfile = session?.user?.id === user.id;
 
   return (
-    <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.scrollView}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingTop: contentPaddingTop, paddingBottom: insets.bottom + 32 }}
+    >
       {/* Profile Header */}
       <ProfileHeader
         name={user.name}

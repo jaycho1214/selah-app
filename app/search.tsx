@@ -2,9 +2,13 @@ import { useState, useCallback, Suspense } from "react";
 import { View, Text, Pressable, ActivityIndicator } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { Stack, router } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { SearchBar } from "@/components/bible/search-bar";
+import { useColors } from "@/hooks/use-colors";
+import {
+  IS_LIQUID_GLASS,
+  useTransparentHeaderPadding,
+} from "@/hooks/use-transparent-header";
 import { useBibleStore } from "@/lib/stores/bible-store";
 import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
 import type { BibleBook } from "@/lib/bible/types";
@@ -136,6 +140,8 @@ function SearchResults({
 }
 
 export default function SearchScreen() {
+  const colors = useColors();
+  const contentPaddingTop = useTransparentHeaderPadding();
   const currentTranslation = useBibleStore((s) => s.currentTranslation);
   const [searchText, setSearchText] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
@@ -152,11 +158,14 @@ export default function SearchScreen() {
   }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
+    <View className="flex-1 bg-background" style={{ paddingTop: contentPaddingTop }}>
       <Stack.Screen
         options={{
           title: "Search",
           headerLargeTitle: true,
+          headerTransparent: IS_LIQUID_GLASS,
+          headerStyle: { backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg },
+          headerShadowVisible: false,
         }}
       />
 
@@ -195,6 +204,6 @@ export default function SearchScreen() {
           </Text>
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 }

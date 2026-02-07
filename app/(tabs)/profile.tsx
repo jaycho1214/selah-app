@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { RelativePathString, router } from "expo-router";
-import { Settings, Share2 } from "lucide-react-native";
+import { LogIn, Settings, Share2 } from "lucide-react-native";
 import {
   Suspense,
   useCallback,
@@ -18,6 +18,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 
@@ -119,25 +120,42 @@ function UnauthenticatedProfile() {
           <Settings size={24} color={colors.text} strokeWidth={1.5} />
         </Pressable>
       </View>
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.welcomeContainer}>
-          <Text style={[styles.welcomeTitle, { color: colors.text }]}>
+      <View style={styles.emptyContainer}>
+        <Animated.View
+          entering={FadeIn.duration(400).delay(200)}
+          style={[
+            styles.emptyCard,
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.emptyIconContainer,
+              { backgroundColor: `${colors.accent}20` },
+            ]}
+          >
+            <LogIn size={24} color={colors.accent} strokeWidth={1.5} />
+          </View>
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>
             Welcome to Selah
           </Text>
-          <Text style={[styles.welcomeSubtitle, { color: colors.textMuted }]}>
+          <Text style={[styles.emptyText, { color: colors.textMuted }]}>
             Sign in to save your reading progress, post reflections, and connect
             with the community
           </Text>
-          <Button style={styles.signInButton} onPress={presentSignIn}>
-            <Text style={styles.signInButtonText}>Sign In</Text>
-          </Button>
-        </View>
-
-        <View style={styles.bottomPadding} />
-      </ScrollView>
+          <Pressable
+            onPress={presentSignIn}
+            style={[styles.ctaButton, { backgroundColor: colors.accent }]}
+          >
+            <Text style={[styles.ctaButtonText, { color: "#fff" }]}>
+              Sign In
+            </Text>
+          </Pressable>
+        </Animated.View>
+      </View>
     </SafeAreaView>
   );
 }
@@ -429,32 +447,48 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  welcomeContainer: {
+  emptyContainer: {
+    flex: 1,
     alignItems: "center",
-    paddingHorizontal: 24,
-    paddingTop: 40,
-    paddingBottom: 24,
+    paddingTop: 60,
+    paddingHorizontal: 16,
   },
-  welcomeTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    marginBottom: 12,
+  emptyCard: {
+    alignItems: "center",
+    padding: 36,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderStyle: "dashed",
   },
-  welcomeSubtitle: {
-    fontSize: 15,
-    textAlign: "center",
-    lineHeight: 22,
-    marginBottom: 24,
+  emptyIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
   },
-  signInButton: {
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  signInButtonText: {
-    color: "#fff",
+  emptyTitle: {
+    fontSize: 17,
     fontWeight: "600",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  emptyText: {
+    fontSize: 14,
+    textAlign: "center",
+    lineHeight: 21,
+    maxWidth: 260,
+  },
+  ctaButton: {
+    marginTop: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
+  },
+  ctaButtonText: {
     fontSize: 15,
+    fontWeight: "600",
   },
   headerButtons: {
     flexDirection: "row",

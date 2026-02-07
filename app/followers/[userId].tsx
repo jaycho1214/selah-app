@@ -1,11 +1,14 @@
-import { View, StyleSheet, ActivityIndicator } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, StyleSheet } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { Users } from "lucide-react-native";
 
 import { Text } from "@/components/ui/text";
 import { useColors } from "@/hooks/use-colors";
+import {
+  IS_LIQUID_GLASS,
+  useTransparentHeaderPadding,
+} from "@/hooks/use-transparent-header";
 
 /**
  * Followers list screen.
@@ -27,16 +30,23 @@ import { useColors } from "@/hooks/use-colors";
 export default function FollowersScreen() {
   const { userId } = useLocalSearchParams<{ userId: string }>();
   const colors = useColors();
+  const contentPaddingTop = useTransparentHeaderPadding();
 
   // TODO: Implement with Relay pagination when backend adds followers connection
   // For now, show empty state indicating feature pending backend support
 
   return (
-    <SafeAreaView
-      edges={["bottom"]}
-      style={[styles.container, { backgroundColor: colors.bg }]}
+    <View
+      style={[styles.container, { backgroundColor: colors.bg, paddingTop: contentPaddingTop }]}
     >
-      <Stack.Screen options={{ title: "Followers" }} />
+      <Stack.Screen
+        options={{
+          title: "Followers",
+          headerTransparent: IS_LIQUID_GLASS,
+          headerStyle: { backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg },
+          headerShadowVisible: false,
+        }}
+      />
       <Animated.View
         entering={FadeIn.duration(300)}
         style={styles.emptyContainer}
@@ -56,7 +66,7 @@ export default function FollowersScreen() {
           When people follow this user, they&apos;ll appear here
         </Text>
       </Animated.View>
-    </SafeAreaView>
+    </View>
   );
 }
 

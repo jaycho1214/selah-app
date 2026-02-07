@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { View, Text, Pressable } from "react-native";
 import { useLocalSearchParams, router, Stack } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Search, Settings } from "lucide-react-native";
 import BottomSheet, {
   BottomSheetView,
@@ -16,9 +15,16 @@ import { TranslationPicker } from "@/components/bible/translation-picker";
 import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
 import { useBibleStore } from "@/lib/stores/bible-store";
 import { useVerseSelectionStore } from "@/lib/stores/verse-selection-store";
+import { useColors } from "@/hooks/use-colors";
+import {
+  IS_LIQUID_GLASS,
+  useTransparentHeaderPadding,
+} from "@/hooks/use-transparent-header";
 import { BibleBook } from "@/lib/bible/types";
 
 export default function BibleChapterScreen() {
+  const colors = useColors();
+  const contentPaddingTop = useTransparentHeaderPadding();
   const { book, chapter } = useLocalSearchParams<{
     book: string;
     chapter: string;
@@ -100,10 +106,13 @@ export default function BibleChapterScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
+    <View className="flex-1 bg-background" style={{ paddingTop: contentPaddingTop }}>
       <Stack.Screen
         options={{
           headerShown: true,
+          headerTransparent: IS_LIQUID_GLASS,
+          headerStyle: { backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg },
+          headerShadowVisible: false,
           headerTitle: () => (
             <Pressable onPress={() => setNavigatorVisible(true)}>
               <View className="items-center">
@@ -210,6 +219,6 @@ export default function BibleChapterScreen() {
           )}
         </BottomSheetView>
       </BottomSheet>
-    </SafeAreaView>
+    </View>
   );
 }

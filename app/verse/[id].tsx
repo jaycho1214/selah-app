@@ -17,6 +17,10 @@ import {
   View,
 } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import {
+  IS_LIQUID_GLASS,
+  useTransparentHeaderPadding,
+} from "@/hooks/use-transparent-header";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 
 import { SignInSheet } from "@/components/auth/sign-in-sheet";
@@ -167,7 +171,8 @@ export default function VerseDetailPage() {
         <Stack.Screen
           options={{
             title: "Verse",
-            headerStyle: { backgroundColor: colors.bg },
+            headerTransparent: IS_LIQUID_GLASS,
+            headerStyle: { backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg },
             headerTintColor: colors.text,
             headerShadowVisible: false,
           }}
@@ -186,7 +191,8 @@ export default function VerseDetailPage() {
       <Stack.Screen
         options={{
           title: reference,
-          headerStyle: { backgroundColor: colors.bg },
+          headerTransparent: IS_LIQUID_GLASS,
+          headerStyle: { backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg },
           headerTintColor: colors.text,
           headerShadowVisible: false,
           headerBackTitle: "",
@@ -237,6 +243,7 @@ function VerseContent({
   };
   isDark: boolean;
 }) {
+  const contentPaddingTop = useTransparentHeaderPadding();
   const { session } = useSession();
   const composerRef = useRef<ReflectionComposerRef>(null);
   const postsListRef = useRef<PostsListRef>(null);
@@ -430,7 +437,7 @@ function VerseContent({
     <View style={styles.contentContainer}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{ paddingTop: contentPaddingTop }}
         showsVerticalScrollIndicator={false}
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
@@ -541,9 +548,6 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-  },
-  scrollContent: {
-    paddingTop: 8,
   },
   // Verse Section
   verseSection: {
