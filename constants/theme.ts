@@ -1,7 +1,8 @@
 /**
- * Warm Parchment Theme - Monastic Minimalism
+ * Clean White & Black (light) / Warm Parchment (dark)
  *
- * A contemplative color palette inspired by aged parchment and monastery libraries.
+ * Light mode: Twitter-inspired white & black palette.
+ * Dark mode: Contemplative warm parchment colors.
  * Matches the CSS variables in global.css.
  */
 
@@ -9,16 +10,15 @@ import { Platform } from "react-native";
 
 /**
  * Colors for use in components that don't support CSS variables.
- * Warm parchment palette with brown/sepia accent.
  */
 export const Colors = {
   light: {
-    text: "#1c1917", // --foreground (stone-900)
-    background: "#faf9f7", // --background (warm off-white)
-    tint: "#8b7355", // --primary (warm brown)
-    icon: "#a8a29e", // --muted-foreground (stone-400)
-    tabIconDefault: "#a8a29e", // --muted-foreground
-    tabIconSelected: "#8b7355", // --primary
+    text: "#0f1419", // --foreground
+    background: "#ffffff", // --background
+    tint: "#0f1419", // --primary
+    icon: "#536471", // --muted-foreground
+    tabIconDefault: "#536471", // --muted-foreground
+    tabIconSelected: "#0f1419", // --primary
   },
   dark: {
     text: "#fafaf9", // --foreground (stone-50)
@@ -36,14 +36,14 @@ export const Colors = {
  */
 export const ThemeColors = {
   light: {
-    bg: "#faf9f7",
+    bg: "#ffffff",
     surface: "#ffffff",
-    surfaceElevated: "#f5f4f2",
-    border: "#e7e5e4",
-    text: "#1c1917",
-    textSecondary: "#44403c",
-    textMuted: "#a8a29e",
-    accent: "#8b7355",
+    surfaceElevated: "#f7f9f9",
+    border: "#eff3f4",
+    text: "#0f1419",
+    textSecondary: "#536471",
+    textMuted: "#536471",
+    accent: "#0f1419",
   },
   dark: {
     bg: "#0c0a09",
@@ -59,18 +59,17 @@ export const ThemeColors = {
 
 /**
  * Navigation theme for React Navigation
- * Warm parchment colors for navigation chrome
  */
 export const NAV_THEME = {
   light: {
     dark: false,
     colors: {
-      background: "#faf9f7", // --background
-      border: "#e7e5e4", // --border
+      background: "#ffffff", // --background
+      border: "#eff3f4", // --border
       card: "#ffffff", // --card
       notification: "#dc2626", // --destructive
-      primary: "#8b7355", // --primary
-      text: "#1c1917", // --foreground
+      primary: "#0f1419", // --primary
+      text: "#0f1419", // --foreground
     },
   },
   dark: {
