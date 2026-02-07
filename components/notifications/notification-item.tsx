@@ -205,10 +205,7 @@ export function NotificationItem({ notificationRef }: NotificationItemProps) {
   return (
     <Pressable
       onPress={handlePress}
-      style={({ pressed }) => [
-        styles.container,
-        { borderBottomColor: colors.border, opacity: pressed ? 0.7 : 1 },
-      ]}
+      style={[styles.container, { borderBottomColor: colors.border }]}
     >
       {/* Type icon — small inline, matching web */}
       <View style={styles.iconWrap}>
@@ -273,10 +270,7 @@ export function NotificationItem({ notificationRef }: NotificationItemProps) {
             {verseRef && (
               <Pressable
                 onPress={handleVersePress}
-                style={({ pressed }) => [
-                  styles.verseButton,
-                  { borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
-                ]}
+                style={[styles.verseButton, { borderColor: colors.border }]}
               >
                 <Text
                   style={[
