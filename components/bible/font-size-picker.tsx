@@ -1,10 +1,14 @@
-import { View, Text, Pressable } from 'react-native';
-import { useSettingsStore, FontSize, FONT_SIZES } from '@/lib/stores/settings-store';
+import { View, Text, Pressable } from "react-native";
+import {
+  useSettingsStore,
+  FontSize,
+  FONT_SIZES,
+} from "@/lib/stores/settings-store";
 
 const FONT_SIZE_OPTIONS: { id: FontSize; label: string }[] = [
-  { id: 'small', label: 'A' },
-  { id: 'medium', label: 'A' },
-  { id: 'large', label: 'A' },
+  { id: "small", label: "A" },
+  { id: "medium", label: "A" },
+  { id: "large", label: "A" },
 ];
 
 interface FontSizePickerProps {
@@ -33,18 +37,22 @@ export function FontSizePicker({ onClose }: FontSizePickerProps) {
               key={option.id}
               onPress={() => handleSelect(option.id)}
               className={`flex-1 py-3 rounded-lg items-center justify-center ${
-                isSelected ? 'bg-primary' : 'bg-muted'
+                isSelected ? "bg-primary" : "bg-muted"
               }`}
             >
               <Text
-                className={isSelected ? 'text-primary-foreground' : 'text-foreground'}
+                className={
+                  isSelected ? "text-primary-foreground" : "text-foreground"
+                }
                 style={{ fontSize: sizes.text }}
               >
                 {option.label}
               </Text>
               <Text
                 className={`text-xs mt-1 ${
-                  isSelected ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                  isSelected
+                    ? "text-primary-foreground/70"
+                    : "text-muted-foreground"
                 }`}
               >
                 {option.id}

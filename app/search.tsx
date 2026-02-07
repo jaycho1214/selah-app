@@ -1,18 +1,29 @@
-import { useState, useCallback, Suspense } from 'react';
-import { View, Text, Pressable, ActivityIndicator } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
-import { Stack, router } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { graphql, useLazyLoadQuery } from 'react-relay';
-import { SearchBar } from '@/components/bible/search-bar';
-import { useBibleStore } from '@/lib/stores/bible-store';
-import { BIBLE_BOOK_DETAILS } from '@/lib/bible/constants';
-import type { BibleBook } from '@/lib/bible/types';
-import type { searchBibleQuery, searchBibleQuery$variables } from '@/lib/relay/__generated__/searchBibleQuery.graphql';
+import { useState, useCallback, Suspense } from "react";
+import { View, Text, Pressable, ActivityIndicator } from "react-native";
+import { FlashList } from "@shopify/flash-list";
+import { Stack, router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { graphql, useLazyLoadQuery } from "react-relay";
+import { SearchBar } from "@/components/bible/search-bar";
+import { useBibleStore } from "@/lib/stores/bible-store";
+import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
+import type { BibleBook } from "@/lib/bible/types";
+import type {
+  searchBibleQuery,
+  searchBibleQuery$variables,
+} from "@/lib/relay/__generated__/searchBibleQuery.graphql";
 
 const searchQuery = graphql`
-  query searchBibleQuery($translation: BibleTranslation!, $query: String!, $limit: Int) {
-    bibleVersesByQuery(translation: $translation, query: $query, limit: $limit) {
+  query searchBibleQuery(
+    $translation: BibleTranslation!
+    $query: String!
+    $limit: Int
+  ) {
+    bibleVersesByQuery(
+      translation: $translation
+      query: $query
+      limit: $limit
+    ) {
       id
       book
       chapter
@@ -61,33 +72,38 @@ function SearchResults({
   const data = useLazyLoadQuery<searchBibleQuery>(
     searchQuery,
     {
-      translation: translation as searchBibleQuery$variables['translation'],
+      translation: translation as searchBibleQuery$variables["translation"],
       query,
       limit: 50,
     },
-    { fetchPolicy: 'store-or-network' }
+    { fetchPolicy: "store-or-network" },
   );
 
   const results = data.bibleVersesByQuery ?? [];
 
-  const handleResultPress = useCallback((verse: { book: BibleBook; chapter: number }) => {
-    router.push(`/bible/${verse.book}/${verse.chapter}`);
-  }, []);
+  const handleResultPress = useCallback(
+    (verse: { book: BibleBook; chapter: number }) => {
+      router.push(`/bible/${verse.book}/${verse.chapter}`);
+    },
+    [],
+  );
 
   const renderItem = useCallback(
     ({ item }: { item: (typeof results)[number] }) => (
       <SearchResultItem
-        verse={item as SearchResultItemProps['verse']}
+        verse={item as SearchResultItemProps["verse"]}
         query={query}
-        onPress={() => handleResultPress(item as { book: BibleBook; chapter: number })}
+        onPress={() =>
+          handleResultPress(item as { book: BibleBook; chapter: number })
+        }
       />
     ),
-    [query, handleResultPress]
+    [query, handleResultPress],
   );
 
   const keyExtractor = useCallback(
     (item: (typeof results)[number]) => item.id,
-    []
+    [],
   );
 
   if (results.length === 0) {
@@ -111,7 +127,7 @@ function SearchResults({
       ListHeaderComponent={
         <View className="px-4 py-2 bg-muted">
           <Text className="text-muted-foreground text-sm">
-            {results.length} result{results.length !== 1 ? 's' : ''}
+            {results.length} result{results.length !== 1 ? "s" : ""}
           </Text>
         </View>
       }
@@ -121,8 +137,8 @@ function SearchResults({
 
 export default function SearchScreen() {
   const { currentTranslation } = useBibleStore();
-  const [searchText, setSearchText] = useState('');
-  const [submittedQuery, setSubmittedQuery] = useState('');
+  const [searchText, setSearchText] = useState("");
+  const [submittedQuery, setSubmittedQuery] = useState("");
 
   const handleSubmit = useCallback(() => {
     if (searchText.trim().length >= 3) {
@@ -131,15 +147,15 @@ export default function SearchScreen() {
   }, [searchText]);
 
   const handleClear = useCallback(() => {
-    setSearchText('');
-    setSubmittedQuery('');
+    setSearchText("");
+    setSubmittedQuery("");
   }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       <Stack.Screen
         options={{
-          title: 'Search',
+          title: "Search",
           headerLargeTitle: true,
         }}
       />
@@ -167,7 +183,10 @@ export default function SearchScreen() {
             </View>
           }
         >
-          <SearchResults query={submittedQuery} translation={currentTranslation} />
+          <SearchResults
+            query={submittedQuery}
+            translation={currentTranslation}
+          />
         </Suspense>
       ) : (
         <View className="flex-1 items-center justify-center p-8">

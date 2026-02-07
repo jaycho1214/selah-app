@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
-import { RelayEnvironmentProvider } from 'react-relay';
-import { environment } from '@/lib/relay/environment';
+import { ReactNode } from "react";
+import { RelayEnvironmentProvider } from "react-relay";
+import { environment } from "@/lib/relay/environment";
 
 interface RelayProviderProps {
   children: ReactNode;

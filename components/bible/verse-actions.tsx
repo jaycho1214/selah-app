@@ -1,240 +1,446 @@
-import { useCallback, useMemo, forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import { View, Pressable, useColorScheme, Share, Platform } from 'react-native';
-import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet';
-import * as Haptics from 'expo-haptics';
-import { Text } from '@/components/ui/text';
-import { useAnnotationsStore, HIGHLIGHT_COLORS } from '@/lib/stores/annotations-store';
-import { parseVerseId } from '@/lib/bible/utils';
-import { BIBLE_BOOK_DETAILS } from '@/lib/bible/constants';
-import type { BibleBook } from '@/lib/bible/types';
+import { Text } from "@/components/ui/text";
+import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
+import type { verseActionsCompareQuery } from "@/lib/relay/__generated__/verseActionsCompareQuery.graphql";
+import { useVerseSelectionStore } from "@/lib/stores/verse-selection-store";
+import { getVerseShareUrl } from "@/lib/utils";
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetScrollView,
+} from "@gorhom/bottom-sheet";
+import * as Clipboard from "expo-clipboard";
+import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
+import * as Haptics from "expo-haptics";
+import { ArrowLeftRight, Copy, Share2, X } from "lucide-react-native";
+import { useCallback, useMemo, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Platform,
+  Pressable,
+  Share,
+  StyleSheet,
+  useColorScheme,
+  View,
+} from "react-native";
+import Animated, {
+  FadeInDown,
+  SlideInDown,
+  SlideOutDown,
+} from "react-native-reanimated";
+import { fetchQuery, graphql, useRelayEnvironment } from "react-relay";
 
-interface VerseActionsProps {
-  onHighlight?: () => void;
-  onBookmark?: () => void;
-  onNote?: (verseId: string, verseText: string) => void;
-  onShare?: () => void;
-}
+const AnimatedGlassView = Animated.createAnimatedComponent(GlassView);
+const hasGlass = isLiquidGlassAvailable();
 
-export interface VerseActionsRef {
-  open: (verseId: string, verseText: string) => void;
-  close: () => void;
-}
+const serifFont = Platform.select({
+  ios: "Georgia",
+  default: "serif",
+});
 
-export const VerseActions = forwardRef<VerseActionsRef, VerseActionsProps>(
-  function VerseActions({ onHighlight, onBookmark, onNote, onShare }, ref) {
-    const bottomSheetRef = useRef<BottomSheet>(null);
-    const colorScheme = useColorScheme();
+const TRANSLATIONS = [
+  { id: "KJV", name: "King James Version" },
+  { id: "ASV", name: "American Standard Version" },
+] as const;
 
-    // Use state for current verse to trigger re-renders
-    const [currentVerse, setCurrentVerse] = useState<{ id: string; text: string } | null>(null);
+const compareQuery = graphql`
+  query verseActionsCompareQuery(
+    $translation: BibleTranslation!
+    $book: BibleBook!
+    $chapter: Int!
+  ) {
+    bibleVersesByReference(
+      translation: $translation
+      book: $book
+      chapter: $chapter
+    ) {
+      id
+      verse
+      text
+    }
+  }
+`;
 
-    const { highlights, addHighlight, removeHighlight, bookmarks, addBookmark, removeBookmark, notes } =
-      useAnnotationsStore();
+export function VerseActions() {
+  const compareSheetRef = useRef<BottomSheetModal>(null);
+  const colorScheme = useColorScheme();
+  const environment = useRelayEnvironment();
 
-    const snapPoints = useMemo(() => ['40%'], []);
+  const isSelecting = useVerseSelectionStore((s) => s.isSelecting);
+  const getSortedVerses = useVerseSelectionStore((s) => s.getSortedVerses);
+  const clearSelection = useVerseSelectionStore((s) => s.clearSelection);
+  const selectedIds = useVerseSelectionStore((s) => s.selectedIds);
 
-    useImperativeHandle(ref, () => ({
-      open: (verseId: string, verseText: string) => {
-        setCurrentVerse({ id: verseId, text: verseText });
-        bottomSheetRef.current?.expand();
-      },
-      close: () => {
-        bottomSheetRef.current?.close();
-      },
-    }));
+  const [compareData, setCompareData] = useState<Record<
+    string,
+    string[]
+  > | null>(null);
+  const [compareLoading, setCompareLoading] = useState(false);
 
-    const handleSheetChange = useCallback((index: number) => {
-      // Clear current verse when sheet closes
-      if (index === -1) {
-        setCurrentVerse(null);
-      }
-    }, []);
+  const count = selectedIds.size;
 
-    const currentHighlight = currentVerse
-      ? highlights[currentVerse.id]
-      : null;
+  const verseReference = useMemo(() => {
+    if (!isSelecting) return "";
+    const sorted = getSortedVerses();
+    if (sorted.length === 0) return "";
 
-    const isBookmarked = currentVerse
-      ? !!bookmarks[currentVerse.id]
-      : false;
+    const first = sorted[0];
+    const last = sorted[sorted.length - 1];
+    const bookDetails = BIBLE_BOOK_DETAILS[first.book];
+    const bookName = bookDetails?.name ?? first.book;
 
-    const hasNote = currentVerse
-      ? !!notes[currentVerse.id]
-      : false;
+    if (sorted.length === 1) {
+      return `${bookName} ${first.chapter}:${first.verseNumber}`;
+    }
+    return `${bookName} ${first.chapter}:${first.verseNumber}–${last.verseNumber}`;
+  }, [isSelecting, getSortedVerses, count]);
 
-    const handleColorSelect = useCallback(
-      (colorValue: string) => {
-        if (!currentVerse) return;
+  const handleShare = useCallback(async () => {
+    const sorted = getSortedVerses();
+    if (sorted.length === 0) return;
 
-        if (currentHighlight?.color === colorValue) {
-          // Remove highlight if same color tapped
-          removeHighlight(currentVerse.id);
-        } else {
-          addHighlight(currentVerse.id, colorValue);
-        }
-        onHighlight?.();
-      },
-      [currentVerse, currentHighlight, addHighlight, removeHighlight, onHighlight]
-    );
+    const combinedText = sorted.map((v) => v.text).join(" ");
+    const shareUrl = getVerseShareUrl(sorted.map((v) => v.id));
+    const shareText = `"${combinedText}"\n\n— ${verseReference}\n${shareUrl}`;
 
-    const handleRemoveHighlight = useCallback(() => {
-      if (!currentVerse) return;
-      removeHighlight(currentVerse.id);
-      onHighlight?.();
-    }, [currentVerse, removeHighlight, onHighlight]);
-
-    const handleBookmarkToggle = useCallback(() => {
-      if (!currentVerse) return;
+    try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      if (isBookmarked) {
-        removeBookmark(currentVerse.id);
-      } else {
-        addBookmark(currentVerse.id);
-      }
-      onBookmark?.();
-    }, [currentVerse, isBookmarked, addBookmark, removeBookmark, onBookmark]);
+      await Share.share({ message: shareText, url: shareUrl });
+    } catch {
+      // User cancelled
+    }
+  }, [getSortedVerses, verseReference]);
 
-    const handleShare = useCallback(async () => {
-      if (!currentVerse) return;
+  const handleCopy = useCallback(async () => {
+    const sorted = getSortedVerses();
+    if (sorted.length === 0) return;
 
-      const parsed = parseVerseId(currentVerse.id);
-      let reference = currentVerse.id;
+    const combinedText = sorted.map((v) => v.text).join(" ");
+    const copyText = `"${combinedText}"\n\n— ${verseReference}`;
 
-      if (parsed) {
-        const bookDetails = BIBLE_BOOK_DETAILS[parsed.book as BibleBook];
-        const bookName = bookDetails?.name ?? parsed.book;
-        reference = `${bookName} ${parsed.chapter}:${parsed.verse}`;
-      }
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    await Clipboard.setStringAsync(copyText);
+    clearSelection();
+  }, [getSortedVerses, verseReference, clearSelection]);
 
-      const shareText = `"${currentVerse.text}"\n\n— ${reference}`;
+  const handleCompare = useCallback(async () => {
+    const sorted = getSortedVerses();
+    if (sorted.length === 0) return;
 
-      try {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        await Share.share({
-          message: shareText,
-          title: reference,
-        });
-        onShare?.();
-      } catch (error) {
-        // User cancelled or error
-      }
-    }, [currentVerse, onShare]);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setCompareData(null);
+    setCompareLoading(true);
+    compareSheetRef.current?.present();
 
-    const renderBackdrop = useCallback(
-      (props: any) => (
-        <BottomSheetBackdrop
-          {...props}
-          disappearsOnIndex={-1}
-          appearsOnIndex={0}
-          opacity={0.4}
-        />
-      ),
-      []
-    );
+    const first = sorted[0];
+    const verseNumbers = new Set(sorted.map((v) => v.verseNumber));
 
-    const isDark = colorScheme === 'dark';
-    const backgroundColor = isDark ? '#18181b' : '#fafaf9';
-    const handleColor = isDark ? '#52525b' : '#d4d4d8';
+    try {
+      const results: Record<string, string[]> = {};
 
-    return (
-      <BottomSheet
-        ref={bottomSheetRef}
-        index={-1}
-        snapPoints={snapPoints}
+      const fetches = TRANSLATIONS.map(async (tr) => {
+        const data = await fetchQuery<verseActionsCompareQuery>(
+          environment,
+          compareQuery,
+          {
+            translation: tr.id as any,
+            book: first.book,
+            chapter: first.chapter,
+          },
+        ).toPromise();
+
+        const verses = (data?.bibleVersesByReference ?? [])
+          .filter((v) => verseNumbers.has(v.verse))
+          .sort((a, b) => a.verse - b.verse);
+
+        results[tr.id] = verses.map((v) => v.text);
+      });
+
+      await Promise.all(fetches);
+      setCompareData(results);
+    } catch {
+      // Network error
+    } finally {
+      setCompareLoading(false);
+    }
+  }, [getSortedVerses, environment]);
+
+  const isDark = colorScheme === "dark";
+
+  const t = useMemo(
+    () =>
+      isDark
+        ? {
+            bg: "#0c0a09",
+            surface: "#1c1917",
+            surfaceElevated: "#292524",
+            border: "#292524",
+            borderSubtle: "#3d3530",
+            text: "#fafaf9",
+            textMuted: "#a8a29e",
+            textSubtle: "#78716c",
+            accent: "#d6bcab",
+            handle: "#44403c",
+            barBg: "#171412",
+            barBorder: "#2a2420",
+          }
+        : {
+            bg: "#fdfcfb",
+            surface: "#f5f4f3",
+            surfaceElevated: "#ffffff",
+            border: "#e7e5e4",
+            borderSubtle: "#d6d3d1",
+            text: "#1c1917",
+            textMuted: "#57534e",
+            textSubtle: "#a8a29e",
+            accent: "#8b7355",
+            handle: "#d6d3d1",
+            barBg: "#faf9f8",
+            barBorder: "#e7e5e4",
+          },
+    [isDark],
+  );
+
+  const renderBackdrop = useCallback(
+    (props: any) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.5}
+      />
+    ),
+    [],
+  );
+
+  return (
+    <>
+      {/* Floating action tray */}
+      {isSelecting && (
+        <AnimatedGlassView
+          entering={SlideInDown.duration(300)}
+          exiting={SlideOutDown.duration(200)}
+          glassEffectStyle="regular"
+          isInteractive
+          style={[
+            styles.tray,
+            {
+              backgroundColor: hasGlass ? "transparent" : t.barBg,
+              borderColor: isLiquidGlassAvailable()
+                ? "transparent"
+                : t.barBorder,
+              shadowColor: isDark ? "#000" : "#78716c",
+            },
+          ]}
+        >
+          <Pressable
+            onPress={handleCompare}
+            disabled={compareLoading}
+            style={styles.actionButton}
+          >
+            <ArrowLeftRight size={18} color={t.textMuted} strokeWidth={1.8} />
+            <Text style={[styles.actionLabel, { color: t.textMuted }]}>
+              Compare
+            </Text>
+          </Pressable>
+
+          <View style={[styles.divider, { backgroundColor: t.barBorder }]} />
+
+          <Pressable onPress={handleShare} style={styles.actionButton}>
+            <Share2 size={18} color={t.textMuted} strokeWidth={1.8} />
+            <Text style={[styles.actionLabel, { color: t.textMuted }]}>
+              Share
+            </Text>
+          </Pressable>
+
+          <View style={[styles.divider, { backgroundColor: t.barBorder }]} />
+
+          <Pressable onPress={handleCopy} style={styles.actionButton}>
+            <Copy size={18} color={t.textMuted} strokeWidth={1.8} />
+            <Text style={[styles.actionLabel, { color: t.textMuted }]}>
+              Copy
+            </Text>
+          </Pressable>
+
+          <View style={[styles.divider, { backgroundColor: t.barBorder }]} />
+
+          <Pressable onPress={clearSelection} style={styles.closeButton}>
+            <X size={18} color={t.textSubtle} strokeWidth={2} />
+          </Pressable>
+        </AnimatedGlassView>
+      )}
+
+      {/* Compare translations bottom sheet */}
+      <BottomSheetModal
+        ref={compareSheetRef}
+        enableDynamicSizing
         enablePanDownToClose
         backdropComponent={renderBackdrop}
-        onChange={handleSheetChange}
         backgroundStyle={{
-          backgroundColor,
-          borderTopLeftRadius: 24,
-          borderTopRightRadius: 24,
+          backgroundColor: t.bg,
+          borderTopLeftRadius: 28,
+          borderTopRightRadius: 28,
         }}
         handleIndicatorStyle={{
-          backgroundColor: handleColor,
+          backgroundColor: hasGlass
+            ? isDark
+              ? "rgba(255,255,255,0.5)"
+              : "rgba(0,0,0,0.3)"
+            : t.handle,
           width: 40,
-          height: 4,
+          height: 5,
           marginTop: 12,
         }}
       >
-        <BottomSheetView className="flex-1 px-6 pb-6">
-          {/* Verse preview */}
-          {currentVerse && (
-            <Text
-              className="text-muted-foreground text-sm mb-4"
-              numberOfLines={2}
-            >
-              {currentVerse.text}
-            </Text>
+        <BottomSheetScrollView style={styles.compareSheet}>
+          {/* Header */}
+          <Text style={[styles.compareRef, { color: t.accent }]}>
+            {verseReference}
+          </Text>
+
+          {/* Loading state */}
+          {compareLoading && (
+            <View style={styles.compareLoading}>
+              <ActivityIndicator size="small" color={t.accent} />
+              <Text
+                style={[styles.compareLoadingText, { color: t.textSubtle }]}
+              >
+                Loading translations...
+              </Text>
+            </View>
           )}
 
-          {/* Highlight colors */}
-          <View className="mb-5">
-            <Text className="text-foreground text-base font-semibold mb-3">
-              Highlight
-            </Text>
-            <View className="flex-row gap-3">
-              {HIGHLIGHT_COLORS.map((color) => (
-                <Pressable
-                  key={color.id}
-                  onPress={() => handleColorSelect(color.value)}
-                  className="w-11 h-11 rounded-full items-center justify-center"
-                  style={[
-                    { backgroundColor: color.value },
-                    currentHighlight?.color === color.value && {
-                      borderWidth: 3,
-                      borderColor: isDark ? '#ffffff' : '#18181b',
-                    },
-                  ]}
-                >
-                  {currentHighlight?.color === color.value && (
-                    <Text className="text-white text-base font-bold">✓</Text>
-                  )}
-                </Pressable>
-              ))}
-              {/* Remove highlight button */}
-              {currentHighlight && (
-                <Pressable
-                  onPress={handleRemoveHighlight}
-                  className="w-11 h-11 rounded-full items-center justify-center border border-border bg-muted"
-                >
-                  <Text className="text-muted-foreground text-base">✕</Text>
-                </Pressable>
-              )}
-            </View>
-          </View>
+          {/* Translation entries */}
+          {compareData &&
+            TRANSLATIONS.map((translation, index) => {
+              const texts = compareData[translation.id];
+              if (!texts || texts.length === 0) return null;
 
-          {/* Action buttons */}
-          <View className="flex-row gap-3">
-            <Pressable
-              onPress={handleBookmarkToggle}
-              className="flex-1 py-3 rounded-xl bg-muted items-center active:opacity-70"
-            >
-              <Text className="text-foreground font-medium">
-                {isBookmarked ? 'Saved' : 'Save'}
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                if (currentVerse) {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  onNote?.(currentVerse.id, currentVerse.text);
-                }
-              }}
-              className="flex-1 py-3 rounded-xl bg-muted items-center active:opacity-70"
-            >
-              <Text className="text-foreground font-medium">
-                {hasNote ? 'Edit Note' : 'Note'}
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={handleShare}
-              className="flex-1 py-3 rounded-xl bg-muted items-center active:opacity-70"
-            >
-              <Text className="text-foreground font-medium">Share</Text>
-            </Pressable>
-          </View>
-        </BottomSheetView>
-      </BottomSheet>
-    );
-  }
-);
+              return (
+                <Animated.View
+                  key={translation.id}
+                  entering={FadeInDown.duration(350).delay(index * 80)}
+                >
+                  {index > 0 && (
+                    <View
+                      style={[
+                        styles.compareDivider,
+                        { backgroundColor: t.border },
+                      ]}
+                    />
+                  )}
+                  <View style={styles.compareEntry}>
+                    <Text style={[styles.compareAbbr, { color: t.accent }]}>
+                      {translation.id}
+                    </Text>
+                    <Text style={[styles.compareName, { color: t.textSubtle }]}>
+                      {translation.name}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.compareText,
+                        { color: t.text, fontFamily: serifFont },
+                      ]}
+                    >
+                      {texts.join(" ")}
+                    </Text>
+                  </View>
+                </Animated.View>
+              );
+            })}
+
+          <View style={{ height: 40 }} />
+        </BottomSheetScrollView>
+      </BottomSheetModal>
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  // Floating tray
+  tray: {
+    position: "absolute",
+    bottom: 100,
+    left: 24,
+    right: 24,
+    flexDirection: "row",
+    alignItems: "stretch",
+    borderRadius: 16,
+    borderWidth: 1,
+    overflow: "hidden",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 30,
+    elevation: 16,
+    height: 52,
+  },
+
+  // Action buttons — equal flex
+  actionButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+  actionLabel: {
+    fontSize: 13,
+    fontWeight: "500",
+  },
+
+  // Thin vertical divider
+  divider: {
+    width: StyleSheet.hairlineWidth,
+    marginVertical: 12,
+  },
+
+  // Fixed-width close button
+  closeButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 48,
+  },
+
+  // Compare sheet
+  compareSheet: {
+    paddingHorizontal: 24,
+    paddingTop: 8,
+  },
+  compareRef: {
+    fontSize: 12,
+    fontWeight: "600",
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+    marginBottom: 24,
+  },
+  compareLoading: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+    gap: 12,
+  },
+  compareLoadingText: {
+    fontSize: 13,
+    letterSpacing: 0.2,
+  },
+  compareDivider: {
+    height: StyleSheet.hairlineWidth,
+    marginVertical: 24,
+  },
+  compareEntry: {
+    gap: 6,
+  },
+  compareAbbr: {
+    fontSize: 13,
+    fontWeight: "700",
+    letterSpacing: 0.8,
+  },
+  compareName: {
+    fontSize: 11,
+    letterSpacing: 0.2,
+    marginBottom: 8,
+  },
+  compareText: {
+    fontSize: 18,
+    lineHeight: 30,
+  },
+});

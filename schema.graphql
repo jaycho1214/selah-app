@@ -178,6 +178,8 @@ type Mutation {
   bibleVersePostLike(id: ID!): BibleVersePostLikePayload!
   bibleVersePostUnlike(id: ID!): BibleVersePostUnlikePayload!
   notificationMarkAsRead: Boolean!
+  registerExpoPushToken(token: String!): Boolean!
+  unregisterExpoPushToken(token: String!): Boolean!
   pollUnvote(pollId: ID!): PollUnvotePayload!
   pollVote(optionId: ID!, pollId: ID!): PollVotePayload!
   updateUserSettings(input: UpdateUserSettingsInput!): UpdateUserSettingsPayload!

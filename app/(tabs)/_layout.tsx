@@ -1,48 +1,51 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useTheme } from '@/components/providers/theme-provider';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import {
+  NativeTabs,
+  Icon,
+  Label,
+  VectorIcon,
+} from "expo-router/unstable-native-tabs";
 
 export default function TabLayout() {
-  const { resolvedTheme } = useTheme();
-
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[resolvedTheme].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="compass" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="person.fill" color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+    <NativeTabs>
+      <NativeTabs.Trigger name="index">
+        <Label hidden />
+        <Icon
+          sf={{ default: "house", selected: "house.fill" }}
+          androidSrc={<VectorIcon family={MaterialIcons} name="home" />}
+        />
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="posts">
+        <Label hidden />
+        <Icon
+          sf={{ default: "text.bubble", selected: "text.bubble.fill" }}
+          androidSrc={<VectorIcon family={MaterialIcons} name="forum" />}
+        />
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="notifications">
+        <Label hidden />
+        <Icon
+          sf={{ default: "bell", selected: "bell.fill" }}
+          androidSrc={
+            <VectorIcon family={MaterialIcons} name="notifications" />
+          }
+        />
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="profile">
+        <Label hidden />
+        <Icon
+          sf={{ default: "person", selected: "person.fill" }}
+          androidSrc={<VectorIcon family={MaterialIcons} name="person" />}
+        />
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="search" role="search">
+        <Label hidden />
+        <Icon
+          sf="magnifyingglass"
+          androidSrc={<VectorIcon family={MaterialIcons} name="search" />}
+        />
+      </NativeTabs.Trigger>
+    </NativeTabs>
   );
 }

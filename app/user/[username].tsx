@@ -1,5 +1,10 @@
 import * as Haptics from "expo-haptics";
-import { Stack, useLocalSearchParams, useRouter, RelativePathString } from "expo-router";
+import {
+  Stack,
+  useLocalSearchParams,
+  useRouter,
+  RelativePathString,
+} from "expo-router";
 import React, { Suspense, useCallback, useRef } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -109,12 +114,15 @@ function UserProfileContent() {
   const user = data.userByUsername;
 
   // Mutations
-  const [commitLike] =
-    useMutation<UsernameLikeMutation>(likeReflectionMutation);
-  const [commitUnlike] =
-    useMutation<UsernameUnlikeMutation>(unlikeReflectionMutation);
-  const [commitDelete] =
-    useMutation<UsernameDeleteMutation>(deleteReflectionMutation);
+  const [commitLike] = useMutation<UsernameLikeMutation>(
+    likeReflectionMutation,
+  );
+  const [commitUnlike] = useMutation<UsernameUnlikeMutation>(
+    unlikeReflectionMutation,
+  );
+  const [commitDelete] = useMutation<UsernameDeleteMutation>(
+    deleteReflectionMutation,
+  );
 
   const handleLike = useCallback(
     (postId: string) => {
@@ -131,7 +139,7 @@ function UserProfileContent() {
         },
       });
     },
-    [commitLike]
+    [commitLike],
   );
 
   const handleUnlike = useCallback(
@@ -149,7 +157,7 @@ function UserProfileContent() {
         },
       });
     },
-    [commitUnlike]
+    [commitUnlike],
   );
 
   const handleDelete = useCallback(
@@ -165,7 +173,7 @@ function UserProfileContent() {
         },
       });
     },
-    [commitDelete]
+    [commitDelete],
   );
 
   const handleEditProfile = () => {

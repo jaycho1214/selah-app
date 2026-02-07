@@ -1,5 +1,5 @@
-import { View, TextInput, Pressable } from 'react-native';
-import { Search, X } from 'lucide-react-native';
+import { View, TextInput, Pressable } from "react-native";
+import { Search, X } from "lucide-react-native";
 
 interface SearchBarProps {
   value: string;
@@ -15,7 +15,7 @@ export function SearchBar({
   onChangeText,
   onSubmit,
   onClear,
-  placeholder = 'Search the Bible...',
+  placeholder = "Search the Bible...",
   autoFocus = false,
 }: SearchBarProps) {
   return (

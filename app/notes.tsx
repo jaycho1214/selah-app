@@ -1,17 +1,17 @@
-import { useCallback, useMemo, useRef } from 'react';
-import { View, Text, Pressable } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
-import { Stack, router } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Trash2, FileText } from 'lucide-react-native';
-import { NoteEditor, NoteEditorRef } from '@/components/bible/note-editor';
-import { useAnnotationsStore } from '@/lib/stores/annotations-store';
-import { BIBLE_BOOK_DETAILS } from '@/lib/bible/constants';
-import type { BibleBook } from '@/lib/bible/types';
+import { useCallback, useMemo, useRef } from "react";
+import { View, Text, Pressable } from "react-native";
+import { FlashList } from "@shopify/flash-list";
+import { Stack, router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Trash2, FileText } from "lucide-react-native";
+import { NoteEditor, NoteEditorRef } from "@/components/bible/note-editor";
+import { useAnnotationsStore } from "@/lib/stores/annotations-store";
+import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
+import type { BibleBook } from "@/lib/bible/types";
 
 // Parse verse ID into parts
 function parseVerseId(verseId: string) {
-  const parts = verseId.split(':');
+  const parts = verseId.split(":");
   if (parts.length !== 4) return null;
   return {
     translation: parts[0],
@@ -36,7 +36,13 @@ interface NoteItemProps {
   onDelete: () => void;
 }
 
-function NoteItem({ verseId, content, updatedAt, onPress, onDelete }: NoteItemProps) {
+function NoteItem({
+  verseId,
+  content,
+  updatedAt,
+  onPress,
+  onDelete,
+}: NoteItemProps) {
   const parsed = parseVerseId(verseId);
   const bookDetails = parsed ? BIBLE_BOOK_DETAILS[parsed.book] : null;
   const reference = parsed
@@ -85,17 +91,17 @@ export default function NotesScreen() {
       // Open note editor to edit
       const note = notes[verseId];
       if (note) {
-        noteEditorRef.current?.open(verseId, ''); // Verse text not available here
+        noteEditorRef.current?.open(verseId, ""); // Verse text not available here
       }
     },
-    [notes]
+    [notes],
   );
 
   const handleDeleteNote = useCallback(
     (verseId: string) => {
       removeNote(verseId);
     },
-    [removeNote]
+    [removeNote],
   );
 
   const renderItem = useCallback(
@@ -108,16 +114,16 @@ export default function NotesScreen() {
         onDelete={() => handleDeleteNote(item.verseId)}
       />
     ),
-    [handleNotePress, handleDeleteNote]
+    [handleNotePress, handleDeleteNote],
   );
 
   const keyExtractor = useCallback((item: Note) => item.verseId, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       <Stack.Screen
         options={{
-          title: 'Notes',
+          title: "Notes",
           headerLargeTitle: true,
         }}
       />

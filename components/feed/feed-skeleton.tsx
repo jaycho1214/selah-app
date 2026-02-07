@@ -29,11 +29,7 @@ function ShimmerBar({
   style?: ViewStyle;
 }) {
   const animatedStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(
-      shimmer.value,
-      [0, 0.5, 1],
-      [0.4, 0.7, 0.4]
-    );
+    const opacity = interpolate(shimmer.value, [0, 0.5, 1], [0.4, 0.7, 0.4]);
     return { opacity };
   });
 
@@ -67,11 +63,7 @@ function ShimmerBarPercent({
   style?: ViewStyle;
 }) {
   const animatedStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(
-      shimmer.value,
-      [0, 0.5, 1],
-      [0.4, 0.7, 0.4]
-    );
+    const opacity = interpolate(shimmer.value, [0, 0.5, 1], [0.4, 0.7, 0.4]);
     return { opacity };
   });
 
@@ -118,25 +110,82 @@ function SkeletonCard({
       <View style={styles.contentColumn}>
         {/* Header row: name, dot, username, dot, time */}
         <View style={styles.headerRow}>
-          <ShimmerBar width={100} height={14} shimmer={shimmer} baseColor={baseColor} />
-          <ShimmerBar width={4} height={4} shimmer={shimmer} baseColor={baseColor} style={{ borderRadius: 2 }} />
-          <ShimmerBar width={70} height={14} shimmer={shimmer} baseColor={baseColor} />
-          <ShimmerBar width={4} height={4} shimmer={shimmer} baseColor={baseColor} style={{ borderRadius: 2 }} />
-          <ShimmerBar width={30} height={14} shimmer={shimmer} baseColor={baseColor} />
+          <ShimmerBar
+            width={100}
+            height={14}
+            shimmer={shimmer}
+            baseColor={baseColor}
+          />
+          <ShimmerBar
+            width={4}
+            height={4}
+            shimmer={shimmer}
+            baseColor={baseColor}
+            style={{ borderRadius: 2 }}
+          />
+          <ShimmerBar
+            width={70}
+            height={14}
+            shimmer={shimmer}
+            baseColor={baseColor}
+          />
+          <ShimmerBar
+            width={4}
+            height={4}
+            shimmer={shimmer}
+            baseColor={baseColor}
+            style={{ borderRadius: 2 }}
+          />
+          <ShimmerBar
+            width={30}
+            height={14}
+            shimmer={shimmer}
+            baseColor={baseColor}
+          />
         </View>
 
         {/* Content lines of varying width */}
         <View style={styles.contentLines}>
-          <ShimmerBarPercent widthPercent="95%" height={14} shimmer={shimmer} baseColor={baseColor} />
-          <ShimmerBarPercent widthPercent="80%" height={14} shimmer={shimmer} baseColor={baseColor} />
-          <ShimmerBarPercent widthPercent="60%" height={14} shimmer={shimmer} baseColor={baseColor} />
+          <ShimmerBarPercent
+            widthPercent="95%"
+            height={14}
+            shimmer={shimmer}
+            baseColor={baseColor}
+          />
+          <ShimmerBarPercent
+            widthPercent="80%"
+            height={14}
+            shimmer={shimmer}
+            baseColor={baseColor}
+          />
+          <ShimmerBarPercent
+            widthPercent="60%"
+            height={14}
+            shimmer={shimmer}
+            baseColor={baseColor}
+          />
         </View>
 
         {/* Action buttons row: 3 small bars */}
         <View style={styles.actionsRow}>
-          <ShimmerBar width={30} height={14} shimmer={shimmer} baseColor={baseColor} />
-          <ShimmerBar width={30} height={14} shimmer={shimmer} baseColor={baseColor} />
-          <ShimmerBar width={30} height={14} shimmer={shimmer} baseColor={baseColor} />
+          <ShimmerBar
+            width={30}
+            height={14}
+            shimmer={shimmer}
+            baseColor={baseColor}
+          />
+          <ShimmerBar
+            width={30}
+            height={14}
+            shimmer={shimmer}
+            baseColor={baseColor}
+          />
+          <ShimmerBar
+            width={30}
+            height={14}
+            shimmer={shimmer}
+            baseColor={baseColor}
+          />
         </View>
       </View>
     </View>
@@ -152,11 +201,7 @@ export function FeedSkeleton({ style }: FeedSkeletonProps) {
   const shimmer = useSharedValue(0);
 
   useEffect(() => {
-    shimmer.value = withRepeat(
-      withTiming(1, { duration: 1200 }),
-      -1,
-      false
-    );
+    shimmer.value = withRepeat(withTiming(1, { duration: 1200 }), -1, false);
   }, []);
 
   return (

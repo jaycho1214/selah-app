@@ -1,33 +1,41 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { View, Text, Pressable } from 'react-native';
-import { useLocalSearchParams, router, Stack } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search, Settings } from 'lucide-react-native';
-import BottomSheet, { BottomSheetView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
-import { BibleReader } from '@/components/bible/bible-reader';
-import { BibleNavigator } from '@/components/bible/bible-navigator';
-import { VerseActions, VerseActionsRef } from '@/components/bible/verse-actions';
-import { NoteEditor, NoteEditorRef } from '@/components/bible/note-editor';
-import { FontSizePicker } from '@/components/bible/font-size-picker';
-import { TranslationPicker } from '@/components/bible/translation-picker';
-import { BIBLE_BOOK_DETAILS } from '@/lib/bible/constants';
-import { useBibleStore } from '@/lib/stores/bible-store';
-import { BibleBook } from '@/lib/bible/types';
+import { useState, useCallback, useEffect, useRef } from "react";
+import { View, Text, Pressable } from "react-native";
+import { useLocalSearchParams, router, Stack } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Search, Settings } from "lucide-react-native";
+import BottomSheet, {
+  BottomSheetView,
+  BottomSheetBackdrop,
+} from "@gorhom/bottom-sheet";
+import * as Haptics from "expo-haptics";
+import { BibleReader } from "@/components/bible/bible-reader";
+import { BibleNavigator } from "@/components/bible/bible-navigator";
+import { VerseActions } from "@/components/bible/verse-actions";
+import { FontSizePicker } from "@/components/bible/font-size-picker";
+import { TranslationPicker } from "@/components/bible/translation-picker";
+import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
+import { useBibleStore } from "@/lib/stores/bible-store";
+import { useVerseSelectionStore } from "@/lib/stores/verse-selection-store";
+import { BibleBook } from "@/lib/bible/types";
 
 export default function BibleChapterScreen() {
-  const { book, chapter } = useLocalSearchParams<{ book: string; chapter: string }>();
+  const { book, chapter } = useLocalSearchParams<{
+    book: string;
+    chapter: string;
+  }>();
   const { currentTranslation, setPosition } = useBibleStore();
-  const [navigatorVisible, setNavigatorVisible] = useState(false);
-  const verseActionsRef = useRef<VerseActionsRef>(null);
-  const noteEditorRef = useRef<NoteEditorRef>(null);
-  const settingsSheetRef = useRef<BottomSheet>(null);
-  const [settingsTab, setSettingsTab] = useState<'font' | 'translation'>('font');
+  const toggleVerse = useVerseSelectionStore((s) => s.toggleVerse);
+  const clearSelection = useVerseSelectionStore((s) => s.clearSelection);
 
-  // Track current position locally for re-renders on navigation
+  const [navigatorVisible, setNavigatorVisible] = useState(false);
+  const settingsSheetRef = useRef<BottomSheet>(null);
+  const [settingsTab, setSettingsTab] = useState<"font" | "translation">(
+    "font",
+  );
+
   const [currentBook, setCurrentBook] = useState<BibleBook>(book as BibleBook);
   const [currentChapter, setCurrentChapter] = useState(parseInt(chapter, 10));
 
-  // Update local state when URL params change (e.g., from navigator)
   useEffect(() => {
     setCurrentBook(book as BibleBook);
     setCurrentChapter(parseInt(chapter, 10));
@@ -40,10 +48,10 @@ export default function BibleChapterScreen() {
     (newBook: BibleBook, newChapter: number) => {
       setCurrentBook(newBook);
       setCurrentChapter(newChapter);
-      // Update URL without navigation animation
       router.setParams({ book: newBook, chapter: String(newChapter) });
+      clearSelection();
     },
-    []
+    [clearSelection],
   );
 
   const handleNavigatorSelect = useCallback(
@@ -51,27 +59,47 @@ export default function BibleChapterScreen() {
       setCurrentBook(selectedBook);
       setCurrentChapter(selectedChapter);
       setPosition(selectedBook, selectedChapter);
-      router.setParams({ book: selectedBook, chapter: String(selectedChapter) });
+      router.setParams({
+        book: selectedBook,
+        chapter: String(selectedChapter),
+      });
+      clearSelection();
     },
-    [setPosition]
+    [setPosition, clearSelection],
   );
 
-  // Open verse actions on tap or long-press
-  const handleVersePress = useCallback((verseId: string, verseText?: string) => {
-    verseActionsRef.current?.open(verseId, verseText ?? '');
-  }, []);
+  const handleVersePress = useCallback(
+    (verseId: string, verseText?: string) => {
+      router.push({
+        pathname: "/verse/[id]",
+        params: { id: verseId },
+      });
+    },
+    [],
+  );
 
-  const handleVerseLongPress = useCallback((verseId: string, verseText?: string) => {
-    verseActionsRef.current?.open(verseId, verseText ?? '');
-  }, []);
-
-  const handleNotePress = useCallback((verseId: string, verseText: string) => {
-    verseActionsRef.current?.close();
-    noteEditorRef.current?.open(verseId, verseText);
-  }, []);
+  const handleVerseLongPress = useCallback(
+    (
+      verseId: string,
+      verseText: string,
+      pressedBook: BibleBook,
+      pressedChapter: number,
+      verseNumber: number,
+    ) => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      toggleVerse({
+        id: verseId,
+        text: verseText,
+        book: pressedBook,
+        chapter: pressedChapter,
+        verseNumber,
+      });
+    },
+    [toggleVerse],
+  );
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       <Stack.Screen
         options={{
           headerShown: true,
@@ -89,10 +117,13 @@ export default function BibleChapterScreen() {
           ),
           headerRight: () => (
             <View className="flex-row">
-              <Pressable onPress={() => router.push('/search')} className="p-2">
+              <Pressable onPress={() => router.push("/search")} className="p-2">
                 <Search size={22} className="text-foreground" />
               </Pressable>
-              <Pressable onPress={() => settingsSheetRef.current?.expand()} className="p-2">
+              <Pressable
+                onPress={() => settingsSheetRef.current?.expand()}
+                className="p-2"
+              >
                 <Settings size={22} className="text-foreground" />
               </Pressable>
             </View>
@@ -117,57 +148,64 @@ export default function BibleChapterScreen() {
         onClose={() => setNavigatorVisible(false)}
       />
 
-      <VerseActions
-        ref={verseActionsRef}
-        onNote={handleNotePress}
-      />
-
-      <NoteEditor ref={noteEditorRef} />
+      <VerseActions />
 
       {/* Settings bottom sheet */}
       <BottomSheet
         ref={settingsSheetRef}
         index={-1}
-        snapPoints={['50%']}
+        snapPoints={["50%"]}
         enablePanDownToClose
         backdropComponent={(props) => (
-          <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />
+          <BottomSheetBackdrop
+            {...props}
+            disappearsOnIndex={-1}
+            appearsOnIndex={0}
+          />
         )}
       >
         <BottomSheetView>
-          {/* Tab buttons */}
           <View className="flex-row border-b border-border">
             <Pressable
-              onPress={() => setSettingsTab('font')}
+              onPress={() => setSettingsTab("font")}
               className={`flex-1 py-3 items-center ${
-                settingsTab === 'font' ? 'border-b-2 border-primary' : ''
+                settingsTab === "font" ? "border-b-2 border-primary" : ""
               }`}
             >
               <Text
-                className={settingsTab === 'font' ? 'text-primary font-medium' : 'text-muted-foreground'}
+                className={
+                  settingsTab === "font"
+                    ? "text-primary font-medium"
+                    : "text-muted-foreground"
+                }
               >
                 Font Size
               </Text>
             </Pressable>
             <Pressable
-              onPress={() => setSettingsTab('translation')}
+              onPress={() => setSettingsTab("translation")}
               className={`flex-1 py-3 items-center ${
-                settingsTab === 'translation' ? 'border-b-2 border-primary' : ''
+                settingsTab === "translation" ? "border-b-2 border-primary" : ""
               }`}
             >
               <Text
-                className={settingsTab === 'translation' ? 'text-primary font-medium' : 'text-muted-foreground'}
+                className={
+                  settingsTab === "translation"
+                    ? "text-primary font-medium"
+                    : "text-muted-foreground"
+                }
               >
                 Translation
               </Text>
             </Pressable>
           </View>
 
-          {/* Tab content */}
-          {settingsTab === 'font' ? (
+          {settingsTab === "font" ? (
             <FontSizePicker onClose={() => settingsSheetRef.current?.close()} />
           ) : (
-            <TranslationPicker onClose={() => settingsSheetRef.current?.close()} />
+            <TranslationPicker
+              onClose={() => settingsSheetRef.current?.close()}
+            />
           )}
         </BottomSheetView>
       </BottomSheet>

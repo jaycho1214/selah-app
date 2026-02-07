@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<07a61aed6c2be650bc6f5d658d2ff449>>
+ * @generated SignedSource<<0d9147782517a98f9adbf1872faa5e47>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -8,7 +8,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ConcreteRequest } from 'relay-runtime';
+import { ConcreteRequest } from "relay-runtime";
 export type BibleVersePostCreateInput = {
   content: string;
   imageIds?: ReadonlyArray<string> | null | undefined;
@@ -37,22 +37,39 @@ export type IdCreateReflectionMutation$data = {
       }>;
       readonly likedAt: any | null | undefined;
       readonly likesCount: number;
-      readonly poll: {
-        readonly id: string;
-        readonly isExpired: boolean | null | undefined;
-        readonly options: ReadonlyArray<{
-          readonly id: string;
-          readonly text: string | null | undefined;
-          readonly voteCount: number | null | undefined;
-          readonly votePercentage: number | null | undefined;
-        }> | null | undefined;
-        readonly totalVotes: number | null | undefined;
-      } | null | undefined;
+      readonly poll:
+        | {
+            readonly deadline: any | null | undefined;
+            readonly id: string;
+            readonly isExpired: boolean | null | undefined;
+            readonly options:
+              | ReadonlyArray<{
+                  readonly id: string;
+                  readonly text: string | null | undefined;
+                  readonly voteCount: number | null | undefined;
+                  readonly votePercentage: number | null | undefined;
+                }>
+              | null
+              | undefined;
+            readonly totalVotes: number | null | undefined;
+            readonly userVote:
+              | {
+                  readonly id: string | null | undefined;
+                  readonly text: string | null | undefined;
+                }
+              | null
+              | undefined;
+          }
+        | null
+        | undefined;
       readonly user: {
         readonly id: string;
-        readonly image: {
-          readonly url: string | null | undefined;
-        } | null | undefined;
+        readonly image:
+          | {
+              readonly url: string | null | undefined;
+            }
+          | null
+          | undefined;
         readonly name: string | null | undefined;
         readonly username: string | null | undefined;
       };
@@ -64,357 +81,360 @@ export type IdCreateReflectionMutation = {
   variables: IdCreateReflectionMutation$variables;
 };
 
-const node: ConcreteRequest = (function(){
-var v0 = {
-  "defaultValue": null,
-  "kind": "LocalArgument",
-  "name": "connections"
-},
-v1 = {
-  "defaultValue": null,
-  "kind": "LocalArgument",
-  "name": "input"
-},
-v2 = [
-  {
-    "kind": "Variable",
-    "name": "input",
-    "variableName": "input"
-  }
-],
-v3 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "id",
-  "storageKey": null
-},
-v4 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "content",
-  "storageKey": null
-},
-v5 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "createdAt",
-  "storageKey": null
-},
-v6 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "likesCount",
-  "storageKey": null
-},
-v7 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "childPostsCount",
-  "storageKey": null
-},
-v8 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "likedAt",
-  "storageKey": null
-},
-v9 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "name",
-  "storageKey": null
-},
-v10 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "username",
-  "storageKey": null
-},
-v11 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "url",
-  "storageKey": null
-},
-v12 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "width",
-  "storageKey": null
-},
-v13 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "height",
-  "storageKey": null
-},
-v14 = {
-  "alias": null,
-  "args": null,
-  "concreteType": "Poll",
-  "kind": "LinkedField",
-  "name": "poll",
-  "plural": false,
-  "selections": [
-    (v3/*: any*/),
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "totalVotes",
-      "storageKey": null
+const node: ConcreteRequest = (function () {
+  var v0 = {
+      defaultValue: null,
+      kind: "LocalArgument",
+      name: "connections",
     },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "isExpired",
-      "storageKey": null
+    v1 = {
+      defaultValue: null,
+      kind: "LocalArgument",
+      name: "input",
     },
-    {
-      "alias": null,
-      "args": null,
-      "concreteType": "PollOption",
-      "kind": "LinkedField",
-      "name": "options",
-      "plural": true,
-      "selections": [
-        (v3/*: any*/),
+    v2 = [
+      {
+        kind: "Variable",
+        name: "input",
+        variableName: "input",
+      },
+    ],
+    v3 = {
+      alias: null,
+      args: null,
+      kind: "ScalarField",
+      name: "id",
+      storageKey: null,
+    },
+    v4 = {
+      alias: null,
+      args: null,
+      kind: "ScalarField",
+      name: "content",
+      storageKey: null,
+    },
+    v5 = {
+      alias: null,
+      args: null,
+      kind: "ScalarField",
+      name: "createdAt",
+      storageKey: null,
+    },
+    v6 = {
+      alias: null,
+      args: null,
+      kind: "ScalarField",
+      name: "likesCount",
+      storageKey: null,
+    },
+    v7 = {
+      alias: null,
+      args: null,
+      kind: "ScalarField",
+      name: "childPostsCount",
+      storageKey: null,
+    },
+    v8 = {
+      alias: null,
+      args: null,
+      kind: "ScalarField",
+      name: "likedAt",
+      storageKey: null,
+    },
+    v9 = {
+      alias: null,
+      args: null,
+      kind: "ScalarField",
+      name: "name",
+      storageKey: null,
+    },
+    v10 = {
+      alias: null,
+      args: null,
+      kind: "ScalarField",
+      name: "username",
+      storageKey: null,
+    },
+    v11 = {
+      alias: null,
+      args: null,
+      kind: "ScalarField",
+      name: "url",
+      storageKey: null,
+    },
+    v12 = {
+      alias: null,
+      args: null,
+      kind: "ScalarField",
+      name: "width",
+      storageKey: null,
+    },
+    v13 = {
+      alias: null,
+      args: null,
+      kind: "ScalarField",
+      name: "height",
+      storageKey: null,
+    },
+    v14 = {
+      alias: null,
+      args: null,
+      kind: "ScalarField",
+      name: "text",
+      storageKey: null,
+    },
+    v15 = {
+      alias: null,
+      args: null,
+      concreteType: "Poll",
+      kind: "LinkedField",
+      name: "poll",
+      plural: false,
+      selections: [
+        v3 /*: any*/,
         {
-          "alias": null,
-          "args": null,
-          "kind": "ScalarField",
-          "name": "text",
-          "storageKey": null
+          alias: null,
+          args: null,
+          kind: "ScalarField",
+          name: "totalVotes",
+          storageKey: null,
         },
         {
-          "alias": null,
-          "args": null,
-          "kind": "ScalarField",
-          "name": "voteCount",
-          "storageKey": null
+          alias: null,
+          args: null,
+          kind: "ScalarField",
+          name: "isExpired",
+          storageKey: null,
         },
         {
-          "alias": null,
-          "args": null,
-          "kind": "ScalarField",
-          "name": "votePercentage",
-          "storageKey": null
-        }
+          alias: null,
+          args: null,
+          kind: "ScalarField",
+          name: "deadline",
+          storageKey: null,
+        },
+        {
+          alias: null,
+          args: null,
+          concreteType: "PollUserVote",
+          kind: "LinkedField",
+          name: "userVote",
+          plural: false,
+          selections: [v3 /*: any*/, v14 /*: any*/],
+          storageKey: null,
+        },
+        {
+          alias: null,
+          args: null,
+          concreteType: "PollOption",
+          kind: "LinkedField",
+          name: "options",
+          plural: true,
+          selections: [
+            v3 /*: any*/,
+            v14 /*: any*/,
+            {
+              alias: null,
+              args: null,
+              kind: "ScalarField",
+              name: "voteCount",
+              storageKey: null,
+            },
+            {
+              alias: null,
+              args: null,
+              kind: "ScalarField",
+              name: "votePercentage",
+              storageKey: null,
+            },
+          ],
+          storageKey: null,
+        },
       ],
-      "storageKey": null
-    }
-  ],
-  "storageKey": null
-};
-return {
-  "fragment": {
-    "argumentDefinitions": [
-      (v0/*: any*/),
-      (v1/*: any*/)
-    ],
-    "kind": "Fragment",
-    "metadata": null,
-    "name": "IdCreateReflectionMutation",
-    "selections": [
-      {
-        "alias": null,
-        "args": (v2/*: any*/),
-        "concreteType": "BibleVersePostCreatePayload",
-        "kind": "LinkedField",
-        "name": "bibleVersePostCreate",
-        "plural": false,
-        "selections": [
-          {
-            "alias": null,
-            "args": null,
-            "concreteType": "BibleVersePost",
-            "kind": "LinkedField",
-            "name": "bibleVersePost",
-            "plural": false,
-            "selections": [
-              (v3/*: any*/),
-              (v4/*: any*/),
-              (v5/*: any*/),
-              (v6/*: any*/),
-              (v7/*: any*/),
-              (v8/*: any*/),
-              {
-                "alias": null,
-                "args": null,
-                "concreteType": "User",
-                "kind": "LinkedField",
-                "name": "user",
-                "plural": false,
-                "selections": [
-                  (v3/*: any*/),
-                  (v9/*: any*/),
-                  (v10/*: any*/),
-                  {
-                    "alias": null,
-                    "args": null,
-                    "concreteType": "Asset",
-                    "kind": "LinkedField",
-                    "name": "image",
-                    "plural": false,
-                    "selections": [
-                      (v11/*: any*/)
-                    ],
-                    "storageKey": null
-                  }
-                ],
-                "storageKey": null
-              },
-              {
-                "alias": null,
-                "args": null,
-                "concreteType": "Asset",
-                "kind": "LinkedField",
-                "name": "images",
-                "plural": true,
-                "selections": [
-                  (v11/*: any*/),
-                  (v12/*: any*/),
-                  (v13/*: any*/)
-                ],
-                "storageKey": null
-              },
-              (v14/*: any*/)
-            ],
-            "storageKey": null
-          }
-        ],
-        "storageKey": null
-      }
-    ],
-    "type": "Mutation",
-    "abstractKey": null
-  },
-  "kind": "Request",
-  "operation": {
-    "argumentDefinitions": [
-      (v1/*: any*/),
-      (v0/*: any*/)
-    ],
-    "kind": "Operation",
-    "name": "IdCreateReflectionMutation",
-    "selections": [
-      {
-        "alias": null,
-        "args": (v2/*: any*/),
-        "concreteType": "BibleVersePostCreatePayload",
-        "kind": "LinkedField",
-        "name": "bibleVersePostCreate",
-        "plural": false,
-        "selections": [
-          {
-            "alias": null,
-            "args": null,
-            "concreteType": "BibleVersePost",
-            "kind": "LinkedField",
-            "name": "bibleVersePost",
-            "plural": false,
-            "selections": [
-              (v3/*: any*/),
-              (v4/*: any*/),
-              (v5/*: any*/),
-              (v6/*: any*/),
-              (v7/*: any*/),
-              (v8/*: any*/),
-              {
-                "alias": null,
-                "args": null,
-                "concreteType": "User",
-                "kind": "LinkedField",
-                "name": "user",
-                "plural": false,
-                "selections": [
-                  (v3/*: any*/),
-                  (v9/*: any*/),
-                  (v10/*: any*/),
-                  {
-                    "alias": null,
-                    "args": null,
-                    "concreteType": "Asset",
-                    "kind": "LinkedField",
-                    "name": "image",
-                    "plural": false,
-                    "selections": [
-                      (v11/*: any*/),
-                      (v3/*: any*/)
-                    ],
-                    "storageKey": null
-                  }
-                ],
-                "storageKey": null
-              },
-              {
-                "alias": null,
-                "args": null,
-                "concreteType": "Asset",
-                "kind": "LinkedField",
-                "name": "images",
-                "plural": true,
-                "selections": [
-                  (v11/*: any*/),
-                  (v12/*: any*/),
-                  (v13/*: any*/),
-                  (v3/*: any*/)
-                ],
-                "storageKey": null
-              },
-              (v14/*: any*/)
-            ],
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "filters": null,
-            "handle": "prependNode",
-            "key": "",
-            "kind": "LinkedHandle",
-            "name": "bibleVersePost",
-            "handleArgs": [
-              {
-                "kind": "Variable",
-                "name": "connections",
-                "variableName": "connections"
-              },
-              {
-                "kind": "Literal",
-                "name": "edgeTypeName",
-                "value": "BibleVersePostEdge"
-              }
-            ]
-          }
-        ],
-        "storageKey": null
-      }
-    ]
-  },
-  "params": {
-    "cacheID": "ff9d527a726c6f65dcd75bd3dd1ab960",
-    "id": null,
-    "metadata": {},
-    "name": "IdCreateReflectionMutation",
-    "operationKind": "mutation",
-    "text": "mutation IdCreateReflectionMutation(\n  $input: BibleVersePostCreateInput!\n) {\n  bibleVersePostCreate(input: $input) {\n    bibleVersePost {\n      id\n      content\n      createdAt\n      likesCount\n      childPostsCount\n      likedAt\n      user {\n        id\n        name\n        username\n        image {\n          url\n          id\n        }\n      }\n      images {\n        url\n        width\n        height\n        id\n      }\n      poll {\n        id\n        totalVotes\n        isExpired\n        options {\n          id\n          text\n          voteCount\n          votePercentage\n        }\n      }\n    }\n  }\n}\n"
-  }
-};
+      storageKey: null,
+    };
+  return {
+    fragment: {
+      argumentDefinitions: [v0 /*: any*/, v1 /*: any*/],
+      kind: "Fragment",
+      metadata: null,
+      name: "IdCreateReflectionMutation",
+      selections: [
+        {
+          alias: null,
+          args: v2 /*: any*/,
+          concreteType: "BibleVersePostCreatePayload",
+          kind: "LinkedField",
+          name: "bibleVersePostCreate",
+          plural: false,
+          selections: [
+            {
+              alias: null,
+              args: null,
+              concreteType: "BibleVersePost",
+              kind: "LinkedField",
+              name: "bibleVersePost",
+              plural: false,
+              selections: [
+                v3 /*: any*/,
+                v4 /*: any*/,
+                v5 /*: any*/,
+                v6 /*: any*/,
+                v7 /*: any*/,
+                v8 /*: any*/,
+                {
+                  alias: null,
+                  args: null,
+                  concreteType: "User",
+                  kind: "LinkedField",
+                  name: "user",
+                  plural: false,
+                  selections: [
+                    v3 /*: any*/,
+                    v9 /*: any*/,
+                    v10 /*: any*/,
+                    {
+                      alias: null,
+                      args: null,
+                      concreteType: "Asset",
+                      kind: "LinkedField",
+                      name: "image",
+                      plural: false,
+                      selections: [v11 /*: any*/],
+                      storageKey: null,
+                    },
+                  ],
+                  storageKey: null,
+                },
+                {
+                  alias: null,
+                  args: null,
+                  concreteType: "Asset",
+                  kind: "LinkedField",
+                  name: "images",
+                  plural: true,
+                  selections: [v11 /*: any*/, v12 /*: any*/, v13 /*: any*/],
+                  storageKey: null,
+                },
+                v15 /*: any*/,
+              ],
+              storageKey: null,
+            },
+          ],
+          storageKey: null,
+        },
+      ],
+      type: "Mutation",
+      abstractKey: null,
+    },
+    kind: "Request",
+    operation: {
+      argumentDefinitions: [v1 /*: any*/, v0 /*: any*/],
+      kind: "Operation",
+      name: "IdCreateReflectionMutation",
+      selections: [
+        {
+          alias: null,
+          args: v2 /*: any*/,
+          concreteType: "BibleVersePostCreatePayload",
+          kind: "LinkedField",
+          name: "bibleVersePostCreate",
+          plural: false,
+          selections: [
+            {
+              alias: null,
+              args: null,
+              concreteType: "BibleVersePost",
+              kind: "LinkedField",
+              name: "bibleVersePost",
+              plural: false,
+              selections: [
+                v3 /*: any*/,
+                v4 /*: any*/,
+                v5 /*: any*/,
+                v6 /*: any*/,
+                v7 /*: any*/,
+                v8 /*: any*/,
+                {
+                  alias: null,
+                  args: null,
+                  concreteType: "User",
+                  kind: "LinkedField",
+                  name: "user",
+                  plural: false,
+                  selections: [
+                    v3 /*: any*/,
+                    v9 /*: any*/,
+                    v10 /*: any*/,
+                    {
+                      alias: null,
+                      args: null,
+                      concreteType: "Asset",
+                      kind: "LinkedField",
+                      name: "image",
+                      plural: false,
+                      selections: [v11 /*: any*/, v3 /*: any*/],
+                      storageKey: null,
+                    },
+                  ],
+                  storageKey: null,
+                },
+                {
+                  alias: null,
+                  args: null,
+                  concreteType: "Asset",
+                  kind: "LinkedField",
+                  name: "images",
+                  plural: true,
+                  selections: [
+                    v11 /*: any*/,
+                    v12 /*: any*/,
+                    v13 /*: any*/,
+                    v3 /*: any*/,
+                  ],
+                  storageKey: null,
+                },
+                v15 /*: any*/,
+              ],
+              storageKey: null,
+            },
+            {
+              alias: null,
+              args: null,
+              filters: null,
+              handle: "prependNode",
+              key: "",
+              kind: "LinkedHandle",
+              name: "bibleVersePost",
+              handleArgs: [
+                {
+                  kind: "Variable",
+                  name: "connections",
+                  variableName: "connections",
+                },
+                {
+                  kind: "Literal",
+                  name: "edgeTypeName",
+                  value: "BibleVersePostEdge",
+                },
+              ],
+            },
+          ],
+          storageKey: null,
+        },
+      ],
+    },
+    params: {
+      cacheID: "f78ac69d5a6cc9160f33264d992b6428",
+      id: null,
+      metadata: {},
+      name: "IdCreateReflectionMutation",
+      operationKind: "mutation",
+      text: "mutation IdCreateReflectionMutation(\n  $input: BibleVersePostCreateInput!\n) {\n  bibleVersePostCreate(input: $input) {\n    bibleVersePost {\n      id\n      content\n      createdAt\n      likesCount\n      childPostsCount\n      likedAt\n      user {\n        id\n        name\n        username\n        image {\n          url\n          id\n        }\n      }\n      images {\n        url\n        width\n        height\n        id\n      }\n      poll {\n        id\n        totalVotes\n        isExpired\n        deadline\n        userVote {\n          id\n          text\n        }\n        options {\n          id\n          text\n          voteCount\n          votePercentage\n        }\n      }\n    }\n  }\n}\n",
+    },
+  };
 })();
 
-(node as any).hash = "34044e5ffb6722f687220ac2e331e168";
+(node as any).hash = "e59323268256f259b59b6244a1b1df34";
 
 export default node;

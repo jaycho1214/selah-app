@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "selah-app",
+    "name": "Selah",
     "slug": "selah-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,7 +11,11 @@
     "ios": {
       "bundleIdentifier": "kr.selah.selah",
       "supportsTablet": true,
-      "appleTeamId": "5ARDZKSX95"
+      "appleTeamId": "5ARDZKSX95",
+      "usesAppleSignIn": true,
+      "entitlements": {
+        "aps-environment": "development"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +25,9 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "kr.selah.selah",
+      "softwareKeyboardLayoutMode": "pan"
     },
     "plugins": [
       "expo-router",
@@ -29,7 +35,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
+          "imageWidth": 120,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
           "dark": {
@@ -38,16 +44,27 @@
         }
       ],
       "expo-secure-store",
+      "expo-apple-authentication",
       [
         "@react-native-google-signin/google-signin",
         {
           "iosUrlScheme": "com.googleusercontent.apps.707707053099-robncnjvk5fidk58dkhsduelgscdemnn"
         }
-      ]
+      ],
+      "expo-sqlite",
+      "@react-native-community/datetimepicker",
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e1647274-91d5-4c63-812c-8e641bda634e"
+      }
+    },
+    "owner": "jaycho1214"
   }
 }

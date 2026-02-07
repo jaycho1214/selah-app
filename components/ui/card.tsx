@@ -1,7 +1,7 @@
-import * as React from 'react';
-import { View, ViewProps } from 'react-native';
-import { cn } from '@/lib/utils';
-import { Text } from './text';
+import * as React from "react";
+import { View, ViewProps } from "react-native";
+import { cn } from "@/lib/utils";
+import { Text } from "./text";
 
 interface CardProps extends ViewProps {
   className?: string;
@@ -11,19 +11,19 @@ const Card = React.forwardRef<View, CardProps>(
   ({ className, ...props }, ref) => (
     <View
       ref={ref}
-      className={cn('rounded-lg border border-border bg-card p-4', className)}
+      className={cn("rounded-lg border border-border bg-card p-4", className)}
       {...props}
     />
-  )
+  ),
 );
-Card.displayName = 'Card';
+Card.displayName = "Card";
 
 const CardHeader = React.forwardRef<View, CardProps>(
   ({ className, ...props }, ref) => (
-    <View ref={ref} className={cn('pb-2', className)} {...props} />
-  )
+    <View ref={ref} className={cn("pb-2", className)} {...props} />
+  ),
 );
-CardHeader.displayName = 'CardHeader';
+CardHeader.displayName = "CardHeader";
 
 interface CardTitleProps {
   className?: string;
@@ -31,16 +31,16 @@ interface CardTitleProps {
 }
 
 const CardTitle = ({ className, children }: CardTitleProps) => (
-  <Text className={cn('text-lg font-semibold', className)}>{children}</Text>
+  <Text className={cn("text-lg font-semibold", className)}>{children}</Text>
 );
-CardTitle.displayName = 'CardTitle';
+CardTitle.displayName = "CardTitle";
 
 const CardContent = React.forwardRef<View, CardProps>(
   ({ className, ...props }, ref) => (
-    <View ref={ref} className={cn('pt-0', className)} {...props} />
-  )
+    <View ref={ref} className={cn("pt-0", className)} {...props} />
+  ),
 );
-CardContent.displayName = 'CardContent';
+CardContent.displayName = "CardContent";
 
 export { Card, CardHeader, CardTitle, CardContent };
 export type { CardProps, CardTitleProps };

@@ -1,8 +1,8 @@
-import { createMMKV, type MMKV } from 'react-native-mmkv';
-import { StateStorage } from 'zustand/middleware';
+import { createMMKV, type MMKV } from "react-native-mmkv";
+import { StateStorage } from "zustand/middleware";
 
 // Single MMKV instance for all settings
-export const storage: MMKV = createMMKV({ id: 'selah-storage' });
+export const storage: MMKV = createMMKV({ id: "selah-storage" });
 
 // Zustand-compatible storage adapter
 export const mmkvStorage: StateStorage = {

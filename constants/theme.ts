@@ -1,60 +1,87 @@
 /**
- * Navigation theme configuration for React Navigation
+ * Warm Parchment Theme - Monastic Minimalism
  *
- * These colors are derived from the CSS variables in global.css and match
- * the OKLCH-to-RGB mappings in lib/theme/colors.ts for consistency with selah-web.
+ * A contemplative color palette inspired by aged parchment and monastery libraries.
+ * Matches the CSS variables in global.css.
  */
 
-import { Platform } from 'react-native';
+import { Platform } from "react-native";
 
 /**
  * Colors for use in components that don't support CSS variables.
- * These are derived from the same OKLCH colors as global.css.
+ * Warm parchment palette with brown/sepia accent.
  */
 export const Colors = {
   light: {
-    text: 'rgb(18, 18, 24)', // --foreground
-    background: 'rgb(255, 255, 255)', // --background
-    tint: 'rgb(33, 36, 48)', // --primary
-    icon: 'rgb(113, 122, 138)', // --muted-foreground
-    tabIconDefault: 'rgb(113, 122, 138)', // --muted-foreground
-    tabIconSelected: 'rgb(33, 36, 48)', // --primary
+    text: "#1c1917", // --foreground (stone-900)
+    background: "#faf9f7", // --background (warm off-white)
+    tint: "#8b7355", // --primary (warm brown)
+    icon: "#a8a29e", // --muted-foreground (stone-400)
+    tabIconDefault: "#a8a29e", // --muted-foreground
+    tabIconSelected: "#8b7355", // --primary
   },
   dark: {
-    text: 'rgb(250, 250, 252)', // --foreground
-    background: 'rgb(18, 18, 24)', // --background
-    tint: 'rgb(228, 232, 238)', // --primary
-    icon: 'rgb(160, 170, 184)', // --muted-foreground
-    tabIconDefault: 'rgb(160, 170, 184)', // --muted-foreground
-    tabIconSelected: 'rgb(228, 232, 238)', // --primary
+    text: "#fafaf9", // --foreground (stone-50)
+    background: "#0c0a09", // --background (stone-950)
+    tint: "#d6bcab", // --primary (warm tan)
+    icon: "#78716c", // --muted-foreground (stone-500)
+    tabIconDefault: "#78716c", // --muted-foreground
+    tabIconSelected: "#d6bcab", // --primary
+  },
+};
+
+/**
+ * Extended color palette for use in screens and components.
+ * Provides all the semantic colors needed for UI elements.
+ */
+export const ThemeColors = {
+  light: {
+    bg: "#faf9f7",
+    surface: "#ffffff",
+    surfaceElevated: "#f5f4f2",
+    border: "#e7e5e4",
+    text: "#1c1917",
+    textSecondary: "#44403c",
+    textMuted: "#a8a29e",
+    accent: "#8b7355",
+  },
+  dark: {
+    bg: "#0c0a09",
+    surface: "#1c1917",
+    surfaceElevated: "#292524",
+    border: "#3d3530",
+    text: "#fafaf9",
+    textSecondary: "#d6d3d1",
+    textMuted: "#78716c",
+    accent: "#d6bcab",
   },
 };
 
 /**
  * Navigation theme for React Navigation
- * Includes required fonts configuration
+ * Warm parchment colors for navigation chrome
  */
 export const NAV_THEME = {
   light: {
     dark: false,
     colors: {
-      background: 'rgb(255, 255, 255)', // --background
-      border: 'rgb(228, 232, 238)', // --border
-      card: 'rgb(255, 255, 255)', // --card
-      notification: 'rgb(220, 38, 38)', // --destructive
-      primary: 'rgb(33, 36, 48)', // --primary
-      text: 'rgb(18, 18, 24)', // --foreground
+      background: "#faf9f7", // --background
+      border: "#e7e5e4", // --border
+      card: "#ffffff", // --card
+      notification: "#dc2626", // --destructive
+      primary: "#8b7355", // --primary
+      text: "#1c1917", // --foreground
     },
   },
   dark: {
     dark: true,
     colors: {
-      background: 'rgb(18, 18, 24)', // --background
-      border: 'rgba(255, 255, 255, 0.1)', // --border
-      card: 'rgb(33, 36, 48)', // --card
-      notification: 'rgb(248, 113, 113)', // --destructive
-      primary: 'rgb(228, 232, 238)', // --primary
-      text: 'rgb(250, 250, 252)', // --foreground
+      background: "#0c0a09", // --background
+      border: "#3d3530", // --border
+      card: "#1c1917", // --card
+      notification: "#f87171", // --destructive
+      primary: "#d6bcab", // --primary
+      text: "#fafaf9", // --foreground
     },
   },
 };
@@ -64,20 +91,20 @@ export const NAV_THEME = {
  */
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
+    /** iOS system default */
+    sans: "system-ui",
+    /** iOS serif - Georgia */
+    serif: "Georgia",
+    /** iOS rounded */
+    rounded: "ui-rounded",
+    /** iOS monospace */
+    mono: "ui-monospace",
   },
   default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
+    sans: "normal",
+    serif: "serif",
+    rounded: "normal",
+    mono: "monospace",
   },
   web: {
     sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",

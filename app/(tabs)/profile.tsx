@@ -1,17 +1,13 @@
 import * as Haptics from "expo-haptics";
 import { RelativePathString, router } from "expo-router";
-import {
-  Bookmark,
-  ChevronRight,
-  FileText,
-  Search,
-} from "lucide-react-native";
-import React, { Suspense, useCallback, useRef, useState } from "react";
+import { Settings, Share2 } from "lucide-react-native";
+import { Suspense, useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
   RefreshControl,
   ScrollView,
+  Share,
   StyleSheet,
   View,
 } from "react-native";
@@ -19,25 +15,29 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 
 import { useSession } from "@/components/providers/session-provider";
-import { useTheme } from "@/components/providers/theme-provider";
-import { ProfileHeader } from "@/components/profile/profile-header";
+import { ProfileHeaderEnhanced } from "@/components/profile/profile-header-enhanced";
 import {
   ProfilePostsList,
   type ProfilePostsListRef,
 } from "@/components/profile/profile-posts-list";
-import { ProfileSkeleton } from "@/components/profile/profile-skeleton";
-import { ProfileStatsRow } from "@/components/profile/profile-stats-row";
+import {
+  ProfileRepliesList,
+  type ProfileRepliesListRef,
+} from "@/components/profile/profile-replies-list";
+import {
+  ProfileLikesList,
+  type ProfileLikesListRef,
+} from "@/components/profile/profile-likes-list";
+import { ProfileSkeletonEnhanced } from "@/components/profile/profile-skeleton-enhanced";
+import { ProfileStatsEnhanced } from "@/components/profile/profile-stats-enhanced";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { useColors } from "@/hooks/use-colors";
-import { signOutFromGoogle } from "@/lib/google-signin";
 import type { profileLikeReflectionMutation } from "@/lib/relay/__generated__/profileLikeReflectionMutation.graphql";
 import type { profileUnlikeReflectionMutation } from "@/lib/relay/__generated__/profileUnlikeReflectionMutation.graphql";
 import type { profileDeleteReflectionMutation } from "@/lib/relay/__generated__/profileDeleteReflectionMutation.graphql";
 import type { profileOwnProfileQuery } from "@/lib/relay/__generated__/profileOwnProfileQuery.graphql";
-import { useAnnotationsStore } from "@/lib/stores/annotations-store";
 
-// GraphQL query for own profile
 const ownProfileQuery = graphql`
   query profileOwnProfileQuery {
     user {
@@ -51,11 +51,12 @@ const ownProfileQuery = graphql`
       followerCount
       followingCount
       ...profilePostsListFragment
+      ...profileRepliesListFragment
+      ...profileLikesListFragment
     }
   }
 `;
 
-// Like mutation
 const likeReflectionMutation = graphql`
   mutation profileLikeReflectionMutation($id: ID!) {
     bibleVersePostLike(id: $id) {
@@ -64,7 +65,6 @@ const likeReflectionMutation = graphql`
   }
 `;
 
-// Unlike mutation
 const unlikeReflectionMutation = graphql`
   mutation profileUnlikeReflectionMutation($id: ID!) {
     bibleVersePostUnlike(id: $id) {
@@ -73,7 +73,6 @@ const unlikeReflectionMutation = graphql`
   }
 `;
 
-// Delete mutation
 const deleteReflectionMutation = graphql`
   mutation profileDeleteReflectionMutation($id: ID!, $connections: [ID!]!) {
     bibleVersePostDelete(id: $id) {
@@ -82,8 +81,10 @@ const deleteReflectionMutation = graphql`
   }
 `;
 
+type ProfileTab = "posts" | "replies" | "likes";
+
 export default function ProfileScreen() {
-  const { isAuthenticated, presentSignIn } = useSession();
+  const { isAuthenticated } = useSession();
   const colors = useColors();
 
   if (!isAuthenticated) {
@@ -92,7 +93,7 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
-      <Suspense fallback={<ProfileSkeleton />}>
+      <Suspense fallback={<ProfileSkeletonEnhanced />}>
         <AuthenticatedProfile />
       </Suspense>
     </SafeAreaView>
@@ -101,23 +102,21 @@ export default function ProfileScreen() {
 
 function UnauthenticatedProfile() {
   const { presentSignIn } = useSession();
-  const { resolvedTheme, toggleTheme } = useTheme();
-  const { bookmarks, notes } = useAnnotationsStore();
   const colors = useColors();
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
-      <ScrollView style={styles.scrollView}>
-        {/* Welcome message for unauthenticated users */}
+      <View style={styles.topBar}>
+        <View style={styles.topBarSpacer} />
+        <Pressable onPress={() => router.push("/settings")} hitSlop={8}>
+          <Settings size={24} color={colors.text} strokeWidth={1.5} />
+        </Pressable>
+      </View>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.welcomeContainer}>
-          <View
-            style={[
-              styles.welcomeAvatar,
-              { backgroundColor: colors.surfaceElevated },
-            ]}
-          >
-            <Text style={styles.welcomeEmoji}>?</Text>
-          </View>
           <Text style={[styles.welcomeTitle, { color: colors.text }]}>
             Welcome to Selah
           </Text>
@@ -130,18 +129,6 @@ function UnauthenticatedProfile() {
           </Button>
         </View>
 
-        {/* Bible Utilities */}
-        <BibleUtilities bookmarks={bookmarks} notes={notes} colors={colors} />
-
-        {/* Settings */}
-        <SettingsSection
-          resolvedTheme={resolvedTheme}
-          toggleTheme={toggleTheme}
-          colors={colors}
-          isAuthenticated={false}
-          onSignOut={() => {}}
-        />
-
         <View style={styles.bottomPadding} />
       </ScrollView>
     </SafeAreaView>
@@ -149,27 +136,25 @@ function UnauthenticatedProfile() {
 }
 
 function AuthenticatedProfile() {
-  const { session, signOut } = useSession();
-  const { resolvedTheme, toggleTheme } = useTheme();
-  const { bookmarks, notes } = useAnnotationsStore();
+  const { session } = useSession();
   const colors = useColors();
   const postsListRef = useRef<ProfilePostsListRef>(null);
+  const repliesListRef = useRef<ProfileRepliesListRef>(null);
+  const likesListRef = useRef<ProfileLikesListRef>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState<ProfileTab>("posts");
 
-  // Fetch profile data
   const data = useLazyLoadQuery<profileOwnProfileQuery>(ownProfileQuery, {});
-
   const user = data.user;
 
-  // Mutations
   const [commitLike] = useMutation<profileLikeReflectionMutation>(
-    likeReflectionMutation
+    likeReflectionMutation,
   );
   const [commitUnlike] = useMutation<profileUnlikeReflectionMutation>(
-    unlikeReflectionMutation
+    unlikeReflectionMutation,
   );
   const [commitDelete] = useMutation<profileDeleteReflectionMutation>(
-    deleteReflectionMutation
+    deleteReflectionMutation,
   );
 
   const handleLike = useCallback(
@@ -187,7 +172,7 @@ function AuthenticatedProfile() {
         },
       });
     },
-    [commitLike]
+    [commitLike],
   );
 
   const handleUnlike = useCallback(
@@ -205,7 +190,7 @@ function AuthenticatedProfile() {
         },
       });
     },
-    [commitUnlike]
+    [commitUnlike],
   );
 
   const handleDelete = useCallback(
@@ -221,23 +206,35 @@ function AuthenticatedProfile() {
         },
       });
     },
-    [commitDelete]
+    [commitDelete],
   );
 
   const handleRefresh = useCallback(() => {
     setIsRefreshing(true);
     postsListRef.current?.refetch();
+    repliesListRef.current?.refetch();
+    likesListRef.current?.refetch();
     setTimeout(() => setIsRefreshing(false), 500);
   }, []);
-
-  const handleSignOut = async () => {
-    await signOutFromGoogle();
-    await signOut();
-  };
 
   const handleEditProfile = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push("/user-edit" as RelativePathString);
+  };
+
+  const handleShareProfile = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (user?.username) {
+      await Share.share({
+        message: `Check out @${user.username} on Selah`,
+        url: `https://selah.kr/@${user.username}`,
+      });
+    }
+  };
+
+  const handleTabPress = (tab: ProfileTab) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setActiveTab(tab);
   };
 
   if (!user) {
@@ -249,224 +246,156 @@ function AuthenticatedProfile() {
   }
 
   return (
-    <ScrollView
-      style={styles.scrollView}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl
-          refreshing={isRefreshing}
-          onRefresh={handleRefresh}
-          tintColor={colors.textMuted}
-          colors={[colors.accent]}
-        />
-      }
-    >
-      {/* Profile Header */}
-      <ProfileHeader
-        name={user.name}
-        username={user.username}
-        bio={user.bio}
-        imageUrl={user.image?.url}
-      >
-        <Button
-          variant="outline"
-          style={styles.editButton}
-          onPress={handleEditProfile}
-        >
-          <Text style={[styles.editButtonText, { color: colors.text }]}>
-            Edit Profile
-          </Text>
-        </Button>
-      </ProfileHeader>
-
-      {/* Stats Row */}
-      <ProfileStatsRow
-        userId={user.id}
-        followerCount={user.followerCount}
-        followingCount={user.followingCount}
-      />
-
-      {/* Divider */}
-      <View style={[styles.divider, { backgroundColor: colors.border }]} />
-
-      {/* Posts List */}
-      <ProfilePostsList
-        ref={postsListRef}
-        userRef={user}
-        currentUserId={session?.user?.id}
-        onLike={handleLike}
-        onUnlike={handleUnlike}
-        onDelete={handleDelete}
-      />
-
-      {/* Divider before utilities */}
-      <View style={[styles.sectionDivider, { backgroundColor: colors.border }]} />
-
-      {/* Bible Utilities */}
-      <BibleUtilities bookmarks={bookmarks} notes={notes} colors={colors} />
-
-      {/* Settings */}
-      <SettingsSection
-        resolvedTheme={resolvedTheme}
-        toggleTheme={toggleTheme}
-        colors={colors}
-        isAuthenticated={true}
-        onSignOut={handleSignOut}
-      />
-
-      <View style={styles.bottomPadding} />
-    </ScrollView>
-  );
-}
-
-interface BibleUtilitiesProps {
-  bookmarks: Record<string, unknown>;
-  notes: Record<string, unknown>;
-  colors: {
-    bg: string;
-    surface: string;
-    surfaceElevated: string;
-    border: string;
-    text: string;
-    textSecondary: string;
-    textMuted: string;
-    accent: string;
-  };
-}
-
-function BibleUtilities({ bookmarks, notes, colors }: BibleUtilitiesProps) {
-  return (
-    <View style={styles.section}>
-      <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
-        Bible
-      </Text>
-
-      <Pressable
-        onPress={() => router.push("/search")}
-        style={({ pressed }) => [
-          styles.menuItem,
-          { backgroundColor: colors.surface, borderColor: colors.border },
-          styles.menuItemFirst,
-          { opacity: pressed ? 0.7 : 1 },
-        ]}
-      >
-        <View style={styles.menuItemLeft}>
-          <Search size={20} color={colors.textMuted} />
-          <Text style={[styles.menuItemText, { color: colors.text }]}>
-            Search Bible
-          </Text>
-        </View>
-        <ChevronRight size={20} color={colors.textMuted} />
-      </Pressable>
-
-      <Pressable
-        onPress={() => router.push("/bookmarks")}
-        style={({ pressed }) => [
-          styles.menuItem,
-          { backgroundColor: colors.surface, borderColor: colors.border },
-          { opacity: pressed ? 0.7 : 1 },
-        ]}
-      >
-        <View style={styles.menuItemLeft}>
-          <Bookmark size={20} color={colors.textMuted} />
-          <Text style={[styles.menuItemText, { color: colors.text }]}>
-            Bookmarks
-          </Text>
-        </View>
-        <View style={styles.menuItemRight}>
-          <Text style={[styles.menuItemCount, { color: colors.textMuted }]}>
-            {Object.keys(bookmarks).length}
-          </Text>
-          <ChevronRight size={20} color={colors.textMuted} />
-        </View>
-      </Pressable>
-
-      <Pressable
-        onPress={() => router.push("/notes")}
-        style={({ pressed }) => [
-          styles.menuItem,
-          { backgroundColor: colors.surface, borderColor: colors.border },
-          styles.menuItemLast,
-          { opacity: pressed ? 0.7 : 1 },
-        ]}
-      >
-        <View style={styles.menuItemLeft}>
-          <FileText size={20} color={colors.textMuted} />
-          <Text style={[styles.menuItemText, { color: colors.text }]}>
-            Notes
-          </Text>
-        </View>
-        <View style={styles.menuItemRight}>
-          <Text style={[styles.menuItemCount, { color: colors.textMuted }]}>
-            {Object.keys(notes).length}
-          </Text>
-          <ChevronRight size={20} color={colors.textMuted} />
-        </View>
-      </Pressable>
-    </View>
-  );
-}
-
-interface SettingsSectionProps {
-  resolvedTheme: string;
-  toggleTheme: () => void;
-  colors: {
-    bg: string;
-    surface: string;
-    surfaceElevated: string;
-    border: string;
-    text: string;
-    textSecondary: string;
-    textMuted: string;
-    accent: string;
-  };
-  isAuthenticated: boolean;
-  onSignOut: () => void;
-}
-
-function SettingsSection({
-  resolvedTheme,
-  toggleTheme,
-  colors,
-  isAuthenticated,
-  onSignOut,
-}: SettingsSectionProps) {
-  return (
-    <View style={styles.section}>
-      <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
-        Settings
-      </Text>
-
-      <Pressable
-        onPress={toggleTheme}
-        style={({ pressed }) => [
-          styles.menuItem,
-          { backgroundColor: colors.surface, borderColor: colors.border },
-          styles.menuItemFirst,
-          !isAuthenticated && styles.menuItemLast,
-          { opacity: pressed ? 0.7 : 1 },
-        ]}
-      >
-        <Text style={[styles.menuItemText, { color: colors.text }]}>
-          Switch to {resolvedTheme === "light" ? "Dark" : "Light"} Mode
-        </Text>
-        <ChevronRight size={20} color={colors.textMuted} />
-      </Pressable>
-
-      {isAuthenticated && (
-        <Pressable
-          onPress={onSignOut}
-          style={({ pressed }) => [
-            styles.menuItem,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-            styles.menuItemLast,
-            { opacity: pressed ? 0.7 : 1 },
-          ]}
-        >
-          <Text style={[styles.signOutText]}>Sign Out</Text>
+    <>
+      <View style={styles.topBar}>
+        <View style={styles.topBarSpacer} />
+        <Pressable onPress={() => router.push("/settings")} hitSlop={8}>
+          <Settings size={24} color={colors.text} strokeWidth={1.5} />
         </Pressable>
-      )}
-    </View>
+      </View>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.textMuted}
+            colors={[colors.accent]}
+          />
+        }
+      >
+        <ProfileHeaderEnhanced
+          name={user.name}
+          username={user.username}
+          bio={user.bio}
+          imageUrl={user.image?.url}
+        >
+          <View style={styles.headerButtons}>
+            <Button
+              variant="outline"
+              style={styles.editButton}
+              onPress={handleEditProfile}
+            >
+              <Text style={[styles.editButtonText, { color: colors.text }]}>
+                Edit Profile
+              </Text>
+            </Button>
+            <Pressable
+              onPress={handleShareProfile}
+              style={[styles.shareButton, { borderColor: colors.border }]}
+            >
+              <Share2 size={18} color={colors.text} strokeWidth={2} />
+            </Pressable>
+          </View>
+        </ProfileHeaderEnhanced>
+
+        <ProfileStatsEnhanced
+          userId={user.id}
+          followerCount={user.followerCount}
+          followingCount={user.followingCount}
+        />
+
+        {/* Tabs */}
+        <View
+          style={[styles.tabsContainer, { borderBottomColor: colors.border }]}
+        >
+          <Pressable onPress={() => handleTabPress("posts")} style={styles.tab}>
+            <Text
+              style={[
+                styles.tabText,
+                {
+                  color: activeTab === "posts" ? colors.text : colors.textMuted,
+                },
+              ]}
+            >
+              Posts
+            </Text>
+            {activeTab === "posts" && (
+              <View
+                style={[styles.tabIndicator, { backgroundColor: colors.text }]}
+              />
+            )}
+          </Pressable>
+
+          <Pressable
+            onPress={() => handleTabPress("replies")}
+            style={styles.tab}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                {
+                  color:
+                    activeTab === "replies" ? colors.text : colors.textMuted,
+                },
+              ]}
+            >
+              Replies
+            </Text>
+            {activeTab === "replies" && (
+              <View
+                style={[styles.tabIndicator, { backgroundColor: colors.text }]}
+              />
+            )}
+          </Pressable>
+
+          <Pressable onPress={() => handleTabPress("likes")} style={styles.tab}>
+            <Text
+              style={[
+                styles.tabText,
+                {
+                  color: activeTab === "likes" ? colors.text : colors.textMuted,
+                },
+              ]}
+            >
+              Likes
+            </Text>
+            {activeTab === "likes" && (
+              <View
+                style={[styles.tabIndicator, { backgroundColor: colors.text }]}
+              />
+            )}
+          </Pressable>
+        </View>
+
+        {/* Tab Content */}
+        {activeTab === "posts" && (
+          <ProfilePostsList
+            ref={postsListRef}
+            userRef={user}
+            currentUserId={session?.user?.id}
+            onLike={handleLike}
+            onUnlike={handleUnlike}
+            onDelete={handleDelete}
+          />
+        )}
+
+        {activeTab === "replies" && (
+          <ProfileRepliesList
+            ref={repliesListRef}
+            userRef={user}
+            currentUserId={session?.user?.id}
+            onLike={handleLike}
+            onUnlike={handleUnlike}
+            onDelete={handleDelete}
+          />
+        )}
+
+        {activeTab === "likes" && (
+          <ProfileLikesList
+            ref={likesListRef}
+            userRef={user}
+            currentUserId={session?.user?.id}
+            onLike={handleLike}
+            onUnlike={handleUnlike}
+            onDelete={handleDelete}
+          />
+        )}
+
+        <View style={styles.bottomPadding} />
+      </ScrollView>
+    </>
   );
 }
 
@@ -481,109 +410,89 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  // Welcome section for unauthenticated
   welcomeContainer: {
     alignItems: "center",
-    padding: 24,
-  },
-  welcomeAvatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-  },
-  welcomeEmoji: {
-    fontSize: 32,
+    paddingHorizontal: 24,
+    paddingTop: 40,
+    paddingBottom: 24,
   },
   welcomeTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    marginBottom: 8,
+    fontSize: 24,
+    fontWeight: "700",
+    marginBottom: 12,
   },
   welcomeSubtitle: {
     fontSize: 15,
     textAlign: "center",
     lineHeight: 22,
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    marginBottom: 24,
   },
   signInButton: {
-    width: "100%",
-    maxWidth: 280,
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 8,
   },
   signInButtonText: {
     color: "#fff",
     fontWeight: "600",
+    fontSize: 15,
   },
-  // Edit button
+  headerButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   editButton: {
     paddingHorizontal: 24,
     paddingVertical: 8,
+    borderRadius: 8,
   },
   editButtonText: {
     fontSize: 14,
     fontWeight: "600",
   },
-  // Dividers
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    marginTop: 8,
+  shareButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  sectionDivider: {
-    height: 8,
+  tabsContainer: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
     marginTop: 16,
   },
-  // Sections
-  section: {
-    marginTop: 24,
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: "500",
-    paddingHorizontal: 16,
-    marginBottom: 8,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  // Menu items
-  menuItem: {
-    flexDirection: "row",
+  tab: {
+    flex: 1,
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingVertical: 12,
+    position: "relative",
   },
-  menuItemFirst: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-  },
-  menuItemLast: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  menuItemLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  menuItemRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  menuItemText: {
-    fontSize: 16,
-  },
-  menuItemCount: {
+  tabText: {
     fontSize: 15,
+    fontWeight: "600",
   },
-  signOutText: {
-    fontSize: 16,
-    color: "#dc2626",
+  tabIndicator: {
+    position: "absolute",
+    bottom: 0,
+    left: 16,
+    right: 16,
+    height: 2,
+    borderRadius: 1,
   },
-  // Bottom padding
+  topBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  topBarSpacer: {
+    flex: 1,
+  },
   bottomPadding: {
-    height: 32,
+    height: 40,
   },
 });

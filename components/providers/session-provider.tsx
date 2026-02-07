@@ -4,12 +4,12 @@ import {
   useRef,
   useCallback,
   PropsWithChildren,
-} from 'react';
-import { BottomSheetModal } from '@gorhom/bottom-sheet';
-import { authClient, useSession as useAuthSession } from '@/lib/auth-client';
-import { SignInSheet } from '@/components/auth/sign-in-sheet';
+} from "react";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { authClient, useSession as useAuthSession } from "@/lib/auth-client";
+import { SignInSheet } from "@/components/auth/sign-in-sheet";
 
-type Session = ReturnType<typeof useAuthSession>['data'];
+type Session = ReturnType<typeof useAuthSession>["data"];
 
 interface SessionContextValue {
   session: Session;
@@ -53,7 +53,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
         presentSignIn();
       }
     },
-    [isAuthenticated, presentSignIn]
+    [isAuthenticated, presentSignIn],
   );
 
   const handleSignInSuccess = useCallback(() => {
@@ -84,7 +84,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
 export function useSession() {
   const context = useContext(SessionContext);
   if (!context) {
-    throw new Error('useSession must be used within SessionProvider');
+    throw new Error("useSession must be used within SessionProvider");
   }
   return context;
 }

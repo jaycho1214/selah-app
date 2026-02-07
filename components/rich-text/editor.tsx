@@ -1,13 +1,13 @@
-import React from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React from "react";
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   RichText,
   Toolbar,
   useEditorBridge,
   TenTapStartKit,
   CoreBridge,
-} from '@10play/tentap-editor';
+} from "@10play/tentap-editor";
 
 interface RichTextEditorProps {
   initialContent?: string;
@@ -16,9 +16,9 @@ interface RichTextEditorProps {
 }
 
 export function RichTextEditor({
-  initialContent = '',
+  initialContent = "",
   onContentChange,
-  placeholder = 'Start writing...',
+  placeholder = "Start writing...",
 }: RichTextEditorProps) {
   const editor = useEditorBridge({
     autofocus: false,
@@ -44,12 +44,12 @@ export function RichTextEditor({
   });
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={styles.container} edges={["bottom"]}>
       <View style={styles.editorContainer}>
         <RichText editor={editor} />
       </View>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
       >
         <Toolbar editor={editor} />
@@ -61,14 +61,14 @@ export function RichTextEditor({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   editorContainer: {
     flex: 1,
   },
   keyboardView: {
-    position: 'absolute',
-    width: '100%',
+    position: "absolute",
+    width: "100%",
     bottom: 0,
   },
 });

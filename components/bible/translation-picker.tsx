@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { View, Text, Pressable, ActivityIndicator } from 'react-native';
-import { Check, Download, Trash2, RefreshCw } from 'lucide-react-native';
-import { useBibleStore } from '@/lib/stores/bible-store';
+import { useState, useEffect } from "react";
+import { View, Text, Pressable, ActivityIndicator } from "react-native";
+import { Check, Download, Trash2, RefreshCw } from "lucide-react-native";
+import { useBibleStore } from "@/lib/stores/bible-store";
 import {
   getRemoteTranslations,
   getDownloadedTranslations,
@@ -10,7 +10,7 @@ import {
   deleteTranslation,
   DownloadProgress,
   RemoteTranslation,
-} from '@/lib/bible/offline';
+} from "@/lib/bible/offline";
 
 interface TranslationPickerProps {
   onClose?: () => void;
@@ -25,8 +25,12 @@ interface LocalTranslation {
 
 export function TranslationPicker({ onClose }: TranslationPickerProps) {
   const { currentTranslation, setTranslation } = useBibleStore();
-  const [remoteTranslations, setRemoteTranslations] = useState<RemoteTranslation[]>([]);
-  const [localTranslations, setLocalTranslations] = useState<LocalTranslation[]>([]);
+  const [remoteTranslations, setRemoteTranslations] = useState<
+    RemoteTranslation[]
+  >([]);
+  const [localTranslations, setLocalTranslations] = useState<
+    LocalTranslation[]
+  >([]);
   const [downloading, setDownloading] = useState<string | null>(null);
   const [progress, setProgress] = useState<DownloadProgress | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,7 +46,7 @@ export function TranslationPicker({ onClose }: TranslationPickerProps) {
         setRemoteTranslations(remote);
         setLocalTranslations(local);
       } catch (error) {
-        console.error('Failed to load translations:', error);
+        console.error("Failed to load translations:", error);
       } finally {
         setLoading(false);
       }
@@ -77,7 +81,7 @@ export function TranslationPicker({ onClose }: TranslationPickerProps) {
       const local = await getDownloadedTranslations();
       setLocalTranslations(local);
     } catch (error) {
-      console.error('Download failed:', error);
+      console.error("Download failed:", error);
     } finally {
       setDownloading(null);
       setProgress(null);
@@ -92,7 +96,7 @@ export function TranslationPicker({ onClose }: TranslationPickerProps) {
       const local = await getDownloadedTranslations();
       setLocalTranslations(local);
     } catch (error) {
-      console.error('Update failed:', error);
+      console.error("Update failed:", error);
     } finally {
       setDownloading(null);
       setProgress(null);
@@ -102,9 +106,11 @@ export function TranslationPicker({ onClose }: TranslationPickerProps) {
   const handleDelete = async (translationId: string) => {
     try {
       await deleteTranslation(translationId);
-      setLocalTranslations((prev) => prev.filter((t) => t.id !== translationId));
+      setLocalTranslations((prev) =>
+        prev.filter((t) => t.id !== translationId),
+      );
     } catch (error) {
-      console.error('Delete failed:', error);
+      console.error("Delete failed:", error);
     }
   };
 
@@ -140,24 +146,30 @@ export function TranslationPicker({ onClose }: TranslationPickerProps) {
             >
               <View
                 className={`w-5 h-5 rounded-full mr-3 items-center justify-center ${
-                  isSelected ? 'bg-primary' : 'border border-muted-foreground'
+                  isSelected ? "bg-primary" : "border border-muted-foreground"
                 }`}
               >
-                {isSelected && <Check size={12} className="text-primary-foreground" />}
+                {isSelected && (
+                  <Check size={12} className="text-primary-foreground" />
+                )}
               </View>
               <View>
                 <View className="flex-row items-center gap-2">
-                  <Text className="text-foreground text-base">{translation.name}</Text>
+                  <Text className="text-foreground text-base">
+                    {translation.name}
+                  </Text>
                   {updateAvailable && (
                     <View className="bg-primary/20 px-1.5 py-0.5 rounded">
-                      <Text className="text-primary text-xs font-medium">Update</Text>
+                      <Text className="text-primary text-xs font-medium">
+                        Update
+                      </Text>
                     </View>
                   )}
                 </View>
                 <Text className="text-muted-foreground text-xs">
                   {downloaded
                     ? `v${local?.version} - Available offline`
-                    : 'Online only'}
+                    : "Online only"}
                 </Text>
               </View>
             </Pressable>

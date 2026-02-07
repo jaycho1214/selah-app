@@ -1,12 +1,12 @@
-import { FlashList } from '@shopify/flash-list';
-import { View, StyleSheet, ActivityIndicator } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import { Users } from 'lucide-react-native';
+import { FlashList } from "@shopify/flash-list";
+import { View, StyleSheet, ActivityIndicator } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
+import { Users } from "lucide-react-native";
 
-import { Text } from '@/components/ui/text';
-import { UserRow } from '@/components/user/user-row';
-import { useColors } from '@/hooks/use-colors';
-import type { userRow_user$key } from '@/lib/relay/__generated__/userRow_user.graphql';
+import { Text } from "@/components/ui/text";
+import { UserRow } from "@/components/user/user-row";
+import { useColors } from "@/hooks/use-colors";
+import type { userRow_user$key } from "@/lib/relay/__generated__/userRow_user.graphql";
 
 interface UserEdge {
   readonly node: userRow_user$key | null;
@@ -34,7 +34,7 @@ export function UserList({
   // Filter out null edges and nodes
   const validUsers = users.filter(
     (edge): edge is { readonly node: userRow_user$key } =>
-      edge !== null && edge.node !== null
+      edge !== null && edge.node !== null,
   );
 
   if (validUsers.length === 0) {
@@ -92,8 +92,8 @@ export function UserList({
 const styles = StyleSheet.create({
   emptyContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 64,
     paddingHorizontal: 32,
   },
@@ -101,23 +101,23 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 20,
   },
   emptyTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontWeight: "600",
+    textAlign: "center",
     marginBottom: 8,
   },
   emptySubtitle: {
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 20,
   },
   footer: {
     paddingVertical: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
 });

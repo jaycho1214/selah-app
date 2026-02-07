@@ -1,11 +1,11 @@
-import { View, StyleSheet, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Stack, useLocalSearchParams } from 'expo-router';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import { Users } from 'lucide-react-native';
+import { View, StyleSheet, ActivityIndicator } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Stack, useLocalSearchParams } from "expo-router";
+import Animated, { FadeIn } from "react-native-reanimated";
+import { Users } from "lucide-react-native";
 
-import { Text } from '@/components/ui/text';
-import { useColors } from '@/hooks/use-colors';
+import { Text } from "@/components/ui/text";
+import { useColors } from "@/hooks/use-colors";
 
 /**
  * Followers list screen.
@@ -32,8 +32,11 @@ export default function FollowersScreen() {
   // For now, show empty state indicating feature pending backend support
 
   return (
-    <SafeAreaView edges={['bottom']} style={[styles.container, { backgroundColor: colors.bg }]}>
-      <Stack.Screen options={{ title: 'Followers' }} />
+    <SafeAreaView
+      edges={["bottom"]}
+      style={[styles.container, { backgroundColor: colors.bg }]}
+    >
+      <Stack.Screen options={{ title: "Followers" }} />
       <Animated.View
         entering={FadeIn.duration(300)}
         style={styles.emptyContainer}
@@ -50,7 +53,7 @@ export default function FollowersScreen() {
           No followers yet
         </Text>
         <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-          When people follow this user, they'll appear here
+          When people follow this user, they&apos;ll appear here
         </Text>
       </Animated.View>
     </SafeAreaView>
@@ -63,8 +66,8 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 64,
     paddingHorizontal: 32,
   },
@@ -72,19 +75,19 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 20,
   },
   emptyTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontWeight: "600",
+    textAlign: "center",
     marginBottom: 8,
   },
   emptySubtitle: {
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 20,
   },
 });

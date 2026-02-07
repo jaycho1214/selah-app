@@ -6,16 +6,16 @@
  * Drizzle ORM for SQLite storage.
  */
 
-import { File, Paths } from 'expo-file-system';
-import { db } from '@/lib/db/client';
-import { translations, verses } from '@/lib/db/schema';
-import { eq, and } from 'drizzle-orm';
-import type { BibleBook } from './types';
+import { File, Paths } from "expo-file-system";
+import { db } from "@/lib/db/client";
+import { translations, verses } from "@/lib/db/schema";
+import { eq, and } from "drizzle-orm";
+import type { BibleBook } from "./types";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://api.selah.app';
+const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "https://api.selah.app";
 
 export interface DownloadProgress {
-  status: 'idle' | 'downloading' | 'processing' | 'complete' | 'error';
+  status: "idle" | "downloading" | "processing" | "complete" | "error";
   progress: number; // 0-100
   error?: string;
 }
@@ -50,7 +50,9 @@ export async function getRemoteTranslations(): Promise<RemoteTranslation[]> {
 /**
  * Check if a translation is downloaded for offline use.
  */
-export async function isTranslationDownloaded(translationId: string): Promise<boolean> {
+export async function isTranslationDownloaded(
+  translationId: string,
+): Promise<boolean> {
   const result = await db
     .select()
     .from(translations)
@@ -80,11 +82,14 @@ export async function checkForUpdates(): Promise<TranslationUpdate[]> {
     const localTranslation = local.find((t) => t.id === remoteTranslation.id);
 
     // Only check downloaded translations
-    if (localTranslation && localTranslation.version !== remoteTranslation.version) {
+    if (
+      localTranslation &&
+      localTranslation.version !== remoteTranslation.version
+    ) {
       updates.push({
         id: remoteTranslation.id,
         name: remoteTranslation.name,
-        currentVersion: localTranslation.version ?? 'unknown',
+        currentVersion: localTranslation.version ?? "unknown",
         newVersion: remoteTranslation.version,
       });
     }
@@ -100,10 +105,10 @@ export async function checkForUpdates(): Promise<TranslationUpdate[]> {
  */
 export async function downloadTranslation(
   translationId: string,
-  onProgress?: (progress: DownloadProgress) => void
+  onProgress?: (progress: DownloadProgress) => void,
 ): Promise<void> {
   try {
-    onProgress?.({ status: 'downloading', progress: 0 });
+    onProgress?.({ status: "downloading", progress: 0 });
 
     const url = `${API_URL}/api/bible/${translationId}.json`;
 
@@ -112,7 +117,7 @@ export async function downloadTranslation(
       idempotent: true,
     });
 
-    onProgress?.({ status: 'processing', progress: 50 });
+    onProgress?.({ status: "processing", progress: 50 });
 
     // Read and parse the file
     const content = await downloadedFile.text();
@@ -155,7 +160,7 @@ export async function downloadTranslation(
       });
 
       const progress = 50 + Math.round((i / totalVerses) * 50);
-      onProgress?.({ status: 'processing', progress });
+      onProgress?.({ status: "processing", progress });
     }
 
     // Mark translation as downloaded with version
@@ -181,10 +186,10 @@ export async function downloadTranslation(
       downloadedFile.delete();
     }
 
-    onProgress?.({ status: 'complete', progress: 100 });
+    onProgress?.({ status: "complete", progress: 100 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    onProgress?.({ status: 'error', progress: 0, error: message });
+    const message = error instanceof Error ? error.message : "Unknown error";
+    onProgress?.({ status: "error", progress: 0, error: message });
     throw error;
   }
 }
@@ -195,7 +200,7 @@ export async function downloadTranslation(
  */
 export async function updateTranslation(
   translationId: string,
-  onProgress?: (progress: DownloadProgress) => void
+  onProgress?: (progress: DownloadProgress) => void,
 ): Promise<void> {
   // Delete existing verses first
   await db.delete(verses).where(eq(verses.translationId, translationId));
@@ -219,7 +224,7 @@ export async function deleteTranslation(translationId: string): Promise<void> {
 export async function getOfflineVerses(
   translationId: string,
   book: BibleBook,
-  chapter: number
+  chapter: number,
 ) {
   return db
     .select()
@@ -228,8 +233,8 @@ export async function getOfflineVerses(
       and(
         eq(verses.translationId, translationId),
         eq(verses.book, book),
-        eq(verses.chapter, chapter)
-      )
+        eq(verses.chapter, chapter),
+      ),
     )
     .orderBy(verses.verse);
 }
@@ -241,7 +246,7 @@ export async function getOfflineVerses(
 export async function isChapterAvailable(
   translationId: string,
   book: BibleBook,
-  chapter: number
+  chapter: number,
 ): Promise<boolean> {
   const result = await db
     .select({ id: verses.id })
@@ -250,8 +255,8 @@ export async function isChapterAvailable(
       and(
         eq(verses.translationId, translationId),
         eq(verses.book, book),
-        eq(verses.chapter, chapter)
-      )
+        eq(verses.chapter, chapter),
+      ),
     )
     .limit(1);
   return result.length > 0;

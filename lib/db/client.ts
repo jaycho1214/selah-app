@@ -1,14 +1,14 @@
-import { drizzle } from 'drizzle-orm/expo-sqlite';
-import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
-import { openDatabaseSync } from 'expo-sqlite';
-import * as schema from './schema';
-import migrations from './migrations/migrations';
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
+import { openDatabaseSync } from "expo-sqlite";
+import * as schema from "./schema";
+import migrations from "./migrations/migrations";
 
 /**
  * Opens the SQLite database synchronously.
  * enableChangeListener allows reactive queries in the future.
  */
-const expoDb = openDatabaseSync('selah.db', { enableChangeListener: true });
+const expoDb = openDatabaseSync("selah.db", { enableChangeListener: true });
 
 /**
  * Drizzle ORM client for type-safe database queries.

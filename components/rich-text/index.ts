@@ -1,2 +1,2 @@
-export { RichTextEditor } from './editor';
-export { RichTextRenderer } from './renderer';
+export { RichTextEditor } from "./editor";
+export { RichTextRenderer } from "./renderer";

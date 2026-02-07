@@ -15,7 +15,9 @@ import {
   useLazyLoadQuery,
   useMutation,
   usePaginationFragment,
+  useRelayEnvironment,
 } from "react-relay";
+import { fetchQuery } from "relay-runtime";
 
 import { useSession } from "@/components/providers/session-provider";
 import { Text } from "@/components/ui/text";
@@ -79,6 +81,7 @@ const ForYouFragment = graphql`
             id
             totalVotes
             isExpired
+            deadline
             userVote {
               id
               text
@@ -215,6 +218,7 @@ function ForYouFeed() {
   const { session } = useSession();
   const currentUserId = session?.user?.id ?? null;
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const environment = useRelayEnvironment();
   const connectionIdRef = useRef<string | null>(null);
 
   // Fetch initial data
@@ -224,7 +228,7 @@ function ForYouFeed() {
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
     usePaginationFragment<postsScreenQuery, postsScreenForYouFragment$key>(
       ForYouFragment,
-      queryData
+      queryData,
     );
 
   const posts = data.bibleVersePosts?.edges ?? [];
@@ -250,7 +254,7 @@ function ForYouFeed() {
         },
       });
     },
-    [commitLike]
+    [commitLike],
   );
 
   const handleUnlike = useCallback(
@@ -268,7 +272,7 @@ function ForYouFeed() {
         },
       });
     },
-    [commitUnlike]
+    [commitUnlike],
   );
 
   const handleDelete = useCallback(
@@ -284,19 +288,16 @@ function ForYouFeed() {
         },
       });
     },
-    [commitDelete]
+    [commitDelete],
   );
 
   const handleRefresh = useCallback(() => {
     setIsRefreshing(true);
-    refetch(
-      {},
-      {
-        fetchPolicy: "store-and-network",
-        onComplete: () => setIsRefreshing(false),
-      }
-    );
-  }, [refetch]);
+    fetchQuery(environment, PostsQuery, {}).subscribe({
+      complete: () => setIsRefreshing(false),
+      error: () => setIsRefreshing(false),
+    });
+  }, [environment]);
 
   const handleLoadMore = useCallback(() => {
     if (hasNext && !isLoadingNext) {
@@ -347,21 +348,15 @@ function ForYouFeed() {
       currentUserId={currentUserId}
       emptyState={emptyState}
       contentContainerStyle={{
-        paddingTop: TAB_BAR_HEIGHT + insets.top,
         paddingBottom: insets.bottom + 100,
       }}
-      progressViewOffset={TAB_BAR_HEIGHT + insets.top}
     />
   );
 }
 
 // ---------- Following Feed ----------
 
-function FollowingFeed({
-  onSwitchToForYou,
-}: {
-  onSwitchToForYou: () => void;
-}) {
+function FollowingFeed({ onSwitchToForYou }: { onSwitchToForYou: () => void }) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { isAuthenticated, presentSignIn } = useSession();
@@ -372,7 +367,7 @@ function FollowingFeed({
         style={[
           styles.followingContainer,
           {
-            paddingTop: TAB_BAR_HEIGHT + insets.top + 60,
+            paddingTop: 60,
             paddingBottom: insets.bottom + 100,
           },
         ]}
@@ -420,7 +415,7 @@ function FollowingFeed({
       style={[
         styles.followingContainer,
         {
-          paddingTop: TAB_BAR_HEIGHT + insets.top + 60,
+          paddingTop: 60,
           paddingBottom: insets.bottom + 100,
         },
       ]}
@@ -466,7 +461,6 @@ function FollowingFeed({
 
 export default function PostsScreen() {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
   const pagerRef = useRef<PagerView>(null);
   const { activeTab, setActiveTab } = useFeedStore();
   const [currentTab, setCurrentTab] = useState(activeTab);
@@ -479,7 +473,7 @@ export default function PostsScreen() {
         setActiveTab(position);
       }
     },
-    [currentTab, setActiveTab]
+    [currentTab, setActiveTab],
   );
 
   const handleTabPress = useCallback(
@@ -488,7 +482,7 @@ export default function PostsScreen() {
         pagerRef.current?.setPage(index);
       }
     },
-    [currentTab]
+    [currentTab],
   );
 
   const handleSwitchToForYou = useCallback(() => {
@@ -504,28 +498,12 @@ export default function PostsScreen() {
         initialPage={activeTab}
         onPageSelected={handlePageSelected}
       >
-        <View
-          key="for-you"
-          style={styles.page}
-          collapsable={false}
-        >
-          <Suspense
-            fallback={
-              <FeedSkeleton
-                style={{
-                  paddingTop: TAB_BAR_HEIGHT + insets.top,
-                }}
-              />
-            }
-          >
+        <View key="for-you" style={styles.page} collapsable={false}>
+          <Suspense fallback={<FeedSkeleton />}>
             <ForYouFeed />
           </Suspense>
         </View>
-        <View
-          key="following"
-          style={styles.page}
-          collapsable={false}
-        >
+        <View key="following" style={styles.page} collapsable={false}>
           <FollowingFeed onSwitchToForYou={handleSwitchToForYou} />
         </View>
       </PagerView>
@@ -541,11 +519,6 @@ const styles = StyleSheet.create({
   },
   // Tab bar
   tabBar: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   tabBarRow: {

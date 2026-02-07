@@ -1,24 +1,25 @@
-import { useCallback, useState } from 'react';
-import { View, ActivityIndicator, StyleSheet, Dimensions } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { useCallback, useState } from "react";
+import { View, StyleSheet, Dimensions, useColorScheme } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   useAnimatedProps,
   withSpring,
   runOnJS,
-} from 'react-native-reanimated';
-import Svg, { Path } from 'react-native-svg';
-import * as Haptics from 'expo-haptics';
-import { Suspense } from 'react';
-import { ChapterView } from './chapter-view';
-import { useBibleStore } from '@/lib/stores/bible-store';
-import { BIBLE_BOOKS, BIBLE_BOOK_DETAILS } from '@/lib/bible/constants';
-import { BibleBook } from '@/lib/bible/types';
+} from "react-native-reanimated";
+import Svg, { Path } from "react-native-svg";
+import * as Haptics from "expo-haptics";
+import { Suspense } from "react";
+import { ChapterView } from "./chapter-view";
+import { ChapterSkeleton } from "./chapter-skeleton";
+import { useBibleStore } from "@/lib/stores/bible-store";
+import { BIBLE_BOOKS, BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
+import { BibleBook } from "@/lib/bible/types";
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.14; // ~40% finger drag with resistance
 const RESISTANCE = 0.35; // Sticky resistance (lower = stickier)
 
 const BULGE_MAX_WIDTH = 24; // Wider bulge (horizontal protrusion)
@@ -36,19 +37,29 @@ const STICKY_SPRING = {
 interface BibleReaderProps {
   initialBook: BibleBook;
   initialChapter: number;
+  scrollToVerse?: number | null;
   onPositionChange?: (book: BibleBook, chapter: number) => void;
   onVersePress?: (verseId: string, verseText?: string) => void;
-  onVerseLongPress?: (verseId: string, verseText?: string) => void;
+  onVerseLongPress?: (
+    verseId: string,
+    verseText: string,
+    book: BibleBook,
+    chapter: number,
+    verseNumber: number,
+  ) => void;
 }
 
 export function BibleReader({
   initialBook,
   initialChapter,
+  scrollToVerse,
   onPositionChange,
   onVersePress,
   onVerseLongPress,
 }: BibleReaderProps) {
   const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
   const { setPosition } = useBibleStore();
 
   // Page position (0 = current, negative = going to prev, positive = going to next)
@@ -58,6 +69,7 @@ export function BibleReader({
 
   const [currentBook, setCurrentBook] = useState(initialBook);
   const [currentChapter, setCurrentChapter] = useState(initialChapter);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const maxChapters = BIBLE_BOOK_DETAILS[currentBook].chapters;
   const bookIndex = BIBLE_BOOKS.indexOf(currentBook);
@@ -93,19 +105,24 @@ export function BibleReader({
 
   const goToPrev = useCallback(() => {
     if (prev) {
+      setIsTransitioning(true);
       setCurrentBook(prev.book);
       setCurrentChapter(prev.chapter);
       setPosition(prev.book, prev.chapter);
       onPositionChange?.(prev.book, prev.chapter);
+      // Brief delay to let new content load
+      setTimeout(() => setIsTransitioning(false), 100);
     }
   }, [prev, setPosition, onPositionChange]);
 
   const goToNext = useCallback(() => {
     if (next) {
+      setIsTransitioning(true);
       setCurrentBook(next.book);
       setCurrentChapter(next.chapter);
       setPosition(next.book, next.chapter);
       onPositionChange?.(next.book, next.chapter);
+      setTimeout(() => setIsTransitioning(false), 100);
     }
   }, [next, setPosition, onPositionChange]);
 
@@ -135,18 +152,14 @@ export function BibleReader({
       const shouldGoPrev = translateX.value > SWIPE_THRESHOLD && prev;
 
       if (shouldGoNext) {
-        // Animate out then change page
-        translateX.value = withSpring(-SCREEN_WIDTH, STICKY_SPRING, () => {
-          runOnJS(triggerHaptic)();
-          runOnJS(goToNext)();
-          translateX.value = 0;
-        });
+        // Change page immediately, animate reset
+        runOnJS(triggerHaptic)();
+        runOnJS(goToNext)();
+        translateX.value = withSpring(0, STICKY_SPRING);
       } else if (shouldGoPrev) {
-        translateX.value = withSpring(SCREEN_WIDTH, STICKY_SPRING, () => {
-          runOnJS(triggerHaptic)();
-          runOnJS(goToPrev)();
-          translateX.value = 0;
-        });
+        runOnJS(triggerHaptic)();
+        runOnJS(goToPrev)();
+        translateX.value = withSpring(0, STICKY_SPRING);
       } else {
         // Snap back with jelly wobble
         translateX.value = withSpring(0, {
@@ -172,7 +185,10 @@ export function BibleReader({
   });
 
   const leftBulgePathProps = useAnimatedProps(() => {
-    const progress = Math.min(Math.abs(translateX.value) / (SCREEN_WIDTH * 0.3), 1);
+    const progress = Math.min(
+      Math.abs(translateX.value) / (SCREEN_WIDTH * 0.3),
+      1,
+    );
     const apex = progress * BULGE_MAX_WIDTH;
     const h = BULGE_HEIGHT;
     const path = `M 0,0 C ${apex * 0.1},${h * 0.2} ${apex},${h * 0.35} ${apex},${h * 0.5} C ${apex},${h * 0.65} ${apex * 0.1},${h * 0.8} 0,${h}`;
@@ -189,7 +205,10 @@ export function BibleReader({
   });
 
   const rightBulgePathProps = useAnimatedProps(() => {
-    const progress = Math.min(Math.abs(translateX.value) / (SCREEN_WIDTH * 0.3), 1);
+    const progress = Math.min(
+      Math.abs(translateX.value) / (SCREEN_WIDTH * 0.3),
+      1,
+    );
     const apex = progress * BULGE_MAX_WIDTH;
     const h = BULGE_HEIGHT;
     const w = BULGE_MAX_WIDTH;
@@ -197,39 +216,56 @@ export function BibleReader({
     return { d: path };
   });
 
-  const ChapterFallback = () => (
-    <View style={styles.fallback}>
-      <ActivityIndicator size="large" />
-    </View>
-  );
+  const ChapterFallback = () => <ChapterSkeleton topInset={insets.top} />;
 
   return (
     <View style={styles.container}>
       <GestureDetector gesture={panGesture}>
         <Animated.View style={[styles.page, pageStyle]}>
-          <Suspense fallback={<ChapterFallback />}>
-            <ChapterView
-              book={currentBook}
-              chapter={currentChapter}
-              topInset={insets.top}
-              onVersePress={onVersePress}
-              onVerseLongPress={onVerseLongPress}
-            />
-          </Suspense>
+          {isTransitioning ? (
+            <ChapterFallback />
+          ) : (
+            <Suspense fallback={<ChapterFallback />}>
+              <ChapterView
+                book={currentBook}
+                chapter={currentChapter}
+                topInset={insets.top}
+                scrollToVerse={scrollToVerse}
+                onVersePress={onVersePress}
+                onVerseLongPress={onVerseLongPress}
+              />
+            </Suspense>
+          )}
         </Animated.View>
       </GestureDetector>
 
       {/* Left edge bulge */}
-      <Animated.View style={[styles.bulgeLeft, leftBulgeStyle]} pointerEvents="none">
+      <Animated.View
+        style={[styles.bulgeLeft, leftBulgeStyle]}
+        pointerEvents="none"
+      >
         <Svg width={BULGE_MAX_WIDTH} height={BULGE_HEIGHT}>
-          <AnimatedPath animatedProps={leftBulgePathProps} fill="#000" />
+          <AnimatedPath
+            animatedProps={leftBulgePathProps}
+            fill="#000"
+            stroke={isDark ? "rgba(255,255,255,0.15)" : undefined}
+            strokeWidth={isDark ? 1 : 0}
+          />
         </Svg>
       </Animated.View>
 
       {/* Right edge bulge */}
-      <Animated.View style={[styles.bulgeRight, rightBulgeStyle]} pointerEvents="none">
+      <Animated.View
+        style={[styles.bulgeRight, rightBulgeStyle]}
+        pointerEvents="none"
+      >
         <Svg width={BULGE_MAX_WIDTH} height={BULGE_HEIGHT}>
-          <AnimatedPath animatedProps={rightBulgePathProps} fill="#000" />
+          <AnimatedPath
+            animatedProps={rightBulgePathProps}
+            fill="#000"
+            stroke={isDark ? "rgba(255,255,255,0.15)" : undefined}
+            strokeWidth={isDark ? 1 : 0}
+          />
         </Svg>
       </Animated.View>
     </View>
@@ -239,25 +275,20 @@ export function BibleReader({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   page: {
     flex: 1,
   },
-  fallback: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   bulgeLeft: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     top: 0,
     width: BULGE_MAX_WIDTH,
     height: BULGE_HEIGHT,
   },
   bulgeRight: {
-    position: 'absolute',
+    position: "absolute",
     right: 0,
     top: 0,
     width: BULGE_MAX_WIDTH,

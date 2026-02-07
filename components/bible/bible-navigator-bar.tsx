@@ -1,9 +1,9 @@
-import { View, Pressable } from 'react-native';
-import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react-native';
-import { Text } from '@/components/ui/text';
-import { useBibleStore } from '@/lib/stores/bible-store';
-import { BIBLE_BOOK_DETAILS, BIBLE_BOOKS } from '@/lib/bible/constants';
-import { BibleBook } from '@/lib/bible/types';
+import { View, Pressable } from "react-native";
+import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react-native";
+import { Text } from "@/components/ui/text";
+import { useBibleStore } from "@/lib/stores/bible-store";
+import { BIBLE_BOOK_DETAILS, BIBLE_BOOKS } from "@/lib/bible/constants";
+import { BibleBook } from "@/lib/bible/types";
 
 interface BibleNavigatorBarProps {
   onOpenNavigator: () => void;
@@ -34,7 +34,7 @@ export function BibleNavigatorBar({
       <Pressable
         onPress={onPrevChapter}
         disabled={isFirstChapter}
-        className={`p-2 rounded-lg ${isFirstChapter ? 'opacity-30' : 'active:bg-muted'}`}
+        className={`p-2 rounded-lg ${isFirstChapter ? "opacity-30" : "active:bg-muted"}`}
       >
         <ChevronLeft size={24} className="text-foreground" />
       </Pressable>
@@ -59,7 +59,7 @@ export function BibleNavigatorBar({
       <Pressable
         onPress={onNextChapter}
         disabled={isLastChapter}
-        className={`p-2 rounded-lg ${isLastChapter ? 'opacity-30' : 'active:bg-muted'}`}
+        className={`p-2 rounded-lg ${isLastChapter ? "opacity-30" : "active:bg-muted"}`}
       >
         <ChevronRight size={24} className="text-foreground" />
       </Pressable>

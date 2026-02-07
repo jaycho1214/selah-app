@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 interface FeedStore {
   activeTab: number; // 0 = For You, 1 = Following

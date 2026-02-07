@@ -1,8 +1,8 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import { mmkvStorage } from '../storage';
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { mmkvStorage } from "../storage";
 
-export type FontSize = 'small' | 'medium' | 'large';
+export type FontSize = "small" | "medium" | "large";
 
 interface SettingsStore {
   fontSize: FontSize;
@@ -12,14 +12,14 @@ interface SettingsStore {
 export const useSettingsStore = create<SettingsStore>()(
   persist(
     (set) => ({
-      fontSize: 'medium',
+      fontSize: "medium",
       setFontSize: (fontSize) => set({ fontSize }),
     }),
     {
-      name: 'settings-store',
+      name: "settings-store",
       storage: createJSONStorage(() => mmkvStorage),
-    }
-  )
+    },
+  ),
 );
 
 // Font size values in pixels

@@ -30,7 +30,7 @@ export const ProfilePostsList = forwardRef<
   ProfilePostsListProps
 >(function ProfilePostsList(
   { userRef, currentUserId, onLike, onUnlike, onDelete },
-  ref
+  ref,
 ) {
   const colors = useColors();
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
@@ -70,6 +70,7 @@ export const ProfilePostsList = forwardRef<
                   id
                   totalVotes
                   isExpired
+                  deadline
                   userVote {
                     id
                     text
@@ -93,7 +94,7 @@ export const ProfilePostsList = forwardRef<
           }
         }
       `,
-      userRef
+      userRef,
     );
 
   const posts = data.bibleVersePosts?.edges ?? [];
@@ -108,7 +109,7 @@ export const ProfilePostsList = forwardRef<
       },
       connectionId,
     }),
-    [refetch, connectionId]
+    [refetch, connectionId],
   );
 
   const handleEndReached = () => {
@@ -159,7 +160,7 @@ export const ProfilePostsList = forwardRef<
 
     // Get book name for verse reference
     const bookName = verse?.book
-      ? BIBLE_BOOK_DETAILS[verse.book as BibleBook]?.name ?? verse.book
+      ? (BIBLE_BOOK_DETAILS[verse.book as BibleBook]?.name ?? verse.book)
       : null;
     const verseReference =
       bookName && verse ? `${bookName} ${verse.chapter}:${verse.verse}` : null;

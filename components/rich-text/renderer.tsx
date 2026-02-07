@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, StyleSheet, useWindowDimensions } from 'react-native';
-import WebView from 'react-native-webview';
+import React from "react";
+import { View, StyleSheet, useWindowDimensions } from "react-native";
+import WebView from "react-native-webview";
 
 interface RichTextRendererProps {
   html: string;
@@ -79,7 +79,7 @@ export function RichTextRenderer({ html }: RichTextRendererProps) {
         scrollEnabled={false}
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
-        originWhitelist={['*']}
+        originWhitelist={["*"]}
       />
     </View>
   );
@@ -88,10 +88,10 @@ export function RichTextRenderer({ html }: RichTextRendererProps) {
 const styles = StyleSheet.create({
   container: {
     minHeight: 60,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   webview: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     minHeight: 60,
   },
 });

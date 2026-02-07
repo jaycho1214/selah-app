@@ -35,10 +35,7 @@ export function ProfileStatsRow({
       {/* Following count */}
       <Pressable
         onPress={handleFollowingPress}
-        style={({ pressed }) => [
-          styles.stat,
-          { opacity: pressed ? 0.6 : 1 },
-        ]}
+        style={({ pressed }) => [styles.stat, { opacity: pressed ? 0.6 : 1 }]}
       >
         <Text style={[styles.count, { color: colors.text }]}>
           {followingCount}
@@ -51,10 +48,7 @@ export function ProfileStatsRow({
       {/* Followers count */}
       <Pressable
         onPress={handleFollowersPress}
-        style={({ pressed }) => [
-          styles.stat,
-          { opacity: pressed ? 0.6 : 1 },
-        ]}
+        style={({ pressed }) => [styles.stat, { opacity: pressed ? 0.6 : 1 }]}
       >
         <Text style={[styles.count, { color: colors.text }]}>
           {followerCount}

@@ -9,7 +9,14 @@ import {
   Trash2,
 } from "lucide-react-native";
 import { useCallback, useMemo, useState } from "react";
-import { Alert, Pressable, Share, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  Share,
+  StyleSheet,
+  View,
+} from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { graphql, useMutation } from "react-relay";
 
@@ -18,11 +25,34 @@ import { createVerseId } from "@/lib/bible/utils";
 import type { BibleBook } from "@/lib/bible/types";
 import { getPostShareUrl } from "@/lib/utils";
 import type { reflectionItemPollVoteMutation } from "@/lib/relay/__generated__/reflectionItemPollVoteMutation.graphql";
+import type { reflectionItemPollUnvoteMutation } from "@/lib/relay/__generated__/reflectionItemPollUnvoteMutation.graphql";
 
 // Poll vote mutation
 const PollVoteMutation = graphql`
   mutation reflectionItemPollVoteMutation($optionId: ID!, $pollId: ID!) {
     pollVote(optionId: $optionId, pollId: $pollId) {
+      poll {
+        id
+        totalVotes
+        userVote {
+          id
+          text
+        }
+        options {
+          id
+          text
+          voteCount
+          votePercentage
+        }
+      }
+    }
+  }
+`;
+
+// Poll unvote mutation
+const PollUnvoteMutation = graphql`
+  mutation reflectionItemPollUnvoteMutation($pollId: ID!) {
+    pollUnvote(pollId: $pollId) {
       poll {
         id
         totalVotes
@@ -139,6 +169,7 @@ interface Poll {
   readonly options?: readonly PollOption[] | null;
   readonly totalVotes?: number | null;
   readonly isExpired?: boolean | null;
+  readonly deadline?: string | null;
   readonly userVote?: {
     readonly id?: string | null;
     readonly text?: string | null;
@@ -206,61 +237,36 @@ export function ReflectionItem({
   const router = useRouter();
   const isLiked = !!likedAt;
   const isOwner = currentUserId === user.id;
-  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
-  const [commitPollVote, isPollVoting] = useMutation<reflectionItemPollVoteMutation>(PollVoteMutation);
+  const [commitPollVote, isPollVoting] =
+    useMutation<reflectionItemPollVoteMutation>(PollVoteMutation);
+  const [commitPollUnvote, isPollUnvoting] =
+    useMutation<reflectionItemPollUnvoteMutation>(PollUnvoteMutation);
+  const isPollLoading = isPollVoting || isPollUnvoting;
 
   const handlePollVote = useCallback(
     (optionId: string) => {
-      if (!poll) return;
+      if (!poll || isPollLoading) return;
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      setSelectedOptionId(optionId);
-
-      const selectedOption = poll.options?.find((opt) => opt.id === optionId);
-
-      // Short delay for the "confirm" visual, then execute mutation
-      setTimeout(() => {
-        commitPollVote({
-          variables: { optionId, pollId: poll.id },
-          optimisticUpdater: (store) => {
-            const pollRecord = store.get(poll.id);
-            if (pollRecord) {
-              // Set userVote
-              const userVoteRecord = store.create(
-                `client:userVote:${optionId}`,
-                "PollUserVote",
-              );
-              userVoteRecord.setValue(optionId, "id");
-              userVoteRecord.setValue(selectedOption?.text ?? "", "text");
-              pollRecord.setLinkedRecord(userVoteRecord, "userVote");
-
-              // Increment totalVotes
-              const currentTotal =
-                (pollRecord.getValue("totalVotes") as number) ?? 0;
-              pollRecord.setValue(currentTotal + 1, "totalVotes");
-
-              // Update the voted option's voteCount
-              const options = pollRecord.getLinkedRecords("options");
-              if (options) {
-                for (const opt of options) {
-                  const optId = opt.getValue("id");
-                  if (optId === optionId) {
-                    const currentVotes =
-                      (opt.getValue("voteCount") as number) ?? 0;
-                    opt.setValue(currentVotes + 1, "voteCount");
-                  }
-                }
-              }
-            }
-          },
-          onError: (error) => {
-            console.error("Poll vote failed:", error);
-            setSelectedOptionId(null); // Reset on error
-          },
-        });
-      }, 200);
+      commitPollVote({
+        variables: { optionId, pollId: poll.id },
+        onError: (error) => {
+          console.error("Poll vote failed:", error);
+        },
+      });
     },
-    [poll, commitPollVote],
+    [poll, commitPollVote, isPollLoading],
   );
+
+  const handlePollUnvote = useCallback(() => {
+    if (!poll || isPollLoading) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    commitPollUnvote({
+      variables: { pollId: poll.id },
+      onError: (error) => {
+        console.error("Poll unvote failed:", error);
+      },
+    });
+  }, [poll, commitPollUnvote, isPollLoading]);
 
   const handleLikeToggle = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -313,7 +319,7 @@ export function ReflectionItem({
         verse.translation,
         verse.book as BibleBook,
         verse.chapter,
-        verse.verse
+        verse.verse,
       );
       router.push(`/verse/${verseId}`);
     }
@@ -381,7 +387,15 @@ export function ReflectionItem({
           return (
             <Text
               key={key++}
-              style={{ color: colors.accent, fontWeight: "500" }}
+              style={{
+                color: "#3b82f6",
+                fontWeight: "500",
+                textDecorationLine: "underline",
+              }}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push(`/user/${node.username}`);
+              }}
             >
               @{node.username}
             </Text>
@@ -435,7 +449,7 @@ export function ReflectionItem({
         </Text>
       );
     }
-  }, [content, colors]);
+  }, [content, colors, router]);
 
   const handleCardPress = useCallback(() => {
     if (disableNavigation) return;
@@ -460,13 +474,7 @@ export function ReflectionItem({
     >
       <Pressable style={styles.row} onPress={handleCardPress}>
         {/* Avatar */}
-        <Pressable
-          onPress={handleUserPress}
-          style={({ pressed }) => [
-            styles.avatarContainer,
-            { opacity: pressed ? 0.8 : 1 },
-          ]}
-        >
+        <Pressable onPress={handleUserPress} style={[styles.avatarContainer]}>
           {user.image?.url ? (
             <Image
               source={{ uri: user.image.url }}
@@ -488,36 +496,37 @@ export function ReflectionItem({
           )}
         </Pressable>
 
-          {/* Content Column */}
-          <View style={styles.contentColumn}>
-            {/* Header: Name + @username • time */}
-            <Pressable
-              onPress={handleUserPress}
-              style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
-            >
-              <View style={styles.headerRow}>
-                <Text
-                  style={[styles.displayName, { color: colors.text }]}
-                  numberOfLines={1}
-                >
-                  {user.name || user.username || "Anonymous"}
-                </Text>
-                <Text style={[styles.headerDot, { color: colors.textMuted }]}>·</Text>
-                <Text
-                  style={[styles.username, { color: colors.textMuted }]}
-                  numberOfLines={1}
-                >
-                  @{user.username || "user"}
-                </Text>
-                <Text style={[styles.headerDot, { color: colors.textMuted }]}>·</Text>
-                <Text
-                  style={[styles.headerMeta, { color: colors.textMuted }]}
-                  numberOfLines={1}
-                >
-                  {formattedDate}
-                </Text>
-              </View>
-            </Pressable>
+        {/* Content Column */}
+        <View style={styles.contentColumn}>
+          {/* Header: Name + @username • time */}
+          <Pressable onPress={handleUserPress}>
+            <View style={styles.headerRow}>
+              <Text
+                style={[styles.displayName, { color: colors.text }]}
+                numberOfLines={1}
+              >
+                {user.name || user.username || "Anonymous"}
+              </Text>
+              <Text style={[styles.headerDot, { color: colors.textMuted }]}>
+                ·
+              </Text>
+              <Text
+                style={[styles.username, { color: colors.textMuted }]}
+                numberOfLines={1}
+              >
+                @{user.username || "user"}
+              </Text>
+              <Text style={[styles.headerDot, { color: colors.textMuted }]}>
+                ·
+              </Text>
+              <Text
+                style={[styles.headerMeta, { color: colors.textMuted }]}
+                numberOfLines={1}
+              >
+                {formattedDate}
+              </Text>
+            </View>
+          </Pressable>
 
           {/* Post Content */}
           {contentElements && (
@@ -553,7 +562,7 @@ export function ReflectionItem({
                     >
                       <Image
                         source={{ uri: image.url }}
-                        style={styles.image}
+                        style={{ width: "100%", height: "100%" }}
                         contentFit="cover"
                         transition={150}
                       />
@@ -564,82 +573,131 @@ export function ReflectionItem({
           )}
 
           {/* Poll */}
-          {poll && poll.options && (() => {
-            const showResults =
-              poll.isExpired || !!poll.userVote || selectedOptionId !== null;
+          {poll &&
+            poll.options &&
+            (() => {
+              const showResults = poll.isExpired || !!poll.userVote;
 
-            return (
-              <View
-                style={[styles.pollContainer, { borderColor: colors.border }]}
-              >
-                {poll.options.map((option) => {
-                  const isVoted =
-                    poll.userVote?.id === option.id ||
-                    selectedOptionId === option.id;
-                  const percentage = option.votePercentage || 0;
-                  const isSelected =
-                    selectedOptionId === option.id && !poll.userVote;
+              // Compute time left from deadline
+              const timeLeft = (() => {
+                if (poll.isExpired) return "Final results";
+                if (!poll.deadline) return null;
+                const now = new Date();
+                const deadline = new Date(poll.deadline);
+                const diffMs = deadline.getTime() - now.getTime();
+                if (diffMs <= 0) return "Final results";
+                const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                const diffMins = Math.floor(diffMs / (1000 * 60));
+                if (diffDays > 0)
+                  return `${diffDays} day${diffDays !== 1 ? "s" : ""} left`;
+                if (diffHours > 0) return `${diffHours}h left`;
+                return `${diffMins}m left`;
+              })();
 
-                  return (
-                    <Pressable
-                      key={option.id}
-                      onPress={() => {
-                        if (!showResults && !isPollVoting) {
-                          handlePollVote(option.id);
-                        }
-                      }}
-                      disabled={showResults || isPollVoting}
-                      style={[
-                        styles.pollOption,
-                        { borderColor: colors.border },
-                        isSelected && {
-                          backgroundColor: colors.accent + "15",
-                        },
-                      ]}
-                    >
-                      {showResults && (
-                        <View
-                          style={[
-                            styles.pollBar,
-                            {
-                              width: `${percentage}%`,
-                              backgroundColor: isVoted
-                                ? colors.accent + "25"
-                                : colors.surfaceElevated,
-                            },
-                          ]}
-                        />
-                      )}
-                      <Text
-                        style={[
-                          styles.pollOptionText,
-                          { color: colors.text },
-                          isVoted && { fontWeight: "600" },
-                        ]}
-                      >
-                        {option.text}
-                      </Text>
-                      {showResults && (
+              return (
+                <Pressable
+                  onPress={() => {
+                    /* absorb touch from outer card */
+                  }}
+                >
+                  <View
+                    style={[
+                      styles.pollContainer,
+                      { borderColor: colors.border },
+                      isPollLoading && { opacity: 0.6 },
+                    ]}
+                  >
+                    {/* Poll Header */}
+                    <View style={styles.pollHeader}>
+                      <View style={styles.pollHeaderRow}>
                         <Text
-                          style={[
-                            styles.pollPercentage,
-                            { color: colors.textMuted },
-                          ]}
+                          style={[styles.pollMeta, { color: colors.textMuted }]}
                         >
-                          {Math.round(percentage)}%
+                          {poll.totalVotes || 0} vote
+                          {(poll.totalVotes || 0) !== 1 ? "s" : ""}
+                          {timeLeft ? `  ·  ${timeLeft}` : ""}
                         </Text>
-                      )}
-                    </Pressable>
-                  );
-                })}
-                <Text style={[styles.pollMeta, { color: colors.textMuted }]}>
-                  {poll.totalVotes || 0} vote
-                  {(poll.totalVotes || 0) !== 1 ? "s" : ""}
-                  {poll.isExpired ? " · Final results" : ""}
-                </Text>
-              </View>
-            );
-          })()}
+                        {isPollLoading && (
+                          <ActivityIndicator
+                            size="small"
+                            color={colors.textMuted}
+                          />
+                        )}
+                      </View>
+                    </View>
+
+                    {/* Poll Options */}
+                    <View style={styles.pollOptions}>
+                      {poll.options.map((option) => {
+                        const isVoted = poll.userVote?.text === option.text;
+                        const percentage = option.votePercentage || 0;
+
+                        return (
+                          <Pressable
+                            key={option.id}
+                            disabled={isPollLoading || poll.isExpired}
+                            onPress={() => {
+                              if (isVoted && showResults) {
+                                handlePollUnvote();
+                              } else if (!showResults) {
+                                handlePollVote(option.id);
+                              }
+                            }}
+                            style={[
+                              styles.pollOption,
+                              {
+                                backgroundColor: colors.surface,
+                                borderColor: colors.border,
+                              },
+                              isVoted &&
+                                showResults && {
+                                  backgroundColor: colors.accent + "12",
+                                  borderColor: colors.accent + "30",
+                                },
+                            ]}
+                          >
+                            {showResults && (
+                              <View style={StyleSheet.absoluteFill}>
+                                <View
+                                  style={{
+                                    width: `${percentage}%`,
+                                    height: "100%",
+                                    backgroundColor: isVoted
+                                      ? colors.accent + "20"
+                                      : colors.border + "60",
+                                  }}
+                                />
+                              </View>
+                            )}
+                            <Text
+                              style={[
+                                styles.pollOptionText,
+                                { color: colors.text },
+                                isVoted && { fontWeight: "600" },
+                              ]}
+                            >
+                              {option.text}
+                            </Text>
+                            {showResults && (
+                              <Text
+                                style={[
+                                  styles.pollPercentage,
+                                  { color: colors.textMuted },
+                                  isVoted && { color: colors.accent },
+                                ]}
+                              >
+                                {Math.round(percentage)}%
+                              </Text>
+                            )}
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </View>
+                </Pressable>
+              );
+            })()}
 
           {/* Footer: Verse Badge + Action Buttons */}
           <View style={styles.footer}>
@@ -658,11 +716,21 @@ export function ReflectionItem({
                   <BookOpen size={14} color={colors.accent} strokeWidth={2} />
                   <View style={styles.verseBadgeTextContainer}>
                     {verse?.translation && (
-                      <Text style={[styles.verseBadgeTranslation, { color: colors.textMuted }]}>
+                      <Text
+                        style={[
+                          styles.verseBadgeTranslation,
+                          { color: colors.textMuted },
+                        ]}
+                      >
                         {verse.translation}
                       </Text>
                     )}
-                    <Text style={[styles.verseBadgeReference, { color: colors.text }]}>
+                    <Text
+                      style={[
+                        styles.verseBadgeReference,
+                        { color: colors.text },
+                      ]}
+                    >
                       {verseReference}
                     </Text>
                   </View>
@@ -711,7 +779,9 @@ export function ReflectionItem({
                     strokeWidth={1.5}
                   />
                   {childPostsCount > 0 && (
-                    <Text style={[styles.actionCount, { color: colors.textMuted }]}>
+                    <Text
+                      style={[styles.actionCount, { color: colors.textMuted }]}
+                    >
                       {childPostsCount}
                     </Text>
                   )}
@@ -725,7 +795,11 @@ export function ReflectionItem({
                 hitSlop={12}
               >
                 <View style={styles.actionItem}>
-                  <ShareIcon size={17} color={colors.textMuted} strokeWidth={1.5} />
+                  <ShareIcon
+                    size={17}
+                    color={colors.textMuted}
+                    strokeWidth={1.5}
+                  />
                 </View>
               </Pressable>
 
@@ -740,7 +814,11 @@ export function ReflectionItem({
                   hitSlop={12}
                 >
                   <View style={styles.actionItem}>
-                    <Trash2 size={17} color={colors.textMuted} strokeWidth={1.5} />
+                    <Trash2
+                      size={17}
+                      color={colors.textMuted}
+                      strokeWidth={1.5}
+                    />
                   </View>
                 </Pressable>
               )}
@@ -861,34 +939,37 @@ const styles = StyleSheet.create({
     width: "50%",
     height: "50%",
   },
-  image: {
-    width: "100%",
-    height: "100%",
-  },
   // Poll
   pollContainer: {
+    borderRadius: 16,
     borderWidth: 1,
-    borderRadius: 12,
-    overflow: "hidden",
     marginTop: 8,
+    padding: 12,
+  },
+  pollHeader: {
+    marginBottom: 8,
+  },
+  pollHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  pollOptions: {
+    gap: 6,
   },
   pollOption: {
     position: "relative",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 14,
-    paddingVertical: 11,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  pollBar: {
-    position: "absolute",
-    left: 0,
-    top: 0,
-    bottom: 0,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    overflow: "hidden",
   },
   pollOptionText: {
-    fontSize: 14,
+    fontSize: 15,
     zIndex: 1,
   },
   pollPercentage: {
@@ -898,8 +979,6 @@ const styles = StyleSheet.create({
   },
   pollMeta: {
     fontSize: 13,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
   },
   // Footer
   footer: {

@@ -1,20 +1,20 @@
-import { useCallback, useMemo } from 'react';
-import { View } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
-import { Stack, router } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCallback, useMemo } from "react";
+import { View } from "react-native";
+import { FlashList } from "@shopify/flash-list";
+import { Stack, router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Text } from '@/components/ui/text';
-import { BookmarkItem } from '@/components/bible/bookmark-item';
-import { useAnnotationsStore } from '@/lib/stores/annotations-store';
-import type { BibleBook } from '@/lib/bible/types';
+import { Text } from "@/components/ui/text";
+import { BookmarkItem } from "@/components/bible/bookmark-item";
+import { useAnnotationsStore } from "@/lib/stores/annotations-store";
+import type { BibleBook } from "@/lib/bible/types";
 
 /**
  * Parse verse ID into routing parameters.
  * Format: "{translationId}:{book}:{chapter}:{verse}"
  */
 function parseVerseId(verseId: string) {
-  const parts = verseId.split(':');
+  const parts = verseId.split(":");
   if (parts.length !== 4) return null;
   return {
     translation: parts[0],
@@ -48,7 +48,7 @@ export default function BookmarksScreen() {
     (verseId: string) => {
       removeBookmark(verseId);
     },
-    [removeBookmark]
+    [removeBookmark],
   );
 
   const renderItem = useCallback(
@@ -60,19 +60,19 @@ export default function BookmarksScreen() {
         onDelete={() => handleDeleteBookmark(item.verseId)}
       />
     ),
-    [handleBookmarkPress, handleDeleteBookmark]
+    [handleBookmarkPress, handleDeleteBookmark],
   );
 
   const keyExtractor = useCallback(
     (item: (typeof bookmarkList)[number]) => item.verseId,
-    []
+    [],
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       <Stack.Screen
         options={{
-          title: 'Bookmarks',
+          title: "Bookmarks",
           headerLargeTitle: true,
         }}
       />

@@ -1,9 +1,9 @@
-import { View, Pressable } from 'react-native';
-import { Trash2 } from 'lucide-react-native';
+import { View, Pressable } from "react-native";
+import { Trash2 } from "lucide-react-native";
 
-import { Text } from '@/components/ui/text';
-import { BIBLE_BOOK_DETAILS } from '@/lib/bible/constants';
-import { BibleBook } from '@/lib/bible/types';
+import { Text } from "@/components/ui/text";
+import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
+import { BibleBook } from "@/lib/bible/types";
 
 interface BookmarkItemProps {
   verseId: string; // Format: "KJV:GENESIS:1:1"
@@ -18,7 +18,7 @@ interface BookmarkItemProps {
  * Format: "{translationId}:{book}:{chapter}:{verse}"
  */
 function parseVerseId(verseId: string) {
-  const parts = verseId.split(':');
+  const parts = verseId.split(":");
   if (parts.length !== 4) return null;
   return {
     translation: parts[0],
@@ -52,9 +52,14 @@ export function BookmarkItem({
       className="flex-row items-center px-4 py-3 border-b border-border active:bg-muted/50"
     >
       <View className="flex-1">
-        <Text className="text-foreground text-base font-medium">{reference}</Text>
+        <Text className="text-foreground text-base font-medium">
+          {reference}
+        </Text>
         {verseText && (
-          <Text className="text-muted-foreground text-sm mt-1" numberOfLines={2}>
+          <Text
+            className="text-muted-foreground text-sm mt-1"
+            numberOfLines={2}
+          >
             {verseText}
           </Text>
         )}

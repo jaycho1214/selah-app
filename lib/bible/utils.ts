@@ -1,11 +1,11 @@
-import type { BibleBook } from './types';
+import type { BibleBook } from "./types";
 
 /**
  * Parse verse ID into components.
  * Format: "{translationId}:{book}:{chapter}:{verse}"
  */
 export function parseVerseId(verseId: string) {
-  const parts = verseId.split(':');
+  const parts = verseId.split(":");
   if (parts.length !== 4) return null;
   return {
     translation: parts[0],
@@ -22,7 +22,7 @@ export function createVerseId(
   translation: string,
   book: BibleBook,
   chapter: number,
-  verse: number
+  verse: number,
 ): string {
   return `${translation}:${book}:${chapter}:${verse}`;
 }
@@ -34,7 +34,7 @@ export function createVerseId(
 export function formatVerseReference(
   bookName: string,
   chapter: number,
-  verse: number
+  verse: number,
 ): string {
   return `${bookName} ${chapter}:${verse}`;
 }

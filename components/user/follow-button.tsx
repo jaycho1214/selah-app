@@ -1,12 +1,12 @@
-import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
-import { useFragment, useMutation } from 'react-relay';
-import { graphql } from 'relay-runtime';
-import * as Haptics from 'expo-haptics';
+import { ActivityIndicator, Pressable, StyleSheet } from "react-native";
+import { useFragment, useMutation } from "react-relay";
+import { graphql } from "relay-runtime";
+import * as Haptics from "expo-haptics";
 
-import { Text } from '@/components/ui/text';
-import { useColors } from '@/hooks/use-colors';
-import type { followButton_user$key } from '@/lib/relay/__generated__/followButton_user.graphql';
-import type { followButtonMutation } from '@/lib/relay/__generated__/followButtonMutation.graphql';
+import { Text } from "@/components/ui/text";
+import { useColors } from "@/hooks/use-colors";
+import type { followButton_user$key } from "@/lib/relay/__generated__/followButton_user.graphql";
+import type { followButtonMutation } from "@/lib/relay/__generated__/followButtonMutation.graphql";
 
 const fragment = graphql`
   fragment followButton_user on User {
@@ -42,7 +42,8 @@ interface FollowButtonProps {
 export function FollowButton({ userRef }: FollowButtonProps) {
   const colors = useColors();
   const data = useFragment(fragment, userRef);
-  const [commit, isMutationInFlight] = useMutation<followButtonMutation>(mutation);
+  const [commit, isMutationInFlight] =
+    useMutation<followButtonMutation>(mutation);
 
   const isFollowing = !!data?.followedAt;
 
@@ -62,20 +63,20 @@ export function FollowButton({ userRef }: FollowButtonProps) {
           // Toggle followedAt
           user.setValue(
             isFollowing ? null : new Date().toISOString(),
-            'followedAt'
+            "followedAt",
           );
           // Update follower count
-          const currentCount = (user.getValue('followerCount') as number) ?? 0;
+          const currentCount = (user.getValue("followerCount") as number) ?? 0;
           user.setValue(
             isFollowing ? currentCount - 1 : currentCount + 1,
-            'followerCount'
+            "followerCount",
           );
         }
       },
       onError: (error) => {
         // Optimistic update auto-rolls back
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        console.error('Follow/unfollow failed:', error);
+        console.error("Follow/unfollow failed:", error);
       },
     });
   };
@@ -94,16 +95,16 @@ export function FollowButton({ userRef }: FollowButtonProps) {
       {isMutationInFlight ? (
         <ActivityIndicator
           size="small"
-          color={isFollowing ? colors.text : '#fff'}
+          color={isFollowing ? colors.text : "#fff"}
         />
       ) : (
         <Text
           style={[
             styles.buttonText,
-            isFollowing ? { color: colors.text } : { color: '#fff' },
+            isFollowing ? { color: colors.text } : { color: "#fff" },
           ]}
         >
-          {isFollowing ? 'Following' : 'Follow'}
+          {isFollowing ? "Following" : "Follow"}
         </Text>
       )}
     </Pressable>
@@ -116,14 +117,14 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     minWidth: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   followButton: {
-    backgroundColor: '#000',
+    backgroundColor: "#000",
   },
   followingButton: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderWidth: 1,
   },
   disabledButton: {
@@ -131,6 +132,6 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

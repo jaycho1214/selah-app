@@ -24,7 +24,7 @@ export function ProfileSkeleton() {
           duration: 800,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     );
     animation.start();
 

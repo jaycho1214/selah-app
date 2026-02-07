@@ -8,9 +8,9 @@ export const authClient = createAuthClient({
   baseURL: API_URL,
   plugins: [
     expoClient({
-      scheme: "selah",           // Deep link scheme
-      storagePrefix: "selah",    // SecureStore key prefix
-      storage: SecureStore,      // Secure token persistence
+      scheme: "selah", // Deep link scheme
+      storagePrefix: "selah", // SecureStore key prefix
+      storage: SecureStore, // Secure token persistence
     }),
   ],
 });

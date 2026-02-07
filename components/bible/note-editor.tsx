@@ -4,7 +4,7 @@ import {
   useRef,
   useState,
   useCallback,
-} from 'react';
+} from "react";
 import {
   View,
   Text,
@@ -13,11 +13,11 @@ import {
   Modal,
   KeyboardAvoidingView,
   Platform,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAnnotationsStore } from '@/lib/stores/annotations-store';
-import { BIBLE_BOOK_DETAILS } from '@/lib/bible/constants';
-import type { BibleBook } from '@/lib/bible/types';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useAnnotationsStore } from "@/lib/stores/annotations-store";
+import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
+import type { BibleBook } from "@/lib/bible/types";
 
 export interface NoteEditorRef {
   open: (verseId: string, verseText: string) => void;
@@ -31,7 +31,7 @@ interface NoteEditorProps {
 
 // Parse verse ID into parts
 function parseVerseId(verseId: string) {
-  const parts = verseId.split(':');
+  const parts = verseId.split(":");
   if (parts.length !== 4) return null;
   return {
     translation: parts[0],
@@ -45,8 +45,8 @@ export const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(
   function NoteEditor({ onSave, onDelete }, ref) {
     const [visible, setVisible] = useState(false);
     const [verseId, setVerseId] = useState<string | null>(null);
-    const [verseText, setVerseText] = useState('');
-    const [noteContent, setNoteContent] = useState('');
+    const [verseText, setVerseText] = useState("");
+    const [noteContent, setNoteContent] = useState("");
     const inputRef = useRef<TextInput>(null);
 
     const { notes, setNote, removeNote } = useAnnotationsStore();
@@ -56,7 +56,7 @@ export const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(
         setVerseId(id);
         setVerseText(text);
         const existingNote = notes[id];
-        setNoteContent(existingNote?.content ?? '');
+        setNoteContent(existingNote?.content ?? "");
         setVisible(true);
         // Focus input after modal opens
         setTimeout(() => inputRef.current?.focus(), 100);
@@ -64,15 +64,15 @@ export const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(
       close: () => {
         setVisible(false);
         setVerseId(null);
-        setVerseText('');
-        setNoteContent('');
+        setVerseText("");
+        setNoteContent("");
       },
     }));
 
     const parsed = verseId ? parseVerseId(verseId) : null;
     const reference = parsed
       ? `${BIBLE_BOOK_DETAILS[parsed.book]?.name ?? parsed.book} ${parsed.chapter}:${parsed.verse}`
-      : '';
+      : "";
 
     const existingNote = verseId ? notes[verseId] : null;
 
@@ -103,7 +103,7 @@ export const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(
       >
         <SafeAreaView className="flex-1 bg-background">
           <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
             className="flex-1"
           >
             {/* Header */}
@@ -112,7 +112,7 @@ export const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(
                 <Text className="text-muted-foreground text-base">Cancel</Text>
               </Pressable>
               <Text className="text-foreground text-lg font-semibold">
-                {existingNote ? 'Edit Note' : 'Add Note'}
+                {existingNote ? "Edit Note" : "Add Note"}
               </Text>
               <Pressable
                 onPress={handleSave}
@@ -121,7 +121,9 @@ export const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(
               >
                 <Text
                   className={`text-base font-medium ${
-                    noteContent.trim() ? 'text-primary' : 'text-muted-foreground'
+                    noteContent.trim()
+                      ? "text-primary"
+                      : "text-muted-foreground"
                   }`}
                 >
                   Save
@@ -131,8 +133,13 @@ export const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(
 
             {/* Verse reference */}
             <View className="px-4 py-3 bg-muted/50 border-b border-border">
-              <Text className="text-primary text-sm font-medium">{reference}</Text>
-              <Text className="text-muted-foreground text-sm mt-1" numberOfLines={2}>
+              <Text className="text-primary text-sm font-medium">
+                {reference}
+              </Text>
+              <Text
+                className="text-muted-foreground text-sm mt-1"
+                numberOfLines={2}
+              >
                 {verseText}
               </Text>
             </View>
@@ -159,7 +166,9 @@ export const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(
                   onPress={handleDelete}
                   className="py-3 rounded-lg bg-destructive/10 items-center"
                 >
-                  <Text className="text-destructive font-medium">Delete Note</Text>
+                  <Text className="text-destructive font-medium">
+                    Delete Note
+                  </Text>
                 </Pressable>
               </View>
             )}
@@ -167,5 +176,5 @@ export const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(
         </SafeAreaView>
       </Modal>
     );
-  }
+  },
 );

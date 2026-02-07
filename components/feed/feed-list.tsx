@@ -39,6 +39,7 @@ interface PostPoll {
   readonly id: string;
   readonly totalVotes?: number | null;
   readonly isExpired?: boolean | null;
+  readonly deadline?: string | null;
   readonly userVote?: {
     readonly id?: string | null;
     readonly text?: string | null;
@@ -85,8 +86,6 @@ interface FeedListProps {
   /** Custom empty state component rendered when posts array is empty */
   emptyState?: React.ReactNode;
   contentContainerStyle?: { paddingTop?: number; paddingBottom?: number };
-  /** Offset for pull-to-refresh indicator (e.g. behind a tab bar) */
-  progressViewOffset?: number;
 }
 
 // ---------- Component ----------
@@ -109,7 +108,6 @@ function FeedList({
   currentUserId,
   emptyState,
   contentContainerStyle,
-  progressViewOffset,
 }: FeedListProps) {
   const colors = useColors();
 
@@ -133,19 +131,13 @@ function FeedList({
     );
   }
 
-  const renderItem = ({
-    item,
-    index,
-  }: {
-    item: PostEdge;
-    index: number;
-  }) => {
+  const renderItem = ({ item, index }: { item: PostEdge; index: number }) => {
     const post = item.node;
     const verse = post.verse;
 
     // Get book name for verse reference
     const bookName = verse?.book
-      ? BIBLE_BOOK_DETAILS[verse.book as BibleBook]?.name ?? verse.book
+      ? (BIBLE_BOOK_DETAILS[verse.book as BibleBook]?.name ?? verse.book)
       : null;
     const verseReference =
       bookName && verse ? `${bookName} ${verse.chapter}:${verse.verse}` : null;
@@ -195,7 +187,6 @@ function FeedList({
             onRefresh={onRefresh}
             tintColor={colors.textMuted}
             colors={[colors.accent]}
-            progressViewOffset={progressViewOffset}
           />
         }
       />
