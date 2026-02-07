@@ -51,10 +51,7 @@ export function ProfileHeaderEnhanced({
         <Pressable
           onPress={onAvatarPress}
           disabled={!onAvatarPress}
-          style={({ pressed }) => [
-            styles.avatarContainer,
-            { opacity: pressed && onAvatarPress ? 0.8 : 1 },
-          ]}
+          style={styles.avatarContainer}
         >
           {imageUrl ? (
             <Image

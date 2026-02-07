@@ -304,11 +304,7 @@ export default function UserEditScreen() {
             <View style={{ paddingHorizontal: 8 }}>
               <Pressable
                 onPress={handleCancel}
-                style={({ pressed }) => ({
-                  opacity: pressed ? 0.5 : 1,
-                  paddingHorizontal: 8,
-                  paddingVertical: 8,
-                })}
+                style={{ paddingHorizontal: 8, paddingVertical: 8 }}
               >
                 <RNText style={{ color: colors.accent, fontSize: 17 }}>
                   Cancel
@@ -321,11 +317,11 @@ export default function UserEditScreen() {
               <Pressable
                 onPress={handleSave}
                 disabled={isDoneDisabled}
-                style={({ pressed }) => ({
-                  opacity: pressed || isDoneDisabled ? 0.5 : 1,
+                style={{
+                  opacity: isDoneDisabled ? 0.5 : 1,
                   paddingHorizontal: 8,
                   paddingVertical: 8,
-                })}
+                }}
               >
                 {isSaving ? (
                   <ActivityIndicator size="small" color={colors.accent} />
@@ -528,11 +524,7 @@ export default function UserEditScreen() {
           >
             <Pressable
               onPress={() => handleAvatarAction("camera")}
-              style={({ pressed }) => ({
-                paddingVertical: 14,
-                paddingHorizontal: 16,
-                backgroundColor: pressed ? colors.surface : "transparent",
-              })}
+              style={{ paddingVertical: 14, paddingHorizontal: 16 }}
             >
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <View
@@ -570,11 +562,7 @@ export default function UserEditScreen() {
 
             <Pressable
               onPress={() => handleAvatarAction("library")}
-              style={({ pressed }) => ({
-                paddingVertical: 14,
-                paddingHorizontal: 16,
-                backgroundColor: pressed ? colors.surface : "transparent",
-              })}
+              style={{ paddingVertical: 14, paddingHorizontal: 16 }}
             >
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <View
@@ -616,11 +604,7 @@ export default function UserEditScreen() {
 
             <Pressable
               onPress={() => handleAvatarAction("remove")}
-              style={({ pressed }) => ({
-                paddingVertical: 14,
-                paddingHorizontal: 16,
-                backgroundColor: pressed ? colors.surface : "transparent",
-              })}
+              style={{ paddingVertical: 14, paddingHorizontal: 16 }}
             >
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <View

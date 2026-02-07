@@ -703,10 +703,7 @@ export function ReflectionItem({
           <View style={styles.footer}>
             {/* Verse Badge */}
             {verseReference && (
-              <Pressable
-                onPress={handleVersePress}
-                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-              >
+              <Pressable onPress={handleVersePress}>
                 <View
                   style={[
                     styles.verseBadge,
@@ -741,11 +738,7 @@ export function ReflectionItem({
             {/* Action Buttons Row - Refined with better spacing */}
             <View style={styles.actionBar}>
               {/* Like */}
-              <Pressable
-                onPress={handleLikeToggle}
-                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-                hitSlop={12}
-              >
+              <Pressable onPress={handleLikeToggle} hitSlop={12}>
                 <View style={styles.actionItem}>
                   <Heart
                     size={18}
@@ -767,11 +760,7 @@ export function ReflectionItem({
               </Pressable>
 
               {/* Comment */}
-              <Pressable
-                onPress={handleComment}
-                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-                hitSlop={12}
-              >
+              <Pressable onPress={handleComment} hitSlop={12}>
                 <View style={styles.actionItem}>
                   <MessageCircle
                     size={18}
@@ -789,11 +778,7 @@ export function ReflectionItem({
               </Pressable>
 
               {/* Share */}
-              <Pressable
-                onPress={handleShare}
-                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-                hitSlop={12}
-              >
+              <Pressable onPress={handleShare} hitSlop={12}>
                 <View style={styles.actionItem}>
                   <ShareIcon
                     size={17}
@@ -808,11 +793,7 @@ export function ReflectionItem({
 
               {/* Delete - only for owner */}
               {isOwner && onDelete && (
-                <Pressable
-                  onPress={handleDelete}
-                  style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-                  hitSlop={12}
-                >
+                <Pressable onPress={handleDelete} hitSlop={12}>
                   <View style={styles.actionItem}>
                     <Trash2
                       size={17}

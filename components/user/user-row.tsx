@@ -46,11 +46,7 @@ export function UserRow({ userRef }: UserRowProps) {
   return (
     <Pressable
       onPress={handlePress}
-      style={({ pressed }) => [
-        styles.container,
-        { borderBottomColor: colors.border },
-        pressed && { opacity: 0.7 },
-      ]}
+      style={[styles.container, { borderBottomColor: colors.border }]}
     >
       <UserAvatar imageUrl={data?.image?.url} name={data?.name} size={48} />
       <View style={styles.content}>

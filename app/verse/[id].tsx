@@ -481,10 +481,7 @@ function VerseContent({
 
             <Pressable
               onPress={handleShare}
-              style={({ pressed }) => [
-                styles.iconButton,
-                { opacity: pressed ? 0.5 : 1 },
-              ]}
+              style={styles.iconButton}
               hitSlop={8}
             >
               <Share2 size={20} color={colors.textMuted} />

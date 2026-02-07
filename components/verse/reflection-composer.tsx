@@ -977,19 +977,14 @@ export const ReflectionComposer = forwardRef<
               colors={colors}
             />
 
-            <Pressable
-              onPress={insertMention}
-              style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
-            >
+            <Pressable onPress={insertMention}>
               <AtSign size={20} color={colors.textSecondary} />
             </Pressable>
 
             <Pressable
               onPress={toggleSpoiler}
               disabled={!hasSelection}
-              style={({ pressed }) => ({
-                opacity: hasSelection ? (pressed ? 0.5 : 1) : 0.3,
-              })}
+              style={{ opacity: hasSelection ? 1 : 0.3 }}
             >
               <EyeOff
                 size={20}
@@ -997,10 +992,7 @@ export const ReflectionComposer = forwardRef<
               />
             </Pressable>
 
-            <Pressable
-              onPress={togglePollCreator}
-              style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
-            >
+            <Pressable onPress={togglePollCreator}>
               <BarChart2
                 size={20}
                 color={
@@ -1009,18 +1001,12 @@ export const ReflectionComposer = forwardRef<
               />
             </Pressable>
 
-            <Pressable
-              onPress={openFullscreen}
-              style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
-            >
+            <Pressable onPress={openFullscreen}>
               <Maximize2 size={18} color={colors.textSecondary} />
             </Pressable>
           </View>
 
-          <Pressable
-            onPress={handleDismissKeyboard}
-            style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
-          >
+          <Pressable onPress={handleDismissKeyboard}>
             <Text style={[styles.doneButton, { color: colors.text }]}>
               Done
             </Text>
@@ -1047,10 +1033,7 @@ export const ReflectionComposer = forwardRef<
           >
             <Pressable
               onPress={closeFullscreen}
-              style={({ pressed }) => [
-                styles.fullscreenHeaderButton,
-                { opacity: pressed ? 0.5 : 1 },
-              ]}
+              style={styles.fullscreenHeaderButton}
             >
               <ChevronDown size={24} color={colors.text} />
             </Pressable>
@@ -1062,12 +1045,11 @@ export const ReflectionComposer = forwardRef<
             <Pressable
               onPress={handleFullscreenSubmit}
               disabled={!canSubmit || !isAuthenticated}
-              style={({ pressed }) => [
+              style={[
                 styles.fullscreenPostButton,
                 {
                   backgroundColor:
                     canSubmit && isAuthenticated ? colors.text : colors.border,
-                  opacity: pressed && canSubmit ? 0.8 : 1,
                 },
               ]}
             >

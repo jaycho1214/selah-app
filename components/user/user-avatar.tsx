@@ -67,14 +67,7 @@ export function UserAvatar({
   );
 
   if (onPress) {
-    return (
-      <Pressable
-        onPress={onPress}
-        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-      >
-        {content}
-      </Pressable>
-    );
+    return <Pressable onPress={onPress}>{content}</Pressable>;
   }
 
   return content;

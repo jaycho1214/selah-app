@@ -34,8 +34,9 @@ export function ProfileStatsRow({
     <View style={styles.container}>
       {/* Following count */}
       <Pressable
-        onPress={handleFollowingPress}
-        style={({ pressed }) => [styles.stat, { opacity: pressed ? 0.6 : 1 }]}
+        onPress={followingCount > 0 ? handleFollowingPress : undefined}
+        disabled={followingCount === 0}
+        style={styles.stat}
       >
         <Text style={[styles.count, { color: colors.text }]}>
           {followingCount}
@@ -47,8 +48,9 @@ export function ProfileStatsRow({
 
       {/* Followers count */}
       <Pressable
-        onPress={handleFollowersPress}
-        style={({ pressed }) => [styles.stat, { opacity: pressed ? 0.6 : 1 }]}
+        onPress={followerCount > 0 ? handleFollowersPress : undefined}
+        disabled={followerCount === 0}
+        style={styles.stat}
       >
         <Text style={[styles.count, { color: colors.text }]}>
           {followerCount}

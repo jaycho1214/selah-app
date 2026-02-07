@@ -1,16 +1,15 @@
 import * as Haptics from "expo-haptics";
 import {
+  RelativePathString,
   Stack,
   useLocalSearchParams,
   useRouter,
-  RelativePathString,
 } from "expo-router";
 import React, { Suspense, useCallback, useRef } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 
-import { useSession } from "@/components/providers/session-provider";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import {
   ProfilePostsList,
@@ -18,14 +17,15 @@ import {
 } from "@/components/profile/profile-posts-list";
 import { ProfileSkeleton } from "@/components/profile/profile-skeleton";
 import { ProfileStatsRow } from "@/components/profile/profile-stats-row";
-import { FollowButton } from "@/components/user/follow-button";
+import { useSession } from "@/components/providers/session-provider";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
+import { FollowButton } from "@/components/user/follow-button";
 import { useColors } from "@/hooks/use-colors";
-import type { UsernameLikeMutation } from "@/lib/relay/__generated__/UsernameLikeMutation.graphql";
-import type { UsernameUnlikeMutation } from "@/lib/relay/__generated__/UsernameUnlikeMutation.graphql";
 import type { UsernameDeleteMutation } from "@/lib/relay/__generated__/UsernameDeleteMutation.graphql";
+import type { UsernameLikeMutation } from "@/lib/relay/__generated__/UsernameLikeMutation.graphql";
 import type { UsernameQuery } from "@/lib/relay/__generated__/UsernameQuery.graphql";
+import type { UsernameUnlikeMutation } from "@/lib/relay/__generated__/UsernameUnlikeMutation.graphql";
 
 // GraphQL query for user profile by username
 const userProfileQuery = graphql`
@@ -86,10 +86,11 @@ export default function UserProfileScreen() {
         options={{
           headerShown: true,
           headerTitle: "Profile",
-          headerBackTitle: "Back",
-          headerStyle: { backgroundColor: colors.bg },
+          headerStyle: { backgroundColor: "transparent" },
           headerTintColor: colors.text,
           headerShadowVisible: false,
+          headerBackButtonDisplayMode: "minimal",
+          headerTransparent: true,
         }}
       />
       <Suspense fallback={<ProfileSkeleton />}>

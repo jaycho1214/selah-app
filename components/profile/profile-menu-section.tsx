@@ -28,15 +28,7 @@ function MenuItem({
   };
 
   return (
-    <Pressable
-      onPress={handlePress}
-      style={({ pressed }) => [
-        styles.menuItem,
-        {
-          backgroundColor: pressed ? colors.border + "40" : "transparent",
-        },
-      ]}
-    >
+    <Pressable onPress={handlePress} style={styles.menuItem}>
       <View style={styles.menuItemLeft}>
         {Icon && (
           <Icon

@@ -250,9 +250,7 @@ export function ImagePickerButton({
     <Pressable
       onPress={handlePress}
       disabled={isDisabled}
-      style={({ pressed }) => ({
-        opacity: pressed || isDisabled ? 0.5 : 1,
-      })}
+      style={{ opacity: isDisabled ? 0.5 : 1 }}
     >
       <ImagePlus
         size={22}

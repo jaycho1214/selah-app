@@ -54,9 +54,7 @@ function SettingsItem({
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         onPress();
       }}
-      style={({ pressed }) => ({
-        backgroundColor: pressed ? colors.surfaceElevated : colors.surface,
-      })}
+      style={{ backgroundColor: colors.surface }}
     >
       <View style={styles.menuItemRow}>
         <View
