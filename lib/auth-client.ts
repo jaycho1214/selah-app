@@ -2,7 +2,9 @@ import { createAuthClient } from "better-auth/react";
 import { expoClient } from "@better-auth/expo/client";
 import * as SecureStore from "expo-secure-store";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "https://www.selah.kr";
+const API_URL = __DEV__
+  ? (process.env.EXPO_PUBLIC_API_URL ?? "https://selah.kr")
+  : "https://selah.kr";
 
 export const authClient = createAuthClient({
   baseURL: API_URL,

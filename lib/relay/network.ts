@@ -1,7 +1,9 @@
 import { GraphQLResponse, RequestParameters, Variables } from "relay-runtime";
 
 const API_URL =
-  (process.env.EXPO_PUBLIC_API_URL ?? "https://www.selah.kr") + "/api/graphql";
+  (__DEV__
+    ? (process.env.EXPO_PUBLIC_API_URL ?? "https://selah.kr")
+    : "https://selah.kr") + "/api/graphql";
 
 export async function fetchGraphQL(
   request: RequestParameters,
