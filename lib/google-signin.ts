@@ -12,8 +12,7 @@ import {
 export function configureGoogleSignIn() {
   GoogleSignin.configure({
     webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-    iosClientId:
-      "707707053099-robncnjvk5fidk58dkhsduelgscdemnn.apps.googleusercontent.com",
+    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
     offlineAccess: false, // We only need idToken for server verification
   });
 }

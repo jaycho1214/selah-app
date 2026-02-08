@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { Alert, Pressable, useColorScheme, StyleSheet } from "react-native";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import Svg, { Path } from "react-native-svg";
 import { Text } from "@/components/ui/text";
 import { authClient } from "@/lib/auth-client";
+import {
+  configureGoogleSignIn,
+  signInWithGoogle,
+} from "@/lib/google-signin";
 
 interface GoogleSignInButtonProps {
   onSuccess?: () => void;
@@ -23,25 +26,13 @@ export function GoogleSignInButton({
 
     setIsLoading(true);
     try {
-      // Configure inline to ensure latest config
-      GoogleSignin.configure({
-        webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-        iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
-      });
+      configureGoogleSignIn();
+      const idToken = await signInWithGoogle();
 
-      const response = await GoogleSignin.signIn();
-
-      if (response.data?.idToken) {
-        // Verify idToken with Better Auth backend
+      if (idToken) {
         const result = await authClient.signIn.social({
           provider: "google",
-          idToken: {
-            token: response.data.idToken,
-            // accessToken is optional - only available with serverAuthCode
-            ...(response.data.serverAuthCode && {
-              accessToken: response.data.serverAuthCode,
-            }),
-          },
+          idToken: { token: idToken },
         });
 
         if (result.error) {
@@ -50,7 +41,6 @@ export function GoogleSignInButton({
 
         onSuccess?.();
       }
-      // If no token, user cancelled - just reset loading state
     } catch (error) {
       console.error("[Auth] Google sign in error:", error);
       const err = error instanceof Error ? error : new Error("Unknown error");
