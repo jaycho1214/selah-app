@@ -11,7 +11,7 @@
 
 // @relayRequestID 16f23e32092d176352c1fbfedeb18e05
 
-import { ConcreteRequest } from 'relay-runtime';
+import { ConcreteRequest } from "relay-runtime";
 export type notificationsRegisterTokenMutation$variables = {
   token: string;
 };
@@ -23,54 +23,54 @@ export type notificationsRegisterTokenMutation = {
   variables: notificationsRegisterTokenMutation$variables;
 };
 
-const node: ConcreteRequest = (function(){
-var v0 = [
-  {
-    "defaultValue": null,
-    "kind": "LocalArgument",
-    "name": "token"
-  }
-],
-v1 = [
-  {
-    "alias": null,
-    "args": [
+const node: ConcreteRequest = (function () {
+  var v0 = [
       {
-        "kind": "Variable",
-        "name": "token",
-        "variableName": "token"
-      }
+        defaultValue: null,
+        kind: "LocalArgument",
+        name: "token",
+      },
     ],
-    "kind": "ScalarField",
-    "name": "registerExpoPushToken",
-    "storageKey": null
-  }
-];
-return {
-  "fragment": {
-    "argumentDefinitions": (v0/*: any*/),
-    "kind": "Fragment",
-    "metadata": null,
-    "name": "notificationsRegisterTokenMutation",
-    "selections": (v1/*: any*/),
-    "type": "Mutation",
-    "abstractKey": null
-  },
-  "kind": "Request",
-  "operation": {
-    "argumentDefinitions": (v0/*: any*/),
-    "kind": "Operation",
-    "name": "notificationsRegisterTokenMutation",
-    "selections": (v1/*: any*/)
-  },
-  "params": {
-    "id": "16f23e32092d176352c1fbfedeb18e05",
-    "metadata": {},
-    "name": "notificationsRegisterTokenMutation",
-    "operationKind": "mutation",
-    "text": null
-  }
-};
+    v1 = [
+      {
+        alias: null,
+        args: [
+          {
+            kind: "Variable",
+            name: "token",
+            variableName: "token",
+          },
+        ],
+        kind: "ScalarField",
+        name: "registerExpoPushToken",
+        storageKey: null,
+      },
+    ];
+  return {
+    fragment: {
+      argumentDefinitions: v0 /*: any*/,
+      kind: "Fragment",
+      metadata: null,
+      name: "notificationsRegisterTokenMutation",
+      selections: v1 /*: any*/,
+      type: "Mutation",
+      abstractKey: null,
+    },
+    kind: "Request",
+    operation: {
+      argumentDefinitions: v0 /*: any*/,
+      kind: "Operation",
+      name: "notificationsRegisterTokenMutation",
+      selections: v1 /*: any*/,
+    },
+    params: {
+      id: "16f23e32092d176352c1fbfedeb18e05",
+      metadata: {},
+      name: "notificationsRegisterTokenMutation",
+      operationKind: "mutation",
+      text: null,
+    },
+  };
 })();
 
 (node as any).hash = "998ca824e50f4ac3829180b01dba3312";

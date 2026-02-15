@@ -11,8 +11,11 @@
 
 // @relayRequestID d34d59af86660aadb2507ee19a2e0911
 
-import { ConcreteRequest } from 'relay-runtime';
-export type notificationsScreenMarkAsReadMutation$variables = Record<PropertyKey, never>;
+import { ConcreteRequest } from "relay-runtime";
+export type notificationsScreenMarkAsReadMutation$variables = Record<
+  PropertyKey,
+  never
+>;
 export type notificationsScreenMarkAsReadMutation$data = {
   readonly notificationMarkAsRead: boolean;
 };
@@ -21,41 +24,41 @@ export type notificationsScreenMarkAsReadMutation = {
   variables: notificationsScreenMarkAsReadMutation$variables;
 };
 
-const node: ConcreteRequest = (function(){
-var v0 = [
-  {
-    "alias": null,
-    "args": null,
-    "kind": "ScalarField",
-    "name": "notificationMarkAsRead",
-    "storageKey": null
-  }
-];
-return {
-  "fragment": {
-    "argumentDefinitions": [],
-    "kind": "Fragment",
-    "metadata": null,
-    "name": "notificationsScreenMarkAsReadMutation",
-    "selections": (v0/*: any*/),
-    "type": "Mutation",
-    "abstractKey": null
-  },
-  "kind": "Request",
-  "operation": {
-    "argumentDefinitions": [],
-    "kind": "Operation",
-    "name": "notificationsScreenMarkAsReadMutation",
-    "selections": (v0/*: any*/)
-  },
-  "params": {
-    "id": "d34d59af86660aadb2507ee19a2e0911",
-    "metadata": {},
-    "name": "notificationsScreenMarkAsReadMutation",
-    "operationKind": "mutation",
-    "text": null
-  }
-};
+const node: ConcreteRequest = (function () {
+  var v0 = [
+    {
+      alias: null,
+      args: null,
+      kind: "ScalarField",
+      name: "notificationMarkAsRead",
+      storageKey: null,
+    },
+  ];
+  return {
+    fragment: {
+      argumentDefinitions: [],
+      kind: "Fragment",
+      metadata: null,
+      name: "notificationsScreenMarkAsReadMutation",
+      selections: v0 /*: any*/,
+      type: "Mutation",
+      abstractKey: null,
+    },
+    kind: "Request",
+    operation: {
+      argumentDefinitions: [],
+      kind: "Operation",
+      name: "notificationsScreenMarkAsReadMutation",
+      selections: v0 /*: any*/,
+    },
+    params: {
+      id: "d34d59af86660aadb2507ee19a2e0911",
+      metadata: {},
+      name: "notificationsScreenMarkAsReadMutation",
+      operationKind: "mutation",
+      text: null,
+    },
+  };
 })();
 
 (node as any).hash = "1ef1ab5b07a4b3d1fe50bffc04d37a0b";
