@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { RelativePathString, router } from "expo-router";
-import { LogIn, Settings, Share2 } from "lucide-react-native";
+import { Settings, Share2 } from "lucide-react-native";
 import {
   Suspense,
   useCallback,
@@ -9,6 +9,7 @@ import {
   useState,
   useTransition,
 } from "react";
+import { ErrorBoundary } from "@/components/error-boundary";
 import {
   ActivityIndicator,
   Pressable,
@@ -18,11 +19,11 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import Animated, { FadeIn } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 
 import { useSession } from "@/components/providers/session-provider";
+import { useAnalytics } from "@/lib/analytics";
 import { ProfileHeaderEnhanced } from "@/components/profile/profile-header-enhanced";
 import {
   ProfilePostsList,
@@ -39,6 +40,7 @@ import {
 import { ProfileSkeletonEnhanced } from "@/components/profile/profile-skeleton-enhanced";
 import { ProfileStatsEnhanced } from "@/components/profile/profile-stats-enhanced";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Text } from "@/components/ui/text";
 import { useColors } from "@/hooks/use-colors";
 import type { profileLikeReflectionMutation } from "@/lib/relay/__generated__/profileLikeReflectionMutation.graphql";
@@ -101,9 +103,11 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
-      <Suspense fallback={<ProfileSkeletonEnhanced />}>
-        <AuthenticatedProfile />
-      </Suspense>
+      <ErrorBoundary propagateServerErrors>
+        <Suspense fallback={<ProfileSkeletonEnhanced />}>
+          <AuthenticatedProfile />
+        </Suspense>
+      </ErrorBoundary>
     </SafeAreaView>
   );
 }
@@ -120,42 +124,11 @@ function UnauthenticatedProfile() {
           <Settings size={24} color={colors.text} strokeWidth={1.5} />
         </Pressable>
       </View>
-      <View style={styles.emptyContainer}>
-        <Animated.View
-          entering={FadeIn.duration(400).delay(200)}
-          style={[
-            styles.emptyCard,
-            {
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
-            },
-          ]}
-        >
-          <View
-            style={[
-              styles.emptyIconContainer,
-              { backgroundColor: `${colors.accent}20` },
-            ]}
-          >
-            <LogIn size={24} color={colors.accent} strokeWidth={1.5} />
-          </View>
-          <Text style={[styles.emptyTitle, { color: colors.text }]}>
-            Welcome to Selah
-          </Text>
-          <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-            Sign in to save your reading progress, post reflections, and connect
-            with the community
-          </Text>
-          <Pressable
-            onPress={presentSignIn}
-            style={[styles.ctaButton, { backgroundColor: colors.accent }]}
-          >
-            <Text style={[styles.ctaButtonText, { color: "#fff" }]}>
-              Sign In
-            </Text>
-          </Pressable>
-        </Animated.View>
-      </View>
+      <EmptyState
+        title="Your space on Selah"
+        message="Sign in to track your reading, share reflections, and connect with the community."
+        action={{ label: "Sign In", onPress: presentSignIn }}
+      />
     </SafeAreaView>
   );
 }
@@ -163,6 +136,7 @@ function UnauthenticatedProfile() {
 function AuthenticatedProfile() {
   const { session } = useSession();
   const colors = useColors();
+  const { capture } = useAnalytics();
   const postsListRef = useRef<ProfilePostsListRef>(null);
   const repliesListRef = useRef<ProfileRepliesListRef>(null);
   const likesListRef = useRef<ProfileLikesListRef>(null);
@@ -171,7 +145,13 @@ function AuthenticatedProfile() {
   const [isPending, startTransition] = useTransition();
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const data = useLazyLoadQuery<profileOwnProfileQuery>(ownProfileQuery, {});
+  const data = useLazyLoadQuery<profileOwnProfileQuery>(
+    ownProfileQuery,
+    {},
+    {
+      fetchPolicy: "store-and-network",
+    },
+  );
   const user = data.user;
 
   const [commitLike] = useMutation<profileLikeReflectionMutation>(
@@ -187,6 +167,7 @@ function AuthenticatedProfile() {
   const handleLike = useCallback(
     (postId: string) => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      capture("post_liked", { post_id: postId });
       commitLike({
         variables: { id: postId },
         optimisticUpdater: (store) => {
@@ -205,6 +186,7 @@ function AuthenticatedProfile() {
   const handleUnlike = useCallback(
     (postId: string) => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      capture("post_unliked", { post_id: postId });
       commitUnlike({
         variables: { id: postId },
         optimisticUpdater: (store) => {
@@ -223,6 +205,7 @@ function AuthenticatedProfile() {
   const handleDelete = useCallback(
     (postId: string) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      capture("post_deleted", { post_id: postId });
       const connectionId = postsListRef.current?.connectionId;
       const connections = connectionId ? [connectionId] : [];
 
@@ -246,11 +229,13 @@ function AuthenticatedProfile() {
 
   const handleRefresh = useCallback(() => {
     setIsRefreshing(true);
-    postsListRef.current?.refetch();
-    repliesListRef.current?.refetch();
-    likesListRef.current?.refetch();
+    startTransition(() => {
+      postsListRef.current?.refetch();
+      repliesListRef.current?.refetch();
+      likesListRef.current?.refetch();
+    });
     refreshTimerRef.current = setTimeout(() => setIsRefreshing(false), 500);
-  }, []);
+  }, [startTransition]);
 
   const handleEditProfile = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -260,6 +245,7 @@ function AuthenticatedProfile() {
   const handleShareProfile = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (user?.username) {
+      capture("profile_shared", { username: user.username });
       await Share.share({
         message: `Check out @${user.username} on Selah`,
         url: `https://selah.kr/@${user.username}`,
@@ -446,49 +432,6 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-  },
-  emptyContainer: {
-    flex: 1,
-    alignItems: "center",
-    paddingTop: 60,
-    paddingHorizontal: 16,
-  },
-  emptyCard: {
-    alignItems: "center",
-    padding: 36,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderStyle: "dashed",
-  },
-  emptyIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
-  },
-  emptyTitle: {
-    fontSize: 17,
-    fontWeight: "600",
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  emptyText: {
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 21,
-    maxWidth: 260,
-  },
-  ctaButton: {
-    marginTop: 20,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 24,
-  },
-  ctaButtonText: {
-    fontSize: 15,
-    fontWeight: "600",
   },
   headerButtons: {
     flexDirection: "row",

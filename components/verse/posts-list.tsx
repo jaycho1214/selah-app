@@ -1,10 +1,7 @@
 import { forwardRef, useImperativeHandle } from "react";
 import { View, StyleSheet } from "react-native";
-import Animated, { FadeIn } from "react-native-reanimated";
 import { graphql, usePaginationFragment } from "react-relay";
-import { MessageCircle } from "lucide-react-native";
-
-import { Text } from "@/components/ui/text";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ReflectionItem } from "@/components/verse/reflection-item";
 import type { postsListFragment$key } from "@/lib/relay/__generated__/postsListFragment.graphql";
 
@@ -24,6 +21,7 @@ interface PostsListProps {
   onLike: (id: string) => void;
   onUnlike: (id: string) => void;
   onDelete: (id: string) => void;
+  onReport?: (id: string) => void;
 }
 
 export interface PostsListRef {
@@ -33,7 +31,7 @@ export interface PostsListRef {
 
 export const PostsList = forwardRef<PostsListRef, PostsListProps>(
   function PostsList(
-    { verseRef, colors, currentUserId, onLike, onUnlike, onDelete },
+    { verseRef, colors, currentUserId, onLike, onUnlike, onDelete, onReport },
     ref,
   ) {
     const { data, refetch } = usePaginationFragment(
@@ -110,35 +108,11 @@ export const PostsList = forwardRef<PostsListRef, PostsListProps>(
 
     if (posts.length === 0) {
       return (
-        <Animated.View
-          entering={FadeIn.duration(400).delay(400)}
-          style={[
-            styles.emptyCard,
-            {
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
-            },
-          ]}
-        >
-          <View
-            style={[
-              styles.emptyIconContainer,
-              { backgroundColor: colors.surfaceElevated },
-            ]}
-          >
-            <MessageCircle
-              size={24}
-              color={colors.textMuted}
-              strokeWidth={1.5}
-            />
-          </View>
-          <Text style={[styles.emptyTitle, { color: colors.text }]}>
-            Be the first to share
-          </Text>
-          <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-            What does this verse mean to you?
-          </Text>
-        </Animated.View>
+        <EmptyState
+          title="Be the first to share"
+          message="What does this verse mean to you?"
+          animationDelay={400}
+        />
       );
     }
 
@@ -162,6 +136,7 @@ export const PostsList = forwardRef<PostsListRef, PostsListProps>(
             onLike={onLike}
             onUnlike={onUnlike}
             onDelete={onDelete}
+            onReport={onReport}
           />
         ))}
       </View>
@@ -172,34 +147,5 @@ export const PostsList = forwardRef<PostsListRef, PostsListProps>(
 const styles = StyleSheet.create({
   postsList: {
     // Full bleed - no horizontal padding
-  },
-  // Empty State
-  emptyCard: {
-    alignItems: "center",
-    padding: 36,
-    marginHorizontal: 16,
-    marginTop: 24,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderStyle: "dashed",
-  },
-  emptyIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
-  },
-  emptyTitle: {
-    fontSize: 17,
-    fontWeight: "600",
-    marginBottom: 8,
-  },
-  emptyText: {
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 21,
-    maxWidth: 260,
   },
 });

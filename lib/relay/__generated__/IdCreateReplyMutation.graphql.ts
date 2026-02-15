@@ -1,5 +1,6 @@
 /**
- * @generated SignedSource<<54d52ad096d390724164978cc0e74934>>
+ * @generated SignedSource<<a8492be48d6bd6bd6614a9fc1723da64>>
+ * @relayHash 47a39bb0796e791929dabdc3018dc9c9
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -7,6 +8,8 @@
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
+
+// @relayRequestID 47a39bb0796e791929dabdc3018dc9c9
 
 import { ConcreteRequest } from "relay-runtime";
 export type BibleVersePostCreateInput = {
@@ -425,12 +428,11 @@ const node: ConcreteRequest = (function () {
       ],
     },
     params: {
-      cacheID: "47a39bb0796e791929dabdc3018dc9c9",
-      id: null,
+      id: "47a39bb0796e791929dabdc3018dc9c9",
       metadata: {},
       name: "IdCreateReplyMutation",
       operationKind: "mutation",
-      text: "mutation IdCreateReplyMutation(\n  $input: BibleVersePostCreateInput!\n) {\n  bibleVersePostCreate(input: $input) {\n    bibleVersePost {\n      id\n      content\n      createdAt\n      likesCount\n      childPostsCount\n      likedAt\n      user {\n        id\n        name\n        username\n        image {\n          url\n          id\n        }\n      }\n      images {\n        url\n        width\n        height\n        id\n      }\n      poll {\n        id\n        totalVotes\n        isExpired\n        deadline\n        userVote {\n          id\n          text\n        }\n        options {\n          id\n          text\n          voteCount\n          votePercentage\n        }\n      }\n    }\n  }\n}\n",
+      text: null,
     },
   };
 })();

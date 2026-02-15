@@ -1,5 +1,6 @@
 /**
- * @generated SignedSource<<45d43d5fedf914fa25a118852dfecba5>>
+ * @generated SignedSource<<69858bf88006dbd1d0fbd6d61119f1da>>
+ * @relayHash 46c14c4029e0bbb08325747cee911153
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -7,6 +8,8 @@
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
+
+// @relayRequestID 46c14c4029e0bbb08325747cee911153
 
 import { ConcreteRequest } from "relay-runtime";
 export type postsScreenLikeMutation$variables = {
@@ -74,12 +77,11 @@ const node: ConcreteRequest = (function () {
       selections: v1 /*: any*/,
     },
     params: {
-      cacheID: "46c14c4029e0bbb08325747cee911153",
-      id: null,
+      id: "46c14c4029e0bbb08325747cee911153",
       metadata: {},
       name: "postsScreenLikeMutation",
       operationKind: "mutation",
-      text: "mutation postsScreenLikeMutation(\n  $id: ID!\n) {\n  bibleVersePostLike(id: $id) {\n    likedAt\n  }\n}\n",
+      text: null,
     },
   };
 })();

@@ -1,8 +1,12 @@
-import "../global.css";
-
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
-import { LogBox, View, Text, ActivityIndicator } from "react-native";
+import {
+  LogBox,
+  View,
+  Text,
+  ActivityIndicator,
+  StyleSheet,
+} from "react-native";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -38,6 +42,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 import { KeyboardProvider } from "react-native-keyboard-controller";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 import { ThemeProvider, useTheme } from "@/components/providers/theme-provider";
 import { RelayProvider } from "@/components/providers/relay-provider";
@@ -47,6 +52,9 @@ import { useDatabaseMigrations } from "@/lib/db/client";
 import { useHydrateUserSettings } from "@/hooks/use-hydrate-user-settings";
 import { useNotificationSetup } from "@/hooks/use-notifications";
 import { AnimatedSplashScreen } from "@/components/animated-splash-screen";
+import { useColors } from "@/hooks/use-colors";
+import { PostHogProvider } from "@/components/providers/posthog-provider";
+import { CommonStyles } from "@/constants/styles";
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -58,14 +66,20 @@ export const unstable_settings = {
  */
 function DatabaseGate({ children }: { children: React.ReactNode }) {
   const { success, error } = useDatabaseMigrations();
+  const colors = useColors();
 
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center bg-background p-4">
-        <Text className="text-destructive text-center mb-2 font-semibold">
+      <View
+        style={[
+          CommonStyles.centered,
+          { backgroundColor: colors.bg, padding: 16 },
+        ]}
+      >
+        <Text style={[styles.errorTitle, { color: colors.destructive }]}>
           Database Error
         </Text>
-        <Text className="text-muted-foreground text-center text-sm">
+        <Text style={[styles.errorMessage, { color: colors.mutedForeground }]}>
           {error.message}
         </Text>
       </View>
@@ -74,7 +88,7 @@ function DatabaseGate({ children }: { children: React.ReactNode }) {
 
   if (!success) {
     return (
-      <View className="flex-1 items-center justify-center bg-background">
+      <View style={[CommonStyles.centered, { backgroundColor: colors.bg }]}>
         <ActivityIndicator size="large" />
       </View>
     );
@@ -129,20 +143,36 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <KeyboardProvider>
-          <BottomSheetModalProvider>
-            <DatabaseGate>
-              <RelayProvider>
-                <SessionProvider>
-                  <ThemeProvider>
-                    <RootLayoutNav />
-                  </ThemeProvider>
-                </SessionProvider>
-              </RelayProvider>
-            </DatabaseGate>
-          </BottomSheetModalProvider>
-        </KeyboardProvider>
+        <ErrorBoundary>
+          <KeyboardProvider>
+            <BottomSheetModalProvider>
+              <DatabaseGate>
+                <RelayProvider>
+                  <SessionProvider>
+                    <PostHogProvider>
+                      <ThemeProvider>
+                        <RootLayoutNav />
+                      </ThemeProvider>
+                    </PostHogProvider>
+                  </SessionProvider>
+                </RelayProvider>
+              </DatabaseGate>
+            </BottomSheetModalProvider>
+          </KeyboardProvider>
+        </ErrorBoundary>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  errorTitle: {
+    textAlign: "center",
+    marginBottom: 8,
+    fontWeight: "600",
+  },
+  errorMessage: {
+    textAlign: "center",
+    fontSize: 14,
+  },
+});

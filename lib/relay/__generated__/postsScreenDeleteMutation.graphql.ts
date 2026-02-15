@@ -1,5 +1,6 @@
 /**
- * @generated SignedSource<<acf848574b8c233909c6a6bda9544001>>
+ * @generated SignedSource<<e5570edc3fbe28f765e1bc852b3cdb4b>>
+ * @relayHash fddae9e1583d0c5edc07556095d968b5
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -7,6 +8,8 @@
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
+
+// @relayRequestID fddae9e1583d0c5edc07556095d968b5
 
 import { ConcreteRequest } from "relay-runtime";
 export type postsScreenDeleteMutation$variables = {
@@ -106,12 +109,11 @@ const node: ConcreteRequest = (function () {
       ],
     },
     params: {
-      cacheID: "fddae9e1583d0c5edc07556095d968b5",
-      id: null,
+      id: "fddae9e1583d0c5edc07556095d968b5",
       metadata: {},
       name: "postsScreenDeleteMutation",
       operationKind: "mutation",
-      text: "mutation postsScreenDeleteMutation(\n  $id: ID!\n) {\n  bibleVersePostDelete(id: $id) {\n    deletedIds\n  }\n}\n",
+      text: null,
     },
   };
 })();

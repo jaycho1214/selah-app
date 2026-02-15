@@ -1,23 +1,19 @@
 import * as React from "react";
-import { Text as RNText, TextProps as RNTextProps } from "react-native";
-import { cn } from "@/lib/utils";
+import {
+  Text as RNText,
+  TextProps as RNTextProps,
+  StyleSheet,
+} from "react-native";
+import { useColors } from "@/hooks/use-colors";
 
-interface TextProps extends RNTextProps {
-  className?: string;
-}
-
-const Text = React.forwardRef<RNText, TextProps>(
-  ({ className, ...props }, ref) => {
+const Text = React.forwardRef<RNText, RNTextProps>(
+  ({ style, ...props }, ref) => {
+    const colors = useColors();
     return (
-      <RNText
-        ref={ref}
-        className={cn("text-foreground", className)}
-        {...props}
-      />
+      <RNText ref={ref} style={[{ color: colors.text }, style]} {...props} />
     );
   },
 );
 Text.displayName = "Text";
 
 export { Text };
-export type { TextProps };

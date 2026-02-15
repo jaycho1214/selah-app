@@ -27,6 +27,7 @@ import { useSession } from "@/components/providers/session-provider";
 import { Text } from "@/components/ui/text";
 import { UserAvatar } from "@/components/user/user-avatar";
 import { useColors } from "@/hooks/use-colors";
+import { useAnalytics } from "@/lib/analytics";
 import type { userEditMutation } from "@/lib/relay/__generated__/userEditMutation.graphql";
 import type { userEditQuery } from "@/lib/relay/__generated__/userEditQuery.graphql";
 
@@ -68,6 +69,7 @@ const mutation = graphql`
 
 export default function UserEditScreen() {
   const colors = useColors();
+  const { capture } = useAnalytics();
   const insets = useSafeAreaInsets();
   const { session } = useSession();
   const data = useLazyLoadQuery<userEditQuery>(query, {});
@@ -160,6 +162,15 @@ export default function UserEditScreen() {
       },
       onCompleted: () => {
         setIsSaving(false);
+        capture("profile_edited", {
+          fields_updated: [
+            "name",
+            "username",
+            "bio",
+            "website",
+            "image",
+          ].filter(Boolean),
+        });
         router.back();
       },
       onError: (error) => {

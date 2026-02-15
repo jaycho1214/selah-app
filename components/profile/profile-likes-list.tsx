@@ -1,10 +1,8 @@
 import { forwardRef, useImperativeHandle } from "react";
 import { StyleSheet, View } from "react-native";
-import Animated, { FadeIn } from "react-native-reanimated";
 import { FlashList } from "@shopify/flash-list";
 import { graphql, usePaginationFragment } from "react-relay";
-import { Heart } from "lucide-react-native";
-
+import { EmptyState } from "@/components/ui/empty-state";
 import { Text } from "@/components/ui/text";
 import { ReflectionItem } from "@/components/verse/reflection-item";
 import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
@@ -18,6 +16,7 @@ interface ProfileLikesListProps {
   onLike: (id: string) => void;
   onUnlike: (id: string) => void;
   onDelete: (id: string) => void;
+  onReport?: (id: string) => void;
 }
 
 export interface ProfileLikesListRef {
@@ -29,7 +28,7 @@ export const ProfileLikesList = forwardRef<
   ProfileLikesListRef,
   ProfileLikesListProps
 >(function ProfileLikesList(
-  { userRef, currentUserId, onLike, onUnlike, onDelete },
+  { userRef, currentUserId, onLike, onUnlike, onDelete, onReport },
   ref,
 ) {
   const colors = useColors();
@@ -119,31 +118,10 @@ export const ProfileLikesList = forwardRef<
 
   if (posts.length === 0) {
     return (
-      <Animated.View
-        entering={FadeIn.duration(400).delay(200)}
-        style={[
-          styles.emptyCard,
-          {
-            backgroundColor: colors.surface,
-            borderColor: colors.border,
-          },
-        ]}
-      >
-        <View
-          style={[
-            styles.emptyIconContainer,
-            { backgroundColor: colors.surfaceElevated },
-          ]}
-        >
-          <Heart size={24} color={colors.textMuted} strokeWidth={1.5} />
-        </View>
-        <Text style={[styles.emptyTitle, { color: colors.text }]}>
-          No likes yet
-        </Text>
-        <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-          Like reflections to save them here
-        </Text>
-      </Animated.View>
+      <EmptyState
+        title="No likes yet"
+        message="Like reflections to save them here"
+      />
     );
   }
 
@@ -207,6 +185,7 @@ export const ProfileLikesList = forwardRef<
           onLike={onLike}
           onUnlike={onUnlike}
           onDelete={onDelete}
+          onReport={onReport}
         />
       </View>
     );
@@ -252,33 +231,5 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     letterSpacing: 0.5,
     textTransform: "uppercase",
-  },
-  emptyCard: {
-    alignItems: "center",
-    padding: 36,
-    marginHorizontal: 16,
-    marginTop: 24,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderStyle: "dashed",
-  },
-  emptyIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
-  },
-  emptyTitle: {
-    fontSize: 17,
-    fontWeight: "600",
-    marginBottom: 8,
-  },
-  emptyText: {
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 21,
-    maxWidth: 260,
   },
 });

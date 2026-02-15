@@ -1,5 +1,6 @@
 /**
- * @generated SignedSource<<26bb6b69f8a04ae9bba69d6ddbb15578>>
+ * @generated SignedSource<<fba6f101838ae0af487757b6886dd39c>>
+ * @relayHash 24e1b97f761336774e58ba1e13dbf49d
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -7,6 +8,8 @@
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
+
+// @relayRequestID 24e1b97f761336774e58ba1e13dbf49d
 
 import { ConcreteRequest } from "relay-runtime";
 export type UsernameDeleteMutation$variables = {
@@ -106,12 +109,11 @@ const node: ConcreteRequest = (function () {
       ],
     },
     params: {
-      cacheID: "24e1b97f761336774e58ba1e13dbf49d",
-      id: null,
+      id: "24e1b97f761336774e58ba1e13dbf49d",
       metadata: {},
       name: "UsernameDeleteMutation",
       operationKind: "mutation",
-      text: "mutation UsernameDeleteMutation(\n  $id: ID!\n) {\n  bibleVersePostDelete(id: $id) {\n    deletedIds\n  }\n}\n",
+      text: null,
     },
   };
 })();

@@ -1,5 +1,6 @@
 /**
- * @generated SignedSource<<8f8fd00f360c736bc0cef182a106e6c2>>
+ * @generated SignedSource<<17919293bd000a64b5c1f1614aaa4c3f>>
+ * @relayHash f42a31420e22dcd3c329b747891e0bc1
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -7,6 +8,8 @@
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
+
+// @relayRequestID f42a31420e22dcd3c329b747891e0bc1
 
 import { ConcreteRequest } from "relay-runtime";
 import { FragmentRefs } from "relay-runtime";
@@ -375,12 +378,11 @@ const node: ConcreteRequest = (function () {
       ],
     },
     params: {
-      cacheID: "f42a31420e22dcd3c329b747891e0bc1",
-      id: null,
+      id: "f42a31420e22dcd3c329b747891e0bc1",
       metadata: {},
       name: "postsScreenQuery",
       operationKind: "query",
-      text: "query postsScreenQuery {\n  ...postsScreenForYouFragment\n}\n\nfragment postsScreenForYouFragment on Query {\n  bibleVersePosts(first: 20) {\n    edges {\n      node {\n        id\n        content\n        createdAt\n        likesCount\n        childPostsCount\n        likedAt\n        user {\n          id\n          name\n          username\n          image {\n            url\n            id\n          }\n        }\n        images {\n          url\n          width\n          height\n          id\n        }\n        poll {\n          id\n          totalVotes\n          isExpired\n          deadline\n          userVote {\n            id\n            text\n          }\n          options {\n            id\n            text\n            voteCount\n            votePercentage\n          }\n        }\n        verse {\n          id\n          book\n          chapter\n          verse\n          translation\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n",
+      text: null,
     },
   };
 })();

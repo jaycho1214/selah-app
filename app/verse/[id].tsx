@@ -25,6 +25,11 @@ import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 
 import { SignInSheet } from "@/components/auth/sign-in-sheet";
 import { useSession } from "@/components/providers/session-provider";
+import { useAnalytics } from "@/lib/analytics";
+import {
+  ReportSheet,
+  type ReportSheetRef,
+} from "@/components/report/report-sheet";
 import { Text } from "@/components/ui/text";
 import { PostsList, type PostsListRef } from "@/components/verse/posts-list";
 import {
@@ -172,7 +177,9 @@ export default function VerseDetailPage() {
           options={{
             title: "Verse",
             headerTransparent: IS_LIQUID_GLASS,
-            headerStyle: { backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg },
+            headerStyle: {
+              backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg,
+            },
             headerTintColor: colors.text,
             headerShadowVisible: false,
           }}
@@ -192,7 +199,9 @@ export default function VerseDetailPage() {
         options={{
           title: reference,
           headerTransparent: IS_LIQUID_GLASS,
-          headerStyle: { backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg },
+          headerStyle: {
+            backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg,
+          },
           headerTintColor: colors.text,
           headerShadowVisible: false,
           headerBackTitle: "",
@@ -245,9 +254,11 @@ function VerseContent({
 }) {
   const contentPaddingTop = useTransparentHeaderPadding();
   const { session } = useSession();
+  const { capture } = useAnalytics();
   const composerRef = useRef<ReflectionComposerRef>(null);
   const postsListRef = useRef<PostsListRef>(null);
   const signInSheetRef = useRef<BottomSheetModal>(null);
+  const reportSheetRef = useRef<ReportSheetRef>(null);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -262,6 +273,12 @@ function VerseContent({
 
   // Fetch verse data
   const data = useLazyLoadQuery<IdQuery>(verseQuery, queryVariables);
+
+  useEffect(() => {
+    if (data.bibleVerseByReference?.id) {
+      capture("verse_selected", { verse_id: verseId });
+    }
+  }, [verseId]);
 
   // Pull to refresh using the fragment's refetch
   const handleRefresh = useCallback(async () => {
@@ -361,8 +378,17 @@ function VerseContent({
           },
           connections,
         },
-        onCompleted: () => {
+        onCompleted: (response) => {
           composerRef.current?.clear();
+          const postId = response.bibleVersePostCreate?.bibleVersePost?.id;
+          if (postId) {
+            capture("post_created", {
+              post_id: postId,
+              has_images: postData.images.length > 0,
+              has_poll: postData.poll !== null,
+              is_reply: false,
+            });
+          }
         },
         onError: (error) => {
           console.error("Failed to create post:", error);
@@ -374,6 +400,7 @@ function VerseContent({
 
   const handleLike = useCallback(
     (postId: string) => {
+      capture("post_liked", { post_id: postId });
       commitLike({
         variables: { id: postId },
         optimisticUpdater: (store) => {
@@ -391,6 +418,7 @@ function VerseContent({
 
   const handleUnlike = useCallback(
     (postId: string) => {
+      capture("post_unliked", { post_id: postId });
       commitUnlike({
         variables: { id: postId },
         optimisticUpdater: (store) => {
@@ -408,6 +436,7 @@ function VerseContent({
 
   const handleDelete = useCallback(
     (postId: string) => {
+      capture("post_deleted", { post_id: postId });
       const connectionId = postsListRef.current?.connectionId;
       const connections = connectionId ? [connectionId] : [];
 
@@ -423,6 +452,10 @@ function VerseContent({
 
   const handleAuthRequired = useCallback(() => {
     signInSheetRef.current?.present();
+  }, []);
+
+  const handleReport = useCallback((postId: string) => {
+    reportSheetRef.current?.present({ type: "post", targetId: postId });
   }, []);
 
   if (!verse) {
@@ -511,6 +544,7 @@ function VerseContent({
             onLike={handleLike}
             onUnlike={handleUnlike}
             onDelete={handleDelete}
+            onReport={handleReport}
           />
         </View>
 
@@ -531,6 +565,7 @@ function VerseContent({
 
       {/* Sign-in Sheet */}
       <SignInSheet ref={signInSheetRef} />
+      <ReportSheet ref={reportSheetRef} />
     </View>
   );
 }

@@ -5,6 +5,7 @@ import * as Haptics from "expo-haptics";
 
 import { Text } from "@/components/ui/text";
 import { useColors } from "@/hooks/use-colors";
+import { useAnalytics } from "@/lib/analytics";
 import type { followButton_user$key } from "@/lib/relay/__generated__/followButton_user.graphql";
 import type { followButtonMutation } from "@/lib/relay/__generated__/followButtonMutation.graphql";
 
@@ -41,6 +42,7 @@ interface FollowButtonProps {
 
 export function FollowButton({ userRef }: FollowButtonProps) {
   const colors = useColors();
+  const { capture } = useAnalytics();
   const data = useFragment(fragment, userRef);
   const [commit, isMutationInFlight] =
     useMutation<followButtonMutation>(mutation);
@@ -51,6 +53,9 @@ export function FollowButton({ userRef }: FollowButtonProps) {
     if (!data?.id) return;
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    capture(isFollowing ? "user_unfollowed" : "user_followed", {
+      target_user_id: data.id,
+    });
 
     commit({
       variables: {
@@ -87,21 +92,22 @@ export function FollowButton({ userRef }: FollowButtonProps) {
       disabled={isMutationInFlight}
       style={[
         styles.button,
-        isFollowing ? styles.followingButton : styles.followButton,
-        { borderColor: colors.border },
+        isFollowing
+          ? [styles.followingButton, { borderColor: colors.border }]
+          : { backgroundColor: colors.text },
         isMutationInFlight && styles.disabledButton,
       ]}
     >
       {isMutationInFlight ? (
         <ActivityIndicator
           size="small"
-          color={isFollowing ? colors.text : "#fff"}
+          color={isFollowing ? colors.text : colors.bg}
         />
       ) : (
         <Text
           style={[
             styles.buttonText,
-            isFollowing ? { color: colors.text } : { color: "#fff" },
+            { color: isFollowing ? colors.text : colors.bg },
           ]}
         >
           {isFollowing ? "Following" : "Follow"}
@@ -119,9 +125,6 @@ const styles = StyleSheet.create({
     minWidth: 100,
     alignItems: "center",
     justifyContent: "center",
-  },
-  followButton: {
-    backgroundColor: "#000",
   },
   followingButton: {
     backgroundColor: "transparent",

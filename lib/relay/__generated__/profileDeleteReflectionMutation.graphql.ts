@@ -1,5 +1,6 @@
 /**
- * @generated SignedSource<<f354a554a097c27b65cf11c62cc7ad9b>>
+ * @generated SignedSource<<57839c3224c5a631634557494889ed6e>>
+ * @relayHash 9690804b512eec366b6d3ad74d33b9be
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -7,6 +8,8 @@
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
+
+// @relayRequestID 9690804b512eec366b6d3ad74d33b9be
 
 import { ConcreteRequest } from "relay-runtime";
 export type profileDeleteReflectionMutation$variables = {
@@ -106,12 +109,11 @@ const node: ConcreteRequest = (function () {
       ],
     },
     params: {
-      cacheID: "9690804b512eec366b6d3ad74d33b9be",
-      id: null,
+      id: "9690804b512eec366b6d3ad74d33b9be",
       metadata: {},
       name: "profileDeleteReflectionMutation",
       operationKind: "mutation",
-      text: "mutation profileDeleteReflectionMutation(\n  $id: ID!\n) {\n  bibleVersePostDelete(id: $id) {\n    deletedIds\n  }\n}\n",
+      text: null,
     },
   };
 })();

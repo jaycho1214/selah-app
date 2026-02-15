@@ -1,5 +1,6 @@
 /**
- * @generated SignedSource<<979bd790c392c88176126ada05e78b5e>>
+ * @generated SignedSource<<374ec3bda2bc264249546639ac6f2b6a>>
+ * @relayHash 88601d61d219a54f27a3f9a2c8ff936a
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -7,6 +8,8 @@
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
+
+// @relayRequestID 88601d61d219a54f27a3f9a2c8ff936a
 
 import { ConcreteRequest } from "relay-runtime";
 import { FragmentRefs } from "relay-runtime";
@@ -303,12 +306,11 @@ const node: ConcreteRequest = (function () {
       ],
     },
     params: {
-      cacheID: "88601d61d219a54f27a3f9a2c8ff936a",
-      id: null,
+      id: "88601d61d219a54f27a3f9a2c8ff936a",
       metadata: {},
       name: "notificationsScreenQuery",
       operationKind: "query",
-      text: "query notificationsScreenQuery {\n  user {\n    unreadNotificationCount\n    id\n  }\n  ...notificationsScreenListFragment\n}\n\nfragment notificationItemFragment on Notification {\n  id\n  type\n  createdAt\n  sender {\n    id\n    name\n    username\n    image {\n      url\n      id\n    }\n  }\n  post {\n    id\n    content\n    verse {\n      id\n      book\n      chapter\n      verse\n      translation\n    }\n    parentPost {\n      verse {\n        id\n        book\n        chapter\n        verse\n        translation\n      }\n      id\n    }\n  }\n}\n\nfragment notificationsScreenListFragment on Query {\n  notifications(first: 20) {\n    edges {\n      node {\n        id\n        ...notificationItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n",
+      text: null,
     },
   };
 })();

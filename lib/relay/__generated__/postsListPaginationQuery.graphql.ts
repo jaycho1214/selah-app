@@ -1,5 +1,6 @@
 /**
- * @generated SignedSource<<8a85f0798fbbe0b2fa23a3b4a2440916>>
+ * @generated SignedSource<<d7c02fa5c70cb3e3581476d48b586b82>>
+ * @relayHash c56f8f17e0243ea5e1167599149753b9
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -7,6 +8,8 @@
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
+
+// @relayRequestID c56f8f17e0243ea5e1167599149753b9
 
 import { ConcreteRequest } from "relay-runtime";
 import { FragmentRefs } from "relay-runtime";
@@ -416,12 +419,11 @@ const node: ConcreteRequest = (function () {
       ],
     },
     params: {
-      cacheID: "c56f8f17e0243ea5e1167599149753b9",
-      id: null,
+      id: "c56f8f17e0243ea5e1167599149753b9",
       metadata: {},
       name: "postsListPaginationQuery",
       operationKind: "query",
-      text: "query postsListPaginationQuery(\n  $count: Int = 20\n  $cursor: String\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...postsListFragment_1G22uz\n    id\n  }\n}\n\nfragment postsListFragment_1G22uz on BibleVerse {\n  id\n  posts(first: $count, after: $cursor) {\n    edges {\n      node {\n        id\n        content\n        createdAt\n        likesCount\n        childPostsCount\n        likedAt\n        user {\n          id\n          name\n          username\n          image {\n            url\n            id\n          }\n        }\n        images {\n          url\n          width\n          height\n          id\n        }\n        poll {\n          id\n          totalVotes\n          isExpired\n          deadline\n          userVote {\n            id\n            text\n          }\n          options {\n            id\n            text\n            voteCount\n            votePercentage\n          }\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n",
+      text: null,
     },
   };
 })();

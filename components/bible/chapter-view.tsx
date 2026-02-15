@@ -300,7 +300,7 @@ function ChapterViewContent({
   }
 
   return (
-    <View className="flex-1">
+    <View style={{ flex: 1 }}>
       <FlashList
         ref={listRef}
         data={verses}

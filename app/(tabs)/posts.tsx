@@ -1,10 +1,9 @@
 import * as Haptics from "expo-haptics";
-import { MessageCircle, Users } from "lucide-react-native";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { ErrorBoundary } from "@/components/error-boundary";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
-  FadeIn,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -20,6 +19,12 @@ import {
 import { fetchQuery } from "relay-runtime";
 
 import { useSession } from "@/components/providers/session-provider";
+import { useAnalytics } from "@/lib/analytics";
+import {
+  ReportSheet,
+  type ReportSheetRef,
+} from "@/components/report/report-sheet";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Text } from "@/components/ui/text";
 import { useColors } from "@/hooks/use-colors";
 import { useFeedStore } from "@/lib/stores/feed-store";
@@ -216,11 +221,13 @@ function ForYouFeed() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { session } = useSession();
+  const { capture } = useAnalytics();
   const currentUserId = session?.user?.id ?? null;
   const [isRefreshing, setIsRefreshing] = useState(false);
   const environment = useRelayEnvironment();
   const connectionIdRef = useRef<string | null>(null);
   const refreshSubRef = useRef<{ unsubscribe: () => void } | null>(null);
+  const reportSheetRef = useRef<ReportSheetRef>(null);
 
   // Fetch initial data
   const queryData = useLazyLoadQuery<postsScreenQuery>(PostsQuery, {});
@@ -243,6 +250,7 @@ function ForYouFeed() {
   const handleLike = useCallback(
     (postId: string) => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      capture("post_liked", { post_id: postId });
       commitLike({
         variables: { id: postId },
         optimisticUpdater: (store) => {
@@ -261,6 +269,7 @@ function ForYouFeed() {
   const handleUnlike = useCallback(
     (postId: string) => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      capture("post_unliked", { post_id: postId });
       commitUnlike({
         variables: { id: postId },
         optimisticUpdater: (store) => {
@@ -279,6 +288,7 @@ function ForYouFeed() {
   const handleDelete = useCallback(
     (postId: string) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      capture("post_deleted", { post_id: postId });
       const connections = connectionIdRef.current
         ? [connectionIdRef.current]
         : [];
@@ -313,52 +323,39 @@ function ForYouFeed() {
     }
   }, [hasNext, isLoadingNext, loadNext]);
 
+  const handleReport = useCallback((postId: string) => {
+    reportSheetRef.current?.present({ type: "post", targetId: postId });
+  }, []);
+
   const emptyState = (
-    <Animated.View
-      entering={FadeIn.duration(400).delay(200)}
-      style={[
-        styles.emptyCard,
-        {
-          backgroundColor: colors.surface,
-          borderColor: colors.border,
-          marginTop: 40,
-        },
-      ]}
-    >
-      <View
-        style={[
-          styles.emptyIconContainer,
-          { backgroundColor: colors.surfaceElevated },
-        ]}
-      >
-        <MessageCircle size={24} color={colors.textMuted} strokeWidth={1.5} />
-      </View>
-      <Text style={[styles.emptyTitle, { color: colors.text }]}>
-        No posts yet
-      </Text>
-      <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-        Be the first to share a reflection on a Bible verse
-      </Text>
-    </Animated.View>
+    <EmptyState
+      title="No posts yet"
+      message="Be the first to share a reflection on a Bible verse"
+      style={{ marginTop: 16 }}
+    />
   );
 
   return (
-    <FeedList
-      posts={posts}
-      isRefreshing={isRefreshing}
-      isLoadingNext={isLoadingNext}
-      hasNext={hasNext}
-      onRefresh={handleRefresh}
-      onLoadMore={handleLoadMore}
-      onLike={handleLike}
-      onUnlike={handleUnlike}
-      onDelete={handleDelete}
-      currentUserId={currentUserId}
-      emptyState={emptyState}
-      contentContainerStyle={{
-        paddingBottom: insets.bottom + 100,
-      }}
-    />
+    <>
+      <FeedList
+        posts={posts}
+        isRefreshing={isRefreshing}
+        isLoadingNext={isLoadingNext}
+        hasNext={hasNext}
+        onRefresh={handleRefresh}
+        onLoadMore={handleLoadMore}
+        onLike={handleLike}
+        onUnlike={handleUnlike}
+        onDelete={handleDelete}
+        onReport={handleReport}
+        currentUserId={currentUserId}
+        emptyState={emptyState}
+        contentContainerStyle={{
+          paddingBottom: insets.bottom + 100,
+        }}
+      />
+      <ReportSheet ref={reportSheetRef} />
+    </>
   );
 }
 
@@ -375,44 +372,15 @@ function FollowingFeed({ onSwitchToForYou }: { onSwitchToForYou: () => void }) {
         style={[
           styles.followingContainer,
           {
-            paddingTop: 60,
             paddingBottom: insets.bottom + 100,
           },
         ]}
       >
-        <Animated.View
-          entering={FadeIn.duration(400).delay(200)}
-          style={[
-            styles.emptyCard,
-            {
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
-            },
-          ]}
-        >
-          <View
-            style={[
-              styles.followingIconContainer,
-              { backgroundColor: `${colors.accent}20` },
-            ]}
-          >
-            <Users size={32} color={colors.accent} strokeWidth={1.5} />
-          </View>
-          <Text style={[styles.emptyTitle, { color: colors.text }]}>
-            Sign in to see your feed
-          </Text>
-          <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-            Sign in to see posts from people you follow
-          </Text>
-          <Pressable
-            onPress={presentSignIn}
-            style={[styles.ctaButton, { backgroundColor: colors.accent }]}
-          >
-            <Text style={[styles.ctaButtonText, { color: "#fff" }]}>
-              Sign In
-            </Text>
-          </Pressable>
-        </Animated.View>
+        <EmptyState
+          title="See who you follow"
+          message="Sign in to follow others and see their reflections here."
+          action={{ label: "Sign In", onPress: presentSignIn }}
+        />
       </View>
     );
   }
@@ -423,44 +391,15 @@ function FollowingFeed({ onSwitchToForYou }: { onSwitchToForYou: () => void }) {
       style={[
         styles.followingContainer,
         {
-          paddingTop: 60,
           paddingBottom: insets.bottom + 100,
         },
       ]}
     >
-      <Animated.View
-        entering={FadeIn.duration(400).delay(200)}
-        style={[
-          styles.emptyCard,
-          {
-            backgroundColor: colors.surface,
-            borderColor: colors.border,
-          },
-        ]}
-      >
-        <View
-          style={[
-            styles.followingIconContainer,
-            { backgroundColor: `${colors.accent}20` },
-          ]}
-        >
-          <Users size={32} color={colors.accent} strokeWidth={1.5} />
-        </View>
-        <Text style={[styles.emptyTitle, { color: colors.text }]}>
-          Follow people to see their posts here
-        </Text>
-        <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-          Posts from people you follow will show up in this feed
-        </Text>
-        <Pressable
-          onPress={onSwitchToForYou}
-          style={[styles.ctaButton, { backgroundColor: colors.accent }]}
-        >
-          <Text style={[styles.ctaButtonText, { color: "#fff" }]}>
-            Discover Posts
-          </Text>
-        </Pressable>
-      </Animated.View>
+      <EmptyState
+        title="Follow people to see their posts here"
+        message="Posts from people you follow will show up in this feed"
+        action={{ label: "Discover Posts", onPress: onSwitchToForYou }}
+      />
     </View>
   );
 }
@@ -508,9 +447,11 @@ export default function PostsScreen() {
         onPageSelected={handlePageSelected}
       >
         <View key="for-you" style={styles.page} collapsable={false}>
-          <Suspense fallback={<FeedSkeleton />}>
-            <ForYouFeed />
-          </Suspense>
+          <ErrorBoundary propagateServerErrors>
+            <Suspense fallback={<FeedSkeleton />}>
+              <ForYouFeed />
+            </Suspense>
+          </ErrorBoundary>
         </View>
         <View key="following" style={styles.page} collapsable={false}>
           <FollowingFeed onSwitchToForYou={handleSwitchToForYou} />
@@ -561,55 +502,5 @@ const styles = StyleSheet.create({
   // Following feed
   followingContainer: {
     flex: 1,
-    alignItems: "center",
-    paddingHorizontal: 16,
-  },
-  followingIconContainer: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
-  },
-  // Shared empty state
-  emptyCard: {
-    alignItems: "center",
-    padding: 36,
-    marginHorizontal: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderStyle: "dashed",
-  },
-  emptyIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
-  },
-  emptyTitle: {
-    fontSize: 17,
-    fontWeight: "600",
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  emptyText: {
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 21,
-    maxWidth: 260,
-  },
-  // CTA button
-  ctaButton: {
-    marginTop: 20,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 24,
-  },
-  ctaButtonText: {
-    fontSize: 15,
-    fontWeight: "600",
   },
 });

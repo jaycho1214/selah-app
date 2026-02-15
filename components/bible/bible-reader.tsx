@@ -12,6 +12,7 @@ import Animated, {
 import Svg, { Path } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import { Suspense } from "react";
+import { ErrorBoundary } from "@/components/error-boundary";
 import { ChapterView } from "./chapter-view";
 import { ChapterSkeleton } from "./chapter-skeleton";
 import { useBibleStore } from "@/lib/stores/bible-store";
@@ -240,16 +241,18 @@ export function BibleReader({
           {isTransitioning ? (
             <ChapterFallback />
           ) : (
-            <Suspense fallback={<ChapterFallback />}>
-              <ChapterView
-                book={currentBook}
-                chapter={currentChapter}
-                topInset={insets.top}
-                scrollToVerse={scrollToVerse}
-                onVersePress={onVersePress}
-                onVerseLongPress={onVerseLongPress}
-              />
-            </Suspense>
+            <ErrorBoundary>
+              <Suspense fallback={<ChapterFallback />}>
+                <ChapterView
+                  book={currentBook}
+                  chapter={currentChapter}
+                  topInset={insets.top}
+                  scrollToVerse={scrollToVerse}
+                  onVersePress={onVersePress}
+                  onVerseLongPress={onVerseLongPress}
+                />
+              </Suspense>
+            </ErrorBoundary>
           )}
         </Animated.View>
       </GestureDetector>

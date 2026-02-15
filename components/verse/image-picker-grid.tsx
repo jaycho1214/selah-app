@@ -6,8 +6,6 @@ import Animated, { FadeIn, FadeOut, Layout } from "react-native-reanimated";
 import { X, ImagePlus } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 
-import { Text } from "@/components/ui/text";
-
 const MAX_IMAGES = 4;
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -38,73 +36,6 @@ export function ImagePickerGrid({
   onImagesChange,
   colors,
 }: ImagePickerGridProps) {
-  const pickImages = useCallback(async () => {
-    try {
-      if (images.length >= MAX_IMAGES) {
-        Alert.alert(
-          "Limit Reached",
-          `You can only attach up to ${MAX_IMAGES} images.`,
-        );
-        return;
-      }
-
-      // Request permissions
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission Required",
-          "Please allow access to your photo library to attach images.",
-        );
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"],
-        allowsMultipleSelection: true,
-        selectionLimit: MAX_IMAGES - images.length,
-        quality: 0.8,
-        exif: false,
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-        const validImages: SelectedImage[] = [];
-
-        for (const asset of result.assets) {
-          // Validate asset has required properties
-          if (!asset.uri || !asset.width || !asset.height) {
-            continue;
-          }
-
-          // Check file size (rough estimate from dimensions)
-          if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE) {
-            Alert.alert(
-              "Image Too Large",
-              "One or more images exceed the 10MB limit.",
-            );
-            continue;
-          }
-
-          validImages.push({
-            uri: asset.uri,
-            width: asset.width,
-            height: asset.height,
-            mimeType: asset.mimeType,
-          });
-        }
-
-        if (validImages.length > 0) {
-          onImagesChange([...images, ...validImages].slice(0, MAX_IMAGES));
-        }
-      }
-    } catch (error) {
-      console.error("Image picker error:", error);
-      Alert.alert("Error", "Failed to pick images. Please try again.");
-    }
-  }, [images, onImagesChange]);
-
   const removeImage = useCallback(
     (index: number) => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -152,30 +83,6 @@ export function ImagePickerGrid({
             </Pressable>
           </Animated.View>
         ))}
-
-        {/* Add more button if under limit */}
-        {images.length > 0 && images.length < MAX_IMAGES && (
-          <Animated.View
-            layout={Layout.springify()}
-            entering={FadeIn.duration(200)}
-            style={[
-              styles.addMoreContainer,
-              images.length === 1 && styles.doubleImage,
-              images.length >= 2 && styles.gridImage,
-              {
-                backgroundColor: colors.surfaceElevated,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <Pressable onPress={pickImages} style={styles.addMoreButton}>
-              <ImagePlus size={24} color={colors.textMuted} />
-              <Text style={[styles.addMoreText, { color: colors.textMuted }]}>
-                {images.length}/{MAX_IMAGES}
-              </Text>
-            </Pressable>
-          </Animated.View>
-        )}
       </View>
     </Animated.View>
   );
@@ -266,25 +173,24 @@ const styles = StyleSheet.create({
   },
   grid: {
     flexDirection: "row",
-    flexWrap: "wrap",
     gap: 8,
   },
   imageContainer: {
     position: "relative",
-    borderRadius: 12,
+    borderRadius: 10,
     overflow: "hidden",
   },
   singleImage: {
-    width: "100%",
-    aspectRatio: 16 / 9,
+    width: 80,
+    height: 80,
   },
   doubleImage: {
-    width: "48%",
-    aspectRatio: 1,
+    width: 80,
+    height: 80,
   },
   gridImage: {
-    width: "31%",
-    aspectRatio: 1,
+    width: 80,
+    height: 80,
   },
   image: {
     width: "100%",
@@ -304,21 +210,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 2,
     elevation: 3,
-  },
-  addMoreContainer: {
-    borderRadius: 12,
-    borderWidth: 1,
-    borderStyle: "dashed",
-    overflow: "hidden",
-  },
-  addMoreButton: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 4,
-  },
-  addMoreText: {
-    fontSize: 11,
-    fontWeight: "500",
   },
 });

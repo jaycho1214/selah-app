@@ -1,46 +1,67 @@
 import * as React from "react";
-import { View, ViewProps } from "react-native";
-import { cn } from "@/lib/utils";
+import { View, ViewProps, StyleSheet } from "react-native";
 import { Text } from "./text";
+import { useColors } from "@/hooks/use-colors";
 
-interface CardProps extends ViewProps {
-  className?: string;
-}
+interface CardProps extends ViewProps {}
 
-const Card = React.forwardRef<View, CardProps>(
-  ({ className, ...props }, ref) => (
+const Card = React.forwardRef<View, CardProps>(({ style, ...props }, ref) => {
+  const colors = useColors();
+  return (
     <View
       ref={ref}
-      className={cn("rounded-lg border border-border bg-card p-4", className)}
+      style={[
+        styles.card,
+        { borderColor: colors.border, backgroundColor: colors.card },
+        style,
+      ]}
       {...props}
     />
-  ),
-);
+  );
+});
 Card.displayName = "Card";
 
-const CardHeader = React.forwardRef<View, CardProps>(
-  ({ className, ...props }, ref) => (
-    <View ref={ref} className={cn("pb-2", className)} {...props} />
+const CardHeader = React.forwardRef<View, ViewProps>(
+  ({ style, ...props }, ref) => (
+    <View ref={ref} style={[styles.cardHeader, style]} {...props} />
   ),
 );
 CardHeader.displayName = "CardHeader";
 
 interface CardTitleProps {
-  className?: string;
+  style?: any;
   children?: React.ReactNode;
 }
 
-const CardTitle = ({ className, children }: CardTitleProps) => (
-  <Text className={cn("text-lg font-semibold", className)}>{children}</Text>
+const CardTitle = ({ style, children }: CardTitleProps) => (
+  <Text style={[styles.cardTitle, style]}>{children}</Text>
 );
 CardTitle.displayName = "CardTitle";
 
-const CardContent = React.forwardRef<View, CardProps>(
-  ({ className, ...props }, ref) => (
-    <View ref={ref} className={cn("pt-0", className)} {...props} />
+const CardContent = React.forwardRef<View, ViewProps>(
+  ({ style, ...props }, ref) => (
+    <View ref={ref} style={[styles.cardContent, style]} {...props} />
   ),
 );
 CardContent.displayName = "CardContent";
+
+const styles = StyleSheet.create({
+  card: {
+    borderRadius: 10,
+    borderWidth: 1,
+    padding: 16,
+  },
+  cardHeader: {
+    paddingBottom: 8,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  cardContent: {
+    paddingTop: 0,
+  },
+});
 
 export { Card, CardHeader, CardTitle, CardContent };
 export type { CardProps, CardTitleProps };

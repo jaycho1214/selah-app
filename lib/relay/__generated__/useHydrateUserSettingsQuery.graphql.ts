@@ -1,5 +1,6 @@
 /**
- * @generated SignedSource<<794e04cf024707561188a400db7b9708>>
+ * @generated SignedSource<<2a8a53a46c9841fbe78f66eb2f95a975>>
+ * @relayHash af6ba83524390d5f821276b747522d80
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -7,6 +8,8 @@
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
+
+// @relayRequestID af6ba83524390d5f821276b747522d80
 
 import { ConcreteRequest } from "relay-runtime";
 export type useHydrateUserSettingsQuery$variables = Record<PropertyKey, never>;
@@ -102,12 +105,11 @@ const node: ConcreteRequest = (function () {
       selections: v0 /*: any*/,
     },
     params: {
-      cacheID: "af6ba83524390d5f821276b747522d80",
-      id: null,
+      id: "af6ba83524390d5f821276b747522d80",
       metadata: {},
       name: "useHydrateUserSettingsQuery",
       operationKind: "query",
-      text: "query useHydrateUserSettingsQuery {\n  userSettings {\n    bible {\n      verseHighlight {\n        enabled\n        color\n      }\n    }\n  }\n}\n",
+      text: null,
     },
   };
 })();

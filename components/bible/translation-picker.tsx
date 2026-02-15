@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { View, Text, Pressable, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  ActivityIndicator,
+  StyleSheet,
+} from "react-native";
 import { Check, Download, Trash2, RefreshCw } from "lucide-react-native";
 import { useBibleStore } from "@/lib/stores/bible-store";
 import {
@@ -11,6 +17,8 @@ import {
   DownloadProgress,
   RemoteTranslation,
 } from "@/lib/bible/offline";
+import { useColors } from "@/hooks/use-colors";
+import { CommonStyles } from "@/constants/styles";
 
 interface TranslationPickerProps {
   onClose?: () => void;
@@ -24,6 +32,7 @@ interface LocalTranslation {
 }
 
 export function TranslationPicker({ onClose }: TranslationPickerProps) {
+  const colors = useColors();
   const currentTranslation = useBibleStore((s) => s.currentTranslation);
   const setTranslation = useBibleStore((s) => s.setTranslation);
   const [remoteTranslations, setRemoteTranslations] = useState<
@@ -117,17 +126,15 @@ export function TranslationPicker({ onClose }: TranslationPickerProps) {
 
   if (loading) {
     return (
-      <View className="p-4 items-center">
+      <View style={[styles.container, { alignItems: "center" }]}>
         <ActivityIndicator size="large" />
       </View>
     );
   }
 
   return (
-    <View className="p-4">
-      <Text className="text-foreground text-base font-semibold mb-3">
-        Translation
-      </Text>
+    <View style={styles.container}>
+      <Text style={[styles.heading, { color: colors.text }]}>Translation</Text>
 
       {remoteTranslations.map((translation) => {
         const isSelected = currentTranslation === translation.id;
@@ -139,35 +146,56 @@ export function TranslationPicker({ onClose }: TranslationPickerProps) {
         return (
           <View
             key={translation.id}
-            className="flex-row items-center justify-between py-3 border-b border-border"
+            style={[
+              CommonStyles.rowBetween,
+              styles.row,
+              { borderBottomColor: colors.border },
+            ]}
           >
             <Pressable
               onPress={() => handleSelect(translation.id)}
-              className="flex-1 flex-row items-center"
+              style={styles.selectButton}
             >
               <View
-                className={`w-5 h-5 rounded-full mr-3 items-center justify-center ${
-                  isSelected ? "bg-primary" : "border border-muted-foreground"
-                }`}
+                style={[
+                  styles.radio,
+                  isSelected
+                    ? { backgroundColor: colors.primary }
+                    : { borderWidth: 1, borderColor: colors.mutedForeground },
+                ]}
               >
                 {isSelected && (
-                  <Check size={12} className="text-primary-foreground" />
+                  <Check size={12} color={colors.primaryForeground} />
                 )}
               </View>
               <View>
-                <View className="flex-row items-center gap-2">
-                  <Text className="text-foreground text-base">
+                <View style={[CommonStyles.row, { gap: 8 }]}>
+                  <Text
+                    style={[styles.translationName, { color: colors.text }]}
+                  >
                     {translation.name}
                   </Text>
                   {updateAvailable && (
-                    <View className="bg-primary/20 px-1.5 py-0.5 rounded">
-                      <Text className="text-primary text-xs font-medium">
+                    <View
+                      style={[
+                        styles.updateBadge,
+                        { backgroundColor: colors.muted },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.updateBadgeText,
+                          { color: colors.primary },
+                        ]}
+                      >
                         Update
                       </Text>
                     </View>
                   )}
                 </View>
-                <Text className="text-muted-foreground text-xs">
+                <Text
+                  style={[styles.statusText, { color: colors.mutedForeground }]}
+                >
                   {downloaded
                     ? `v${local?.version} - Available offline`
                     : "Online only"}
@@ -177,49 +205,101 @@ export function TranslationPicker({ onClose }: TranslationPickerProps) {
 
             {/* Action buttons */}
             {isDownloading ? (
-              <View className="flex-row items-center gap-2">
+              <View style={[CommonStyles.row, { gap: 8 }]}>
                 <ActivityIndicator size="small" />
-                <Text className="text-muted-foreground text-xs">
+                <Text
+                  style={[styles.statusText, { color: colors.mutedForeground }]}
+                >
                   {progress?.progress ?? 0}%
                 </Text>
               </View>
             ) : updateAvailable ? (
-              <View className="flex-row items-center">
+              <View style={CommonStyles.row}>
                 <Pressable
                   onPress={() => handleUpdate(translation.id)}
-                  className="p-2"
+                  style={styles.actionButton}
                 >
-                  <RefreshCw size={18} className="text-primary" />
+                  <RefreshCw size={18} color={colors.primary} />
                 </Pressable>
                 <Pressable
                   onPress={() => handleDelete(translation.id)}
-                  className="p-2"
+                  style={styles.actionButton}
                 >
-                  <Trash2 size={18} className="text-muted-foreground" />
+                  <Trash2 size={18} color={colors.mutedForeground} />
                 </Pressable>
               </View>
             ) : downloaded ? (
               <Pressable
                 onPress={() => handleDelete(translation.id)}
-                className="p-2"
+                style={styles.actionButton}
               >
-                <Trash2 size={18} className="text-muted-foreground" />
+                <Trash2 size={18} color={colors.mutedForeground} />
               </Pressable>
             ) : (
               <Pressable
                 onPress={() => handleDownload(translation.id)}
-                className="p-2"
+                style={styles.actionButton}
               >
-                <Download size={18} className="text-primary" />
+                <Download size={18} color={colors.primary} />
               </Pressable>
             )}
           </View>
         );
       })}
 
-      <Text className="text-muted-foreground text-xs mt-3">
+      <Text style={[styles.footerText, { color: colors.mutedForeground }]}>
         Downloaded translations work without internet connection
       </Text>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+  },
+  heading: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 12,
+  },
+  row: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  selectButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  radio: {
+    width: 20,
+    height: 20,
+    borderRadius: 9999,
+    marginRight: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  translationName: {
+    fontSize: 16,
+  },
+  updateBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  updateBadgeText: {
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  statusText: {
+    fontSize: 12,
+  },
+  actionButton: {
+    padding: 8,
+  },
+  footerText: {
+    fontSize: 12,
+    marginTop: 12,
+  },
+});

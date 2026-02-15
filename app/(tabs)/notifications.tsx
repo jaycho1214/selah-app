@@ -1,8 +1,7 @@
-import { Bell, LogIn } from "lucide-react-native";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { Pressable, RefreshControl, StyleSheet, View } from "react-native";
+import { ErrorBoundary } from "@/components/error-boundary";
+import { RefreshControl, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, { FadeIn } from "react-native-reanimated";
 import { FlashList } from "@shopify/flash-list";
 import {
   graphql,
@@ -15,6 +14,7 @@ import { fetchQuery } from "relay-runtime";
 import { useFocusEffect } from "@react-navigation/native";
 
 import { useSession } from "@/components/providers/session-provider";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Text } from "@/components/ui/text";
 import { useColors } from "@/hooks/use-colors";
 import { NotificationItem } from "@/components/notifications/notification-item";
@@ -134,33 +134,10 @@ function NotificationList() {
 
   if (notifications.length === 0) {
     return (
-      <View style={styles.emptyContainer}>
-        <Animated.View
-          entering={FadeIn.duration(400).delay(200)}
-          style={[
-            styles.emptyCard,
-            {
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
-            },
-          ]}
-        >
-          <View
-            style={[
-              styles.emptyIconContainer,
-              { backgroundColor: colors.surfaceElevated },
-            ]}
-          >
-            <Bell size={24} color={colors.textMuted} strokeWidth={1.5} />
-          </View>
-          <Text style={[styles.emptyTitle, { color: colors.text }]}>
-            No notifications yet
-          </Text>
-          <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-            When someone likes, replies, or mentions you, it will show up here
-          </Text>
-        </Animated.View>
-      </View>
+      <EmptyState
+        title="No notifications yet"
+        message="When someone likes, replies, or mentions you, it will show up here"
+      />
     );
   }
 
@@ -188,43 +165,14 @@ function NotificationList() {
 // ---------- Unauthenticated State ----------
 
 function UnauthenticatedState() {
-  const colors = useColors();
   const { presentSignIn } = useSession();
 
   return (
-    <View style={styles.emptyContainer}>
-      <Animated.View
-        entering={FadeIn.duration(400).delay(200)}
-        style={[
-          styles.emptyCard,
-          {
-            backgroundColor: colors.surface,
-            borderColor: colors.border,
-          },
-        ]}
-      >
-        <View
-          style={[
-            styles.emptyIconContainer,
-            { backgroundColor: `${colors.accent}20` },
-          ]}
-        >
-          <LogIn size={24} color={colors.accent} strokeWidth={1.5} />
-        </View>
-        <Text style={[styles.emptyTitle, { color: colors.text }]}>
-          Sign in to see notifications
-        </Text>
-        <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-          Sign in to get notified about likes, replies, and more
-        </Text>
-        <Pressable
-          onPress={presentSignIn}
-          style={[styles.ctaButton, { backgroundColor: colors.accent }]}
-        >
-          <Text style={[styles.ctaButtonText, { color: "#fff" }]}>Sign In</Text>
-        </Pressable>
-      </Animated.View>
-    </View>
+    <EmptyState
+      title="Don't miss a thing"
+      message="Sign in to get notified when others respond to your reflections."
+      action={{ label: "Sign In", onPress: presentSignIn }}
+    />
   );
 }
 
@@ -255,9 +203,11 @@ export default function NotificationsScreen() {
       {!isAuthenticated ? (
         <UnauthenticatedState />
       ) : (
-        <Suspense fallback={<NotificationsSkeleton />}>
-          <NotificationList />
-        </Suspense>
+        <ErrorBoundary propagateServerErrors>
+          <Suspense fallback={<NotificationsSkeleton />}>
+            <NotificationList />
+          </Suspense>
+        </ErrorBoundary>
       )}
     </View>
   );
@@ -273,52 +223,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: "700",
-    letterSpacing: -0.5,
-  },
-  // Empty states
-  emptyContainer: {
-    flex: 1,
-    alignItems: "center",
-    paddingTop: 60,
-    paddingHorizontal: 16,
-  },
-  emptyCard: {
-    alignItems: "center",
-    padding: 36,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderStyle: "dashed",
-  },
-  emptyIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
-  },
-  emptyTitle: {
-    fontSize: 17,
-    fontWeight: "600",
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  emptyText: {
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 21,
-    maxWidth: 260,
-  },
-  ctaButton: {
-    marginTop: 20,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 24,
-  },
-  ctaButtonText: {
-    fontSize: 15,
-    fontWeight: "600",
+    letterSpacing: -0.3,
   },
 });

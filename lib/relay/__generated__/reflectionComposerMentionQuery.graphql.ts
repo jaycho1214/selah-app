@@ -1,5 +1,6 @@
 /**
- * @generated SignedSource<<9ccc8cde22ce0b6a9aae9b35434104ae>>
+ * @generated SignedSource<<a30384abb426e65c5e636f4926555c9b>>
+ * @relayHash 58d90ee598e9566a615a278e40c96a19
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -7,6 +8,8 @@
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
+
+// @relayRequestID 58d90ee598e9566a615a278e40c96a19
 
 import { ConcreteRequest } from "relay-runtime";
 export type UserFilterInput = {
@@ -210,12 +213,11 @@ const node: ConcreteRequest = (function () {
       ],
     },
     params: {
-      cacheID: "58d90ee598e9566a615a278e40c96a19",
-      id: null,
+      id: "58d90ee598e9566a615a278e40c96a19",
       metadata: {},
       name: "reflectionComposerMentionQuery",
       operationKind: "query",
-      text: "query reflectionComposerMentionQuery(\n  $filter: UserFilterInput!\n) {\n  users(first: 5, filter: $filter) {\n    edges {\n      node {\n        id\n        username\n        name\n        image {\n          url\n          id\n        }\n      }\n    }\n  }\n}\n",
+      text: null,
     },
   };
 })();

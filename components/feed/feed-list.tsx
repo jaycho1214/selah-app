@@ -8,7 +8,7 @@ import {
 import { FlashList } from "@shopify/flash-list";
 
 import { ReflectionItem } from "@/components/verse/reflection-item";
-import { Text } from "@/components/ui/text";
+import { EmptyState } from "@/components/ui/empty-state";
 import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
 import type { BibleBook } from "@/lib/bible/types";
 import { useColors } from "@/hooks/use-colors";
@@ -82,6 +82,7 @@ interface FeedListProps {
   onLike: (id: string) => void;
   onUnlike: (id: string) => void;
   onDelete: (id: string) => void;
+  onReport?: (id: string) => void;
   currentUserId: string | null;
   /** Custom empty state component rendered when posts array is empty */
   emptyState?: React.ReactNode;
@@ -105,6 +106,7 @@ function FeedList({
   onLike,
   onUnlike,
   onDelete,
+  onReport,
   currentUserId,
   emptyState,
   contentContainerStyle,
@@ -152,10 +154,11 @@ function FeedList({
           onLike={onLike}
           onUnlike={onUnlike}
           onDelete={onDelete}
+          onReport={onReport}
         />
       );
     },
-    [colors, currentUserId, onLike, onUnlike, onDelete],
+    [colors, currentUserId, onLike, onUnlike, onDelete, onReport],
   );
 
   // Empty state
@@ -164,10 +167,8 @@ function FeedList({
       return <View style={styles.container}>{emptyState}</View>;
     }
     return (
-      <View style={[styles.container, styles.emptyDefault]}>
-        <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-          No posts yet
-        </Text>
+      <View style={styles.container}>
+        <EmptyState variant="inline" title="No posts yet" />
       </View>
     );
   }
@@ -208,15 +209,6 @@ export default FeedList;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  emptyDefault: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 100,
-  },
-  emptyText: {
-    fontSize: 15,
-    textAlign: "center",
   },
   loadingMore: {
     paddingVertical: 20,

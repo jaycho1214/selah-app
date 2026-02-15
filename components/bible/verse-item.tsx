@@ -37,11 +37,10 @@ export function VerseItem({
   const firstChar = isFirstVerse ? verse.text.charAt(0) : "";
   const restOfText = isFirstVerse ? verse.text.slice(1) : verse.text;
 
-  // Drop cap color
+  // Colors
+  const textColor = isDark ? "#fafaf9" : "#0f1419";
+  const verseNumColor = isDark ? "#78716c" : "#536471";
   const dropCapColor = isDark ? "#e7e0d8" : "#292524";
-
-  // Drop cap size
-  const dropCapSize = sizes.text * 2.6;
 
   // Selection underline color - warm accent, subtle
   const underlineColor = isDark ? "#d6bcab" : "#8b7355";
@@ -56,8 +55,10 @@ export function VerseItem({
       onPress={onPress}
       onLongPress={onLongPress}
       delayLongPress={400}
-      className="flex-row gap-3 px-4 active:bg-muted/50"
       style={{
+        flexDirection: "row",
+        gap: 12,
+        paddingHorizontal: 16,
         paddingTop: 8,
         paddingBottom: 8,
         backgroundColor: highlightBg,
@@ -65,8 +66,9 @@ export function VerseItem({
     >
       {/* Verse number column */}
       <Text
-        className="text-muted-foreground font-semibold"
         style={{
+          color: verseNumColor,
+          fontWeight: "600",
           fontSize: sizes.verse,
           minWidth: 28,
           textAlign: "right",
@@ -77,16 +79,16 @@ export function VerseItem({
       </Text>
 
       {/* Verse text */}
-      <View className="flex-1">
+      <View style={{ flex: 1 }}>
         {isFirstVerse ? (
           <View>
             <Text
-              className="text-foreground"
               style={{
+                color: textColor,
                 fontSize: sizes.text,
                 lineHeight: sizes.lineHeight,
                 fontFamily: serifFont,
-                paddingTop: dropCapSize - sizes.lineHeight,
+                paddingTop: sizes.lineHeight,
                 textDecorationLine: isSelected ? "underline" : "none",
                 textDecorationColor: underlineColor,
                 textDecorationStyle: "solid",
@@ -94,7 +96,7 @@ export function VerseItem({
             >
               <Text
                 style={{
-                  fontSize: dropCapSize,
+                  fontSize: sizes.text * 2.6,
                   lineHeight: sizes.lineHeight,
                   fontWeight: "500",
                   fontFamily: serifFont,
@@ -109,8 +111,8 @@ export function VerseItem({
           </View>
         ) : (
           <Text
-            className="text-foreground"
             style={{
+              color: textColor,
               fontSize: sizes.text,
               lineHeight: sizes.lineHeight,
               fontFamily: serifFont,

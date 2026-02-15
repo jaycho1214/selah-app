@@ -10,6 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { ErrorBoundary } from "@/components/error-boundary";
 import {
   ActivityIndicator,
   Keyboard,
@@ -31,12 +32,18 @@ import {
 
 import { SignInSheet } from "@/components/auth/sign-in-sheet";
 import { useSession } from "@/components/providers/session-provider";
+import {
+  ReportSheet,
+  type ReportSheetRef,
+} from "@/components/report/report-sheet";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Text } from "@/components/ui/text";
 import {
   ReflectionComposer,
   type ReflectionComposerRef,
 } from "@/components/verse/reflection-composer";
 import { ReflectionItem } from "@/components/verse/reflection-item";
+import { useAnalytics } from "@/lib/analytics";
 import { createLexicalState } from "@/lib/lexical/html-to-lexical";
 import type { IdChildrenFragment$key } from "@/lib/relay/__generated__/IdChildrenFragment.graphql";
 import type { IdCreateReplyMutation } from "@/lib/relay/__generated__/IdCreateReplyMutation.graphql";
@@ -185,7 +192,9 @@ export default function PostDetailPage() {
           options={{
             title: "Post",
             headerTransparent: IS_LIQUID_GLASS,
-            headerStyle: { backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg },
+            headerStyle: {
+              backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg,
+            },
             headerTintColor: colors.text,
             headerShadowVisible: false,
             headerBackButtonDisplayMode: "minimal",
@@ -202,7 +211,9 @@ export default function PostDetailPage() {
         options={{
           title: "Post",
           headerTransparent: IS_LIQUID_GLASS,
-          headerStyle: { backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg },
+          headerStyle: {
+            backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg,
+          },
           headerTintColor: colors.text,
           headerShadowVisible: false,
           headerBackTitle: "",
@@ -210,15 +221,17 @@ export default function PostDetailPage() {
         }}
       />
 
-      <Suspense
-        fallback={
-          <View style={[styles.container, styles.center]}>
-            <ActivityIndicator size="large" color={colors.accent} />
-          </View>
-        }
-      >
-        <PostContent postId={id} colors={colors} />
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense
+          fallback={
+            <View style={[styles.container, styles.center]}>
+              <ActivityIndicator size="large" color={colors.accent} />
+            </View>
+          }
+        >
+          <PostContent postId={id} colors={colors} />
+        </Suspense>
+      </ErrorBoundary>
     </View>
   );
 }
@@ -295,9 +308,11 @@ function PostContent({
 }) {
   const contentPaddingTop = useTransparentHeaderPadding();
   const { session } = useSession();
+  const { capture } = useAnalytics();
   const composerRef = useRef<ReflectionComposerRef>(null);
   const signInSheetRef = useRef<BottomSheetModal>(null);
   const childPostsRef = useRef<ChildPostsListRef>(null);
+  const reportSheetRef = useRef<ReportSheetRef>(null);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [connectionId, setConnectionId] = useState<string | null>(null);
@@ -381,7 +396,16 @@ function PostContent({
             parentPost.setValue(currentCount + 1, "childPostsCount");
           }
         },
-        onCompleted: () => {
+        onCompleted: (response) => {
+          const newPostId = response.bibleVersePostCreate?.bibleVersePost?.id;
+          if (newPostId) {
+            capture("post_created", {
+              post_id: newPostId,
+              has_images: false,
+              has_poll: !!postData.poll,
+              is_reply: true,
+            });
+          }
           composerRef.current?.clear();
         },
         onError: (error) => {
@@ -389,11 +413,12 @@ function PostContent({
         },
       });
     },
-    [post?.id, connectionId, commitCreateReply],
+    [post?.id, connectionId, commitCreateReply, capture],
   );
 
   const handleLike = useCallback(
     (id: string) => {
+      capture("post_liked", { post_id: id });
       commitLike({
         variables: { id },
         optimisticUpdater: (store) => {
@@ -407,11 +432,12 @@ function PostContent({
         },
       });
     },
-    [commitLike],
+    [commitLike, capture],
   );
 
   const handleUnlike = useCallback(
     (id: string) => {
+      capture("post_unliked", { post_id: id });
       commitUnlike({
         variables: { id },
         optimisticUpdater: (store) => {
@@ -425,11 +451,12 @@ function PostContent({
         },
       });
     },
-    [commitUnlike],
+    [commitUnlike, capture],
   );
 
   const handleDelete = useCallback(
     (deletedId: string) => {
+      capture("post_deleted", { post_id: deletedId });
       const connections = connectionId ? [connectionId] : [];
 
       commitDelete({
@@ -453,17 +480,21 @@ function PostContent({
         },
       });
     },
-    [connectionId, commitDelete, post?.id],
+    [connectionId, commitDelete, post?.id, capture],
   );
 
   const handleAuthRequired = useCallback(() => {
     signInSheetRef.current?.present();
   }, []);
 
+  const handleReport = useCallback((postId: string) => {
+    reportSheetRef.current?.present({ type: "post", targetId: postId });
+  }, []);
+
   if (!post) {
     return (
       <View style={[styles.container, styles.center]}>
-        <Text style={{ color: colors.textMuted }}>Post not found</Text>
+        <EmptyState variant="inline" title="Post not found" />
       </View>
     );
   }
@@ -502,6 +533,7 @@ function PostContent({
           onLike={handleLike}
           onUnlike={handleUnlike}
           onDelete={handleDelete}
+          onReport={handleReport}
           disableNavigation
         />
 
@@ -524,6 +556,7 @@ function PostContent({
           onLike={handleLike}
           onUnlike={handleUnlike}
           onDelete={handleDelete}
+          onReport={handleReport}
           onConnectionId={setConnectionId}
         />
 
@@ -544,6 +577,7 @@ function PostContent({
 
       {/* Sign-in Sheet */}
       <SignInSheet ref={signInSheetRef} />
+      <ReportSheet ref={reportSheetRef} />
     </View>
   );
 }
@@ -570,6 +604,7 @@ const ChildPostsList = forwardRef<
     onLike: (id: string) => void;
     onUnlike: (id: string) => void;
     onDelete: (id: string) => void;
+    onReport?: (id: string) => void;
     onConnectionId: (id: string | null) => void;
   }
 >(function ChildPostsList(
@@ -580,6 +615,7 @@ const ChildPostsList = forwardRef<
     onLike,
     onUnlike,
     onDelete,
+    onReport,
     onConnectionId,
   },
   ref,
@@ -607,11 +643,11 @@ const ChildPostsList = forwardRef<
 
   if (childPosts.length === 0) {
     return (
-      <View style={styles.emptyReplies}>
-        <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-          No replies yet. Be the first to reply!
-        </Text>
-      </View>
+      <EmptyState
+        variant="inline"
+        title="No replies yet"
+        message="Be the first to reply!"
+      />
     );
   }
 
@@ -635,6 +671,7 @@ const ChildPostsList = forwardRef<
           onLike={onLike}
           onUnlike={onUnlike}
           onDelete={onDelete}
+          onReport={onReport}
         />
       ))}
     </View>
@@ -665,13 +702,5 @@ const styles = StyleSheet.create({
   repliesTitle: {
     fontSize: 16,
     fontWeight: "600",
-  },
-  emptyReplies: {
-    padding: 32,
-    alignItems: "center",
-  },
-  emptyText: {
-    fontSize: 14,
-    textAlign: "center",
   },
 });

@@ -1,5 +1,6 @@
 /**
- * @generated SignedSource<<7f97edd5b383cafb7c28a5da861767ab>>
+ * @generated SignedSource<<f5e9b3ee19d99ee82aff7d9a4d902107>>
+ * @relayHash 65129abce97bc5625a243a37cb18c600
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -7,6 +8,8 @@
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
+
+// @relayRequestID 65129abce97bc5625a243a37cb18c600
 
 import { ConcreteRequest } from "relay-runtime";
 export type reflectionItemPollUnvoteMutation$variables = {
@@ -156,12 +159,11 @@ const node: ConcreteRequest = (function () {
       selections: v3 /*: any*/,
     },
     params: {
-      cacheID: "65129abce97bc5625a243a37cb18c600",
-      id: null,
+      id: "65129abce97bc5625a243a37cb18c600",
       metadata: {},
       name: "reflectionItemPollUnvoteMutation",
       operationKind: "mutation",
-      text: "mutation reflectionItemPollUnvoteMutation(\n  $pollId: ID!\n) {\n  pollUnvote(pollId: $pollId) {\n    poll {\n      id\n      totalVotes\n      userVote {\n        id\n        text\n      }\n      options {\n        id\n        text\n        voteCount\n        votePercentage\n      }\n    }\n  }\n}\n",
+      text: null,
     },
   };
 })();

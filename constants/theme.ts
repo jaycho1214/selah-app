@@ -3,7 +3,7 @@
  *
  * Light mode: Twitter-inspired white & black palette.
  * Dark mode: Contemplative warm parchment colors.
- * Matches the CSS variables in global.css.
+ * Single source of truth for all theme colors.
  */
 
 import { Platform } from "react-native";
@@ -44,6 +44,18 @@ export const ThemeColors = {
     textSecondary: "#536471",
     textMuted: "#536471",
     accent: "#0f1419",
+    primary: "#0f1419",
+    primaryForeground: "#ffffff",
+    secondary: "#f7f9f9",
+    secondaryForeground: "#0f1419",
+    card: "#ffffff",
+    cardForeground: "#0f1419",
+    muted: "#f7f9f9",
+    mutedForeground: "#536471",
+    destructive: "#dc2626",
+    destructiveForeground: "#ffffff",
+    input: "#eff3f4",
+    ring: "#0f1419",
   },
   dark: {
     bg: "#0c0a09",
@@ -54,6 +66,18 @@ export const ThemeColors = {
     textSecondary: "#d6d3d1",
     textMuted: "#78716c",
     accent: "#d6bcab",
+    primary: "#d6bcab",
+    primaryForeground: "#1c1917",
+    secondary: "#292524",
+    secondaryForeground: "#d6d3d1",
+    card: "#1c1917",
+    cardForeground: "#fafaf9",
+    muted: "#292524",
+    mutedForeground: "#78716c",
+    destructive: "#f87171",
+    destructiveForeground: "#1c1917",
+    input: "#3d3530",
+    ring: "#d6bcab",
   },
 };
 

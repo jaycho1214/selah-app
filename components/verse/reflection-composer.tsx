@@ -775,81 +775,105 @@ export const ReflectionComposer = forwardRef<
           </Animated.View>
         )}
 
-        {/* Inline Poll Creator - iMessage style */}
-        {showPollCreator && (
-          <Animated.View
-            entering={FadeInDown.duration(200)}
-            exiting={FadeOutDown.duration(200)}
-            layout={LinearTransition.springify().damping(20)}
-            style={[
-              styles.inlinePoll,
-              { backgroundColor: colors.surfaceElevated },
-            ]}
+        {/* Scrollable attachments area (poll + images) */}
+        {(showPollCreator || images.length > 0) && (
+          <ScrollView
+            style={styles.attachmentsScroll}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="always"
+            bounces={false}
           >
-            {pollOptions.map((option, index) => (
-              <View
-                key={index}
+            {/* Inline Poll Creator - iMessage style */}
+            {showPollCreator && (
+              <Animated.View
+                entering={FadeInDown.duration(200)}
+                exiting={FadeOutDown.duration(200)}
+                layout={LinearTransition.springify().damping(20)}
                 style={[
-                  styles.pollOptionRow,
-                  index < pollOptions.length - 1 && {
-                    borderBottomWidth: StyleSheet.hairlineWidth,
-                    borderBottomColor: colors.border,
-                  },
+                  styles.inlinePoll,
+                  { backgroundColor: colors.surfaceElevated },
                 ]}
               >
-                <TextInput
-                  value={option}
-                  onChangeText={(text) => updatePollOption(index, text)}
-                  placeholder={`Choice ${index + 1}`}
-                  placeholderTextColor={colors.textMuted}
-                  style={[styles.pollOptionInput, { color: colors.text }]}
-                  maxLength={100}
-                />
-                {pollOptions.length > 2 && (
-                  <Pressable
-                    onPress={() => removePollOption(index)}
-                    hitSlop={8}
-                    style={styles.pollRemoveBtn}
+                {pollOptions.map((option, index) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.pollOptionRow,
+                      index < pollOptions.length - 1 && {
+                        borderBottomWidth: StyleSheet.hairlineWidth,
+                        borderBottomColor: colors.border,
+                      },
+                    ]}
                   >
-                    <X size={16} color={colors.textMuted} />
+                    <TextInput
+                      value={option}
+                      onChangeText={(text) => updatePollOption(index, text)}
+                      placeholder={`Choice ${index + 1}`}
+                      placeholderTextColor={colors.textMuted}
+                      style={[styles.pollOptionInput, { color: colors.text }]}
+                      maxLength={100}
+                    />
+                    {pollOptions.length > 2 && (
+                      <Pressable
+                        onPress={() => removePollOption(index)}
+                        hitSlop={8}
+                        style={styles.pollRemoveBtn}
+                      >
+                        <X size={16} color={colors.textMuted} />
+                      </Pressable>
+                    )}
+                  </View>
+                ))}
+                {pollOptions.length < 5 && (
+                  <Pressable
+                    onPress={addPollOption}
+                    style={[
+                      styles.pollOptionRow,
+                      {
+                        borderTopWidth: StyleSheet.hairlineWidth,
+                        borderTopColor: colors.border,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[styles.pollAddText, { color: colors.textMuted }]}
+                    >
+                      Add choice...
+                    </Text>
                   </Pressable>
                 )}
-              </View>
-            ))}
-            {pollOptions.length < 5 && (
-              <Pressable
-                onPress={addPollOption}
-                style={[
-                  styles.pollOptionRow,
-                  {
-                    borderTopWidth: StyleSheet.hairlineWidth,
-                    borderTopColor: colors.border,
-                  },
-                ]}
-              >
-                <Text style={[styles.pollAddText, { color: colors.textMuted }]}>
-                  Add choice...
-                </Text>
-              </Pressable>
+                <Pressable
+                  onPress={() => setShowDatePicker(true)}
+                  style={[
+                    styles.pollDeadlineRow,
+                    {
+                      borderTopWidth: StyleSheet.hairlineWidth,
+                      borderTopColor: colors.border,
+                    },
+                  ]}
+                >
+                  <Clock size={14} color={colors.textMuted} />
+                  <Text
+                    style={[
+                      styles.pollDeadlineText,
+                      { color: colors.textMuted },
+                    ]}
+                  >
+                    Ends in {formatDeadline(pollDeadline)}
+                  </Text>
+                </Pressable>
+              </Animated.View>
             )}
-            <Pressable
-              onPress={() => setShowDatePicker(true)}
-              style={[
-                styles.pollDeadlineRow,
-                {
-                  borderTopWidth: StyleSheet.hairlineWidth,
-                  borderTopColor: colors.border,
-                },
-              ]}
-            >
-              <Clock size={14} color={colors.textMuted} />
-              <Text
-                style={[styles.pollDeadlineText, { color: colors.textMuted }]}
-              >
-                Ends in {formatDeadline(pollDeadline)}
-              </Text>
-            </Pressable>
-          </Animated.View>
+
+            {/* Image Grid */}
+            {images.length > 0 && (
+              <ImagePickerGrid
+                images={images}
+                onImagesChange={handleImagesChange}
+                colors={colors}
+              />
+            )}
+          </ScrollView>
         )}
 
         {/* Deadline Picker Modal */}
@@ -888,15 +912,6 @@ export const ReflectionComposer = forwardRef<
             </Pressable>
           </Pressable>
         </Modal>
-
-        {/* Image Grid */}
-        {images.length > 0 && (
-          <ImagePickerGrid
-            images={images}
-            onImagesChange={handleImagesChange}
-            colors={colors}
-          />
-        )}
 
         {/* WebView Editor + Submit Button */}
         <View style={styles.inputContainer}>
@@ -1330,6 +1345,10 @@ const styles = StyleSheet.create({
   },
   mentionList: {
     maxHeight: 200,
+  },
+  attachmentsScroll: {
+    maxHeight: 220,
+    marginBottom: 4,
   },
   inlinePoll: {
     borderRadius: 12,

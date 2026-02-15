@@ -1,5 +1,7 @@
-import { View, TextInput, Pressable } from "react-native";
+import { View, TextInput, Pressable, StyleSheet } from "react-native";
 import { Search, X } from "lucide-react-native";
+import { useColors } from "@/hooks/use-colors";
+import { CommonStyles } from "@/constants/styles";
 
 interface SearchBarProps {
   value: string;
@@ -18,26 +20,57 @@ export function SearchBar({
   placeholder = "Search the Bible...",
   autoFocus = false,
 }: SearchBarProps) {
+  const colors = useColors();
+
   return (
-    <View className="flex-row items-center bg-muted rounded-lg px-3 py-2">
-      <Search size={18} className="text-muted-foreground mr-2" />
+    <View
+      style={[
+        CommonStyles.row,
+        styles.container,
+        { backgroundColor: colors.muted },
+      ]}
+    >
+      <Search
+        size={18}
+        color={colors.mutedForeground}
+        style={styles.searchIcon}
+      />
       <TextInput
         value={value}
         onChangeText={onChangeText}
         onSubmitEditing={onSubmit}
         placeholder={placeholder}
-        placeholderTextColor="#9CA3AF"
+        placeholderTextColor={colors.mutedForeground}
         returnKeyType="search"
         autoFocus={autoFocus}
         autoCapitalize="none"
         autoCorrect={false}
-        className="flex-1 text-foreground text-base py-1"
+        style={[styles.input, { color: colors.text }]}
       />
       {value.length > 0 && (
-        <Pressable onPress={onClear} className="p-1">
-          <X size={18} className="text-muted-foreground" />
+        <Pressable onPress={onClear} style={styles.clearButton}>
+          <X size={18} color={colors.mutedForeground} />
         </Pressable>
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    paddingVertical: 4,
+  },
+  clearButton: {
+    padding: 4,
+  },
+});

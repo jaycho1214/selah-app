@@ -1,5 +1,6 @@
 /**
- * @generated SignedSource<<05a13acd6862cff884f3393391fb927f>>
+ * @generated SignedSource<<b7f67dbe86a47e3ce1d42954d60c5fee>>
+ * @relayHash c7f2a50dc1201be225ca64b6d33adbee
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -7,6 +8,8 @@
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
+
+// @relayRequestID c7f2a50dc1201be225ca64b6d33adbee
 
 import { ConcreteRequest } from "relay-runtime";
 export type notificationsUnregisterTokenMutation$variables = {
@@ -61,12 +64,11 @@ const node: ConcreteRequest = (function () {
       selections: v1 /*: any*/,
     },
     params: {
-      cacheID: "c7f2a50dc1201be225ca64b6d33adbee",
-      id: null,
+      id: "c7f2a50dc1201be225ca64b6d33adbee",
       metadata: {},
       name: "notificationsUnregisterTokenMutation",
       operationKind: "mutation",
-      text: "mutation notificationsUnregisterTokenMutation(\n  $token: String!\n) {\n  unregisterExpoPushToken(token: $token)\n}\n",
+      text: null,
     },
   };
 })();

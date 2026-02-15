@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useLocalSearchParams, router, Stack } from "expo-router";
 import { Search, Settings } from "lucide-react-native";
 import BottomSheet, {
@@ -16,10 +16,12 @@ import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
 import { useBibleStore } from "@/lib/stores/bible-store";
 import { useVerseSelectionStore } from "@/lib/stores/verse-selection-store";
 import { useColors } from "@/hooks/use-colors";
+import { useAnalytics } from "@/lib/analytics";
 import {
   IS_LIQUID_GLASS,
   useTransparentHeaderPadding,
 } from "@/hooks/use-transparent-header";
+import { CommonStyles } from "@/constants/styles";
 import { BibleBook } from "@/lib/bible/types";
 
 export default function BibleChapterScreen() {
@@ -29,6 +31,7 @@ export default function BibleChapterScreen() {
     book: string;
     chapter: string;
   }>();
+  const { capture } = useAnalytics();
   const currentTranslation = useBibleStore((s) => s.currentTranslation);
   const setPosition = useBibleStore((s) => s.setPosition);
   const toggleVerse = useVerseSelectionStore((s) => s.toggleVerse);
@@ -46,6 +49,11 @@ export default function BibleChapterScreen() {
   useEffect(() => {
     setCurrentBook(book as BibleBook);
     setCurrentChapter(parseInt(chapter, 10));
+    capture("chapter_viewed", {
+      book: book as string,
+      chapter: parseInt(chapter, 10),
+      translation: currentTranslation,
+    });
   }, [book, chapter]);
 
   const bookDetails = BIBLE_BOOK_DETAILS[currentBook];
@@ -106,35 +114,50 @@ export default function BibleChapterScreen() {
   );
 
   return (
-    <View className="flex-1 bg-background" style={{ paddingTop: contentPaddingTop }}>
+    <View
+      style={[
+        CommonStyles.flex1,
+        { backgroundColor: colors.bg, paddingTop: contentPaddingTop },
+      ]}
+    >
       <Stack.Screen
         options={{
           headerShown: true,
           headerTransparent: IS_LIQUID_GLASS,
-          headerStyle: { backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg },
+          headerStyle: {
+            backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg,
+          },
           headerShadowVisible: false,
           headerTitle: () => (
             <Pressable onPress={() => setNavigatorVisible(true)}>
-              <View className="items-center">
-                <Text className="text-foreground text-lg font-semibold">
+              <View style={styles.headerTitleContainer}>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>
                   {bookName} {currentChapter}
                 </Text>
-                <Text className="text-muted-foreground text-xs">
+                <Text
+                  style={[
+                    styles.headerSubtitle,
+                    { color: colors.mutedForeground },
+                  ]}
+                >
                   {currentTranslation}
                 </Text>
               </View>
             </Pressable>
           ),
           headerRight: () => (
-            <View className="flex-row">
-              <Pressable onPress={() => router.push("/search")} className="p-2">
-                <Search size={22} className="text-foreground" />
+            <View style={CommonStyles.row}>
+              <Pressable
+                onPress={() => router.push("/search")}
+                style={styles.headerButton}
+              >
+                <Search size={22} color={colors.text} />
               </Pressable>
               <Pressable
                 onPress={() => settingsSheetRef.current?.expand()}
-                className="p-2"
+                style={styles.headerButton}
               >
-                <Settings size={22} className="text-foreground" />
+                <Settings size={22} color={colors.text} />
               </Pressable>
             </View>
           ),
@@ -175,18 +198,22 @@ export default function BibleChapterScreen() {
         )}
       >
         <BottomSheetView>
-          <View className="flex-row border-b border-border">
+          <View style={[styles.tabBar, { borderBottomColor: colors.border }]}>
             <Pressable
               onPress={() => setSettingsTab("font")}
-              className={`flex-1 py-3 items-center ${
-                settingsTab === "font" ? "border-b-2 border-primary" : ""
-              }`}
+              style={[
+                styles.tab,
+                settingsTab === "font" && {
+                  borderBottomWidth: 2,
+                  borderBottomColor: colors.primary,
+                },
+              ]}
             >
               <Text
-                className={
+                style={
                   settingsTab === "font"
-                    ? "text-primary font-medium"
-                    : "text-muted-foreground"
+                    ? [styles.tabTextActive, { color: colors.primary }]
+                    : [styles.tabText, { color: colors.mutedForeground }]
                 }
               >
                 Font Size
@@ -194,15 +221,19 @@ export default function BibleChapterScreen() {
             </Pressable>
             <Pressable
               onPress={() => setSettingsTab("translation")}
-              className={`flex-1 py-3 items-center ${
-                settingsTab === "translation" ? "border-b-2 border-primary" : ""
-              }`}
+              style={[
+                styles.tab,
+                settingsTab === "translation" && {
+                  borderBottomWidth: 2,
+                  borderBottomColor: colors.primary,
+                },
+              ]}
             >
               <Text
-                className={
+                style={
                   settingsTab === "translation"
-                    ? "text-primary font-medium"
-                    : "text-muted-foreground"
+                    ? [styles.tabTextActive, { color: colors.primary }]
+                    : [styles.tabText, { color: colors.mutedForeground }]
                 }
               >
                 Translation
@@ -222,3 +253,32 @@ export default function BibleChapterScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  headerTitleContainer: {
+    alignItems: "center",
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  headerSubtitle: {
+    fontSize: 12,
+  },
+  headerButton: {
+    padding: 8,
+  },
+  tabBar: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  tabTextActive: {
+    fontWeight: "500",
+  },
+  tabText: {},
+});

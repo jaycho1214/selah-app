@@ -1,5 +1,6 @@
 /**
- * @generated SignedSource<<f53512f226f6cdf850e109cc93e2c34c>>
+ * @generated SignedSource<<dfe22801f30178d76069fc56b64a2d24>>
+ * @relayHash ba207af9c36c37c2c77048210f324bcd
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -7,6 +8,8 @@
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
+
+// @relayRequestID ba207af9c36c37c2c77048210f324bcd
 
 import { ConcreteRequest } from "relay-runtime";
 export type UserUpdateInput = {
@@ -153,12 +156,11 @@ const node: ConcreteRequest = (function () {
       selections: v2 /*: any*/,
     },
     params: {
-      cacheID: "ba207af9c36c37c2c77048210f324bcd",
-      id: null,
+      id: "ba207af9c36c37c2c77048210f324bcd",
       metadata: {},
       name: "userEditMutation",
       operationKind: "mutation",
-      text: "mutation userEditMutation(\n  $input: UserUpdateInput!\n) {\n  userUpdate(input: $input) {\n    user {\n      id\n      name\n      username\n      bio\n      website\n      image {\n        id\n        url\n      }\n    }\n  }\n}\n",
+      text: null,
     },
   };
 })();

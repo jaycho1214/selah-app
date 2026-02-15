@@ -1,5 +1,6 @@
 /**
- * @generated SignedSource<<a47fea4d924b4261f291cd7a695e5d78>>
+ * @generated SignedSource<<6dd42cb29fc8d6a5a217eb4500b72246>>
+ * @relayHash 72b22f502979eb9e1b85670b2834d1a3
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -7,6 +8,8 @@
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
+
+// @relayRequestID 72b22f502979eb9e1b85670b2834d1a3
 
 import { ConcreteRequest } from "relay-runtime";
 export type followButtonMutation$variables = {
@@ -142,12 +145,11 @@ const node: ConcreteRequest = (function () {
       selections: v3 /*: any*/,
     },
     params: {
-      cacheID: "72b22f502979eb9e1b85670b2834d1a3",
-      id: null,
+      id: "72b22f502979eb9e1b85670b2834d1a3",
       metadata: {},
       name: "followButtonMutation",
       operationKind: "mutation",
-      text: "mutation followButtonMutation(\n  $userId: ID!\n  $value: Boolean!\n) {\n  userFollow(userId: $userId) @include(if: $value) {\n    user {\n      id\n      followedAt\n      followerCount\n    }\n  }\n  userUnfollow(userId: $userId) @skip(if: $value) {\n    user {\n      id\n      followedAt\n      followerCount\n    }\n  }\n}\n",
+      text: null,
     },
   };
 })();

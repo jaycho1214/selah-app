@@ -1,12 +1,20 @@
 import * as Haptics from "expo-haptics";
-import { Stack } from "expo-router";
-import { LogOut, type LucideIcon } from "lucide-react-native";
+import { Stack, useRouter } from "expo-router";
+import { Heart, LogOut, Trash2, type LucideIcon } from "lucide-react-native";
 import { useState } from "react";
-import { useRelayEnvironment } from "react-relay";
-import { Pressable, StyleSheet, ScrollView, Switch, View } from "react-native";
+import { graphql, useMutation, useRelayEnvironment } from "react-relay";
+import {
+  Alert,
+  Pressable,
+  StyleSheet,
+  ScrollView,
+  Switch,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useSession } from "@/components/providers/session-provider";
+import { useAnalytics } from "@/lib/analytics";
 import { useTheme } from "@/components/providers/theme-provider";
 import { Text } from "@/components/ui/text";
 import { useColors } from "@/hooks/use-colors";
@@ -29,7 +37,16 @@ import {
   getStoredPushToken,
   clearStoredPushToken,
 } from "@/hooks/use-notifications";
-import { storage } from "@/lib/storage";
+import { getStorage } from "@/lib/storage";
+import type { settingsDeleteAccountMutation } from "@/lib/relay/__generated__/settingsDeleteAccountMutation.graphql";
+
+const deleteAccountMutation = graphql`
+  mutation settingsDeleteAccountMutation {
+    deleteMyAccount {
+      success
+    }
+  }
+`;
 
 // ---------------------------------------------------------------------------
 // Reusable primitives
@@ -311,7 +328,7 @@ function NotificationSettings() {
       if (value) {
         const token = await registerForPushNotificationsAsync();
         if (token) {
-          storage.set(PUSH_TOKEN_KEY, token);
+          getStorage().set(PUSH_TOKEN_KEY, token);
           await registerTokenWithServer(environment, token);
         } else {
           setEnabled(false);
@@ -353,12 +370,66 @@ function NotificationSettings() {
 export default function SettingsScreen() {
   const { isAuthenticated, signOut } = useSession();
   const colors = useColors();
+  const { capture } = useAnalytics();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const [commitDeleteAccount] = useMutation<settingsDeleteAccountMutation>(
+    deleteAccountMutation,
+  );
 
   const handleSignOut = async () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    capture("sign_out", {});
     await signOutFromGoogle();
     await signOut();
+  };
+
+  const handleDeleteAccount = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    Alert.alert(
+      "Delete Account?",
+      "This will permanently delete your account, all your posts, and all your data. This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete Account",
+          style: "destructive",
+          onPress: () => {
+            Alert.alert(
+              "Are you absolutely sure?",
+              "There is no way to recover your account after deletion.",
+              [
+                { text: "Cancel", style: "cancel" },
+                {
+                  text: "Yes, Delete Everything",
+                  style: "destructive",
+                  onPress: () => {
+                    commitDeleteAccount({
+                      variables: {},
+                      onCompleted: () => {
+                        capture("account_deleted", {});
+                        signOutFromGoogle().then(() => {
+                          getStorage().clearAll();
+                          clearStoredPushToken();
+                          signOut();
+                        });
+                      },
+                      onError: (error) => {
+                        console.error("Delete account failed:", error);
+                        Alert.alert(
+                          "Error",
+                          "Failed to delete account. Please try again.",
+                        );
+                      },
+                    });
+                  },
+                },
+              ],
+            );
+          },
+        },
+      ],
+    );
   };
 
   return (
@@ -418,12 +489,26 @@ export default function SettingsScreen() {
           </View>
         )}
 
+        <SettingsSection title="Support">
+          <SettingsItem
+            icon={Heart}
+            label="Support Selah"
+            onPress={() => router.push("/donate")}
+          />
+        </SettingsSection>
+
         {isAuthenticated && (
           <SettingsSection title="Account">
             <SettingsItem
               icon={LogOut}
               label="Sign Out"
               onPress={handleSignOut}
+              destructive
+            />
+            <SettingsItem
+              icon={Trash2}
+              label="Delete Account"
+              onPress={handleDeleteAccount}
               destructive
             />
           </SettingsSection>

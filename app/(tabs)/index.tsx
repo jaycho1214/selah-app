@@ -113,7 +113,7 @@ export default function HomeScreen() {
   );
 
   return (
-    <View style={styles.container} className="bg-background">
+    <View style={[styles.container, { backgroundColor: themeColors.bg }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
       {/* Immersive Bible reader */}

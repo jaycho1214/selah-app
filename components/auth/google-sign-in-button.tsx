@@ -2,11 +2,9 @@ import { useState } from "react";
 import { Alert, Pressable, useColorScheme, StyleSheet } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { Text } from "@/components/ui/text";
+import { useAnalytics } from "@/lib/analytics";
 import { authClient } from "@/lib/auth-client";
-import {
-  configureGoogleSignIn,
-  signInWithGoogle,
-} from "@/lib/google-signin";
+import { configureGoogleSignIn, signInWithGoogle } from "@/lib/google-signin";
 
 interface GoogleSignInButtonProps {
   onSuccess?: () => void;
@@ -18,6 +16,7 @@ export function GoogleSignInButton({
   onError,
 }: GoogleSignInButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const { capture } = useAnalytics();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
 
@@ -39,6 +38,7 @@ export function GoogleSignInButton({
           throw new Error(result.error.message ?? "Sign-in failed");
         }
 
+        capture("sign_in", { provider: "google" });
         onSuccess?.();
       }
     } catch (error) {

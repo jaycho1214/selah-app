@@ -3,6 +3,7 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import {
   BookOpen,
+  Flag,
   Heart,
   MessageCircle,
   Share as ShareIcon,
@@ -21,6 +22,7 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import { graphql, useMutation } from "react-relay";
 
 import { Text } from "@/components/ui/text";
+import { useAnalytics } from "@/lib/analytics";
 import { createVerseId } from "@/lib/bible/utils";
 import type { BibleBook } from "@/lib/bible/types";
 import { getPostShareUrl } from "@/lib/utils";
@@ -211,6 +213,7 @@ interface ReflectionItemProps {
   onLike?: (id: string) => void;
   onUnlike?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onReport?: (id: string) => void;
   disableNavigation?: boolean;
 }
 
@@ -232,9 +235,11 @@ export function ReflectionItem({
   onLike,
   onUnlike,
   onDelete,
+  onReport,
   disableNavigation = false,
 }: ReflectionItemProps) {
   const router = useRouter();
+  const { capture } = useAnalytics();
   const isLiked = !!likedAt;
   const isOwner = currentUserId === user.id;
   const [commitPollVote, isPollVoting] =
@@ -247,6 +252,7 @@ export function ReflectionItem({
     (optionId: string) => {
       if (!poll || isPollLoading) return;
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      capture("poll_voted", { post_id: id, option_id: optionId });
       commitPollVote({
         variables: { optionId, pollId: poll.id },
         onError: (error) => {
@@ -260,6 +266,7 @@ export function ReflectionItem({
   const handlePollUnvote = useCallback(() => {
     if (!poll || isPollLoading) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    capture("poll_unvoted", { post_id: id });
     commitPollUnvote({
       variables: { pollId: poll.id },
       onError: (error) => {
@@ -284,6 +291,7 @@ export function ReflectionItem({
 
   const handleShare = useCallback(async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    capture("post_shared", { post_id: id, method: "share_sheet" });
     const shareUrl = getPostShareUrl(id);
     const plainText = extractPlainText(content);
     const authorName = user.name || user.username || "Someone";
@@ -294,7 +302,12 @@ export function ReflectionItem({
     } catch {
       // User cancelled
     }
-  }, [id, content, user]);
+  }, [id, content, user, capture]);
+
+  const handleReport = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onReport?.(id);
+  }, [id, onReport]);
 
   const handleDelete = useCallback(() => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -457,11 +470,11 @@ export function ReflectionItem({
   }, [id, router, disableNavigation]);
 
   const handleUserPress = useCallback(() => {
-    if (user.username) {
+    if (user.username && user.id !== currentUserId) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       router.push(`/user/${user.username}`);
     }
-  }, [user.username, router]);
+  }, [user.username, user.id, currentUserId, router]);
 
   // Derive accent colors for visual interest
   const accentLight = colors.accent + "12";
@@ -787,6 +800,19 @@ export function ReflectionItem({
                   />
                 </View>
               </Pressable>
+
+              {/* Report - only for non-owner posts */}
+              {!isOwner && onReport && (
+                <Pressable onPress={handleReport} hitSlop={12}>
+                  <View style={styles.actionItem}>
+                    <Flag
+                      size={17}
+                      color={colors.textMuted}
+                      strokeWidth={1.5}
+                    />
+                  </View>
+                </Pressable>
+              )}
 
               {/* Spacer */}
               <View style={styles.spacer} />

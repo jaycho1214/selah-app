@@ -1,9 +1,11 @@
-import { View, Pressable } from "react-native";
+import { View, Pressable, StyleSheet } from "react-native";
 import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react-native";
 import { Text } from "@/components/ui/text";
 import { useBibleStore } from "@/lib/stores/bible-store";
 import { BIBLE_BOOK_DETAILS, BIBLE_BOOKS } from "@/lib/bible/constants";
 import { BibleBook } from "@/lib/bible/types";
+import { useColors } from "@/hooks/use-colors";
+import { CommonStyles } from "@/constants/styles";
 
 interface BibleNavigatorBarProps {
   onOpenNavigator: () => void;
@@ -16,6 +18,7 @@ export function BibleNavigatorBar({
   onPrevChapter,
   onNextChapter,
 }: BibleNavigatorBarProps) {
+  const colors = useColors();
   const currentBook = useBibleStore((s) => s.currentBook);
   const currentChapter = useBibleStore((s) => s.currentChapter);
   const currentTranslation = useBibleStore((s) => s.currentTranslation);
@@ -31,40 +34,92 @@ export function BibleNavigatorBar({
     currentChapter === bookDetails?.chapters;
 
   return (
-    <View className="flex-row items-center justify-between px-4 py-3 bg-background border-b border-border">
+    <View
+      style={[
+        CommonStyles.rowBetween,
+        styles.container,
+        { backgroundColor: colors.bg, borderBottomColor: colors.border },
+      ]}
+    >
       {/* Previous Chapter */}
       <Pressable
         onPress={onPrevChapter}
         disabled={isFirstChapter}
-        className={`p-2 rounded-lg ${isFirstChapter ? "opacity-30" : "active:bg-muted"}`}
+        style={({ pressed }) => [
+          styles.navButton,
+          isFirstChapter && styles.disabled,
+          pressed && !isFirstChapter && { backgroundColor: colors.muted },
+        ]}
       >
-        <ChevronLeft size={24} className="text-foreground" />
+        <ChevronLeft size={24} color={colors.text} />
       </Pressable>
 
       {/* Current Position - Tap to open navigator */}
       <Pressable
         onPress={onOpenNavigator}
-        className="flex-row items-center gap-1 px-3 py-2 rounded-lg active:bg-muted"
+        style={({ pressed }) => [
+          styles.centerButton,
+          pressed && { backgroundColor: colors.muted },
+        ]}
       >
-        <View className="items-center">
-          <Text className="text-foreground text-lg font-semibold">
+        <View style={styles.centerContent}>
+          <Text style={[styles.bookTitle, { color: colors.text }]}>
             {bookName} {currentChapter}
           </Text>
-          <Text className="text-muted-foreground text-xs">
+          <Text
+            style={[styles.translationLabel, { color: colors.mutedForeground }]}
+          >
             {currentTranslation}
           </Text>
         </View>
-        <ChevronDown size={16} className="text-muted-foreground" />
+        <ChevronDown size={16} color={colors.mutedForeground} />
       </Pressable>
 
       {/* Next Chapter */}
       <Pressable
         onPress={onNextChapter}
         disabled={isLastChapter}
-        className={`p-2 rounded-lg ${isLastChapter ? "opacity-30" : "active:bg-muted"}`}
+        style={({ pressed }) => [
+          styles.navButton,
+          isLastChapter && styles.disabled,
+          pressed && !isLastChapter && { backgroundColor: colors.muted },
+        ]}
       >
-        <ChevronRight size={24} className="text-foreground" />
+        <ChevronRight size={24} color={colors.text} />
       </Pressable>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  navButton: {
+    padding: 8,
+    borderRadius: 10,
+  },
+  disabled: {
+    opacity: 0.3,
+  },
+  centerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  centerContent: {
+    alignItems: "center",
+  },
+  bookTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  translationLabel: {
+    fontSize: 12,
+  },
+});

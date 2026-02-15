@@ -13,11 +13,14 @@ import {
   Modal,
   KeyboardAvoidingView,
   Platform,
+  StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAnnotationsStore } from "@/lib/stores/annotations-store";
 import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
 import type { BibleBook } from "@/lib/bible/types";
+import { useColors } from "@/hooks/use-colors";
+import { CommonStyles } from "@/constants/styles";
 
 export interface NoteEditorRef {
   open: (verseId: string, verseText: string) => void;
@@ -43,6 +46,7 @@ function parseVerseId(verseId: string) {
 
 export const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(
   function NoteEditor({ onSave, onDelete }, ref) {
+    const colors = useColors();
     const [visible, setVisible] = useState(false);
     const [verseId, setVerseId] = useState<string | null>(null);
     const [verseText, setVerseText] = useState("");
@@ -103,30 +107,45 @@ export const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(
         presentationStyle="pageSheet"
         onRequestClose={handleClose}
       >
-        <SafeAreaView className="flex-1 bg-background">
+        <SafeAreaView
+          style={[CommonStyles.flex1, { backgroundColor: colors.bg }]}
+        >
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
-            className="flex-1"
+            style={CommonStyles.flex1}
           >
             {/* Header */}
-            <View className="flex-row items-center justify-between px-4 py-3 border-b border-border">
-              <Pressable onPress={handleClose} className="p-2 -ml-2">
-                <Text className="text-muted-foreground text-base">Cancel</Text>
+            <View
+              style={[
+                CommonStyles.rowBetween,
+                styles.header,
+                { borderBottomColor: colors.border },
+              ]}
+            >
+              <Pressable onPress={handleClose} style={styles.cancelButton}>
+                <Text
+                  style={[styles.bodyText, { color: colors.mutedForeground }]}
+                >
+                  Cancel
+                </Text>
               </Pressable>
-              <Text className="text-foreground text-lg font-semibold">
+              <Text style={[styles.title, { color: colors.text }]}>
                 {existingNote ? "Edit Note" : "Add Note"}
               </Text>
               <Pressable
                 onPress={handleSave}
                 disabled={!noteContent.trim()}
-                className="p-2 -mr-2"
+                style={styles.saveButton}
               >
                 <Text
-                  className={`text-base font-medium ${
-                    noteContent.trim()
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  }`}
+                  style={[
+                    styles.saveText,
+                    {
+                      color: noteContent.trim()
+                        ? colors.primary
+                        : colors.mutedForeground,
+                    },
+                  ]}
                 >
                   Save
                 </Text>
@@ -134,12 +153,20 @@ export const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(
             </View>
 
             {/* Verse reference */}
-            <View className="px-4 py-3 bg-muted/50 border-b border-border">
-              <Text className="text-primary text-sm font-medium">
+            <View
+              style={[
+                styles.verseRef,
+                {
+                  backgroundColor: colors.muted,
+                  borderBottomColor: colors.border,
+                },
+              ]}
+            >
+              <Text style={[styles.refLabel, { color: colors.primary }]}>
                 {reference}
               </Text>
               <Text
-                className="text-muted-foreground text-sm mt-1"
+                style={[styles.refText, { color: colors.mutedForeground }]}
                 numberOfLines={2}
               >
                 {verseText}
@@ -147,28 +174,32 @@ export const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(
             </View>
 
             {/* Note input */}
-            <View className="flex-1 p-4">
+            <View style={[CommonStyles.flex1, styles.inputContainer]}>
               <TextInput
                 ref={inputRef}
                 value={noteContent}
                 onChangeText={setNoteContent}
                 placeholder="Write your note..."
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.mutedForeground}
                 multiline
                 textAlignVertical="top"
-                className="flex-1 text-foreground text-base"
-                style={{ minHeight: 200 }}
+                style={[styles.textInput, { color: colors.text }]}
               />
             </View>
 
             {/* Delete button (only for existing notes) */}
             {existingNote && (
-              <View className="px-4 pb-4">
+              <View style={styles.deleteContainer}>
                 <Pressable
                   onPress={handleDelete}
-                  className="py-3 rounded-lg bg-destructive/10 items-center"
+                  style={[
+                    styles.deleteButton,
+                    { backgroundColor: `${colors.destructive}1A` },
+                  ]}
                 >
-                  <Text className="text-destructive font-medium">
+                  <Text
+                    style={[styles.deleteText, { color: colors.destructive }]}
+                  >
                     Delete Note
                   </Text>
                 </Pressable>
@@ -180,3 +211,63 @@ export const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(
     );
   },
 );
+
+const styles = StyleSheet.create({
+  header: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  cancelButton: {
+    padding: 8,
+    marginLeft: -8,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  saveButton: {
+    padding: 8,
+    marginRight: -8,
+  },
+  saveText: {
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  bodyText: {
+    fontSize: 16,
+  },
+  verseRef: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  refLabel: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  refText: {
+    fontSize: 14,
+    marginTop: 4,
+  },
+  inputContainer: {
+    padding: 16,
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 16,
+    minHeight: 200,
+  },
+  deleteContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  deleteButton: {
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  deleteText: {
+    fontWeight: "500",
+  },
+});

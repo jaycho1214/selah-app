@@ -9,6 +9,7 @@ import {
 import * as AppleAuthentication from "expo-apple-authentication";
 import Svg, { Path } from "react-native-svg";
 import { Text } from "@/components/ui/text";
+import { useAnalytics } from "@/lib/analytics";
 import { authClient } from "@/lib/auth-client";
 
 interface AppleSignInButtonProps {
@@ -21,6 +22,7 @@ export function AppleSignInButton({
   onError,
 }: AppleSignInButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const { capture } = useAnalytics();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
 
@@ -52,6 +54,7 @@ export function AppleSignInButton({
           throw new Error(result.error.message ?? "Sign-in failed");
         }
 
+        capture("sign_in", { provider: "apple" });
         onSuccess?.();
       }
       // If no token, user cancelled - just reset loading state

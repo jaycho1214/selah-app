@@ -1,5 +1,6 @@
 /**
- * @generated SignedSource<<27e2b71200c2c88bf170feba313ddee0>>
+ * @generated SignedSource<<aa8fa1ec832ac538e63f4f284cbb9b23>>
+ * @relayHash 3c27b62b519b25c8044b50459a89509a
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -7,6 +8,8 @@
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
+
+// @relayRequestID 3c27b62b519b25c8044b50459a89509a
 
 import { ConcreteRequest } from "relay-runtime";
 export type BibleBook =
@@ -195,12 +198,11 @@ const node: ConcreteRequest = (function () {
       selections: v3 /*: any*/,
     },
     params: {
-      cacheID: "3c27b62b519b25c8044b50459a89509a",
-      id: null,
+      id: "3c27b62b519b25c8044b50459a89509a",
       metadata: {},
       name: "searchBibleQuery",
       operationKind: "query",
-      text: "query searchBibleQuery(\n  $translation: BibleTranslation!\n  $query: String!\n  $limit: Int\n) {\n  bibleVersesByQuery(translation: $translation, query: $query, limit: $limit) {\n    id\n    book\n    chapter\n    verse\n    text\n  }\n}\n",
+      text: null,
     },
   };
 })();

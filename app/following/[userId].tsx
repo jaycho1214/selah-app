@@ -37,13 +37,18 @@ export default function FollowingScreen() {
 
   return (
     <View
-      style={[styles.container, { backgroundColor: colors.bg, paddingTop: contentPaddingTop }]}
+      style={[
+        styles.container,
+        { backgroundColor: colors.bg, paddingTop: contentPaddingTop },
+      ]}
     >
       <Stack.Screen
         options={{
           title: "Following",
           headerTransparent: IS_LIQUID_GLASS,
-          headerStyle: { backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg },
+          headerStyle: {
+            backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg,
+          },
           headerShadowVisible: false,
         }}
       />

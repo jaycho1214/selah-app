@@ -2,13 +2,11 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
   ReactNode,
 } from "react";
-import { useColorScheme as useNativeWindColorScheme } from "nativewind";
-import { useColorScheme as useRNColorScheme } from "react-native";
+import { useColorScheme } from "react-native";
 
 type Theme = "light" | "dark" | "system";
 
@@ -30,17 +28,11 @@ export function ThemeProvider({
   children,
   defaultTheme = "system",
 }: ThemeProviderProps) {
-  const systemColorScheme = useRNColorScheme();
-  const { setColorScheme } = useNativeWindColorScheme();
+  const systemColorScheme = useColorScheme();
   const [theme, setThemeState] = useState<Theme>(defaultTheme);
 
   const resolvedTheme =
     theme === "system" ? (systemColorScheme ?? "light") : theme;
-
-  useEffect(() => {
-    // Update NativeWind color scheme when theme changes
-    setColorScheme(resolvedTheme);
-  }, [resolvedTheme, setColorScheme]);
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);

@@ -1,19 +1,28 @@
 import { createMMKV, type MMKV } from "react-native-mmkv";
 import { StateStorage } from "zustand/middleware";
 
-// Single MMKV instance for all settings
-export const storage: MMKV = createMMKV({ id: "selah-storage" });
+// Lazy-initialized MMKV instance — avoids calling NitroModules during
+// JS bundle evaluation when the native factory may not be ready yet
+// (causes SIGSEGV on TestFlight/production builds).
+let _storage: MMKV | null = null;
+
+export function getStorage(): MMKV {
+  if (!_storage) {
+    _storage = createMMKV({ id: "selah-storage" });
+  }
+  return _storage;
+}
 
 // Zustand-compatible storage adapter
 export const mmkvStorage: StateStorage = {
   getItem: (name: string) => {
-    const value = storage.getString(name);
+    const value = getStorage().getString(name);
     return value ?? null;
   },
   setItem: (name: string, value: string) => {
-    storage.set(name, value);
+    getStorage().set(name, value);
   },
   removeItem: (name: string) => {
-    storage.remove(name);
+    getStorage().remove(name);
   },
 };

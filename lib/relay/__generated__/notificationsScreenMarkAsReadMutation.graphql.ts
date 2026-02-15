@@ -1,5 +1,6 @@
 /**
- * @generated SignedSource<<a14a5e928852d2374a8a4a065720576d>>
+ * @generated SignedSource<<4f7d638c6fbc0f171037f1ada4b3d0ea>>
+ * @relayHash d34d59af86660aadb2507ee19a2e0911
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -7,6 +8,8 @@
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
+
+// @relayRequestID d34d59af86660aadb2507ee19a2e0911
 
 import { ConcreteRequest } from "relay-runtime";
 export type notificationsScreenMarkAsReadMutation$variables = Record<
@@ -49,12 +52,11 @@ const node: ConcreteRequest = (function () {
       selections: v0 /*: any*/,
     },
     params: {
-      cacheID: "d34d59af86660aadb2507ee19a2e0911",
-      id: null,
+      id: "d34d59af86660aadb2507ee19a2e0911",
       metadata: {},
       name: "notificationsScreenMarkAsReadMutation",
       operationKind: "mutation",
-      text: "mutation notificationsScreenMarkAsReadMutation {\n  notificationMarkAsRead\n}\n",
+      text: null,
     },
   };
 })();

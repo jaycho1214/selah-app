@@ -1,5 +1,6 @@
 /**
- * @generated SignedSource<<e5e65b988ddf650cd6647676e68daf63>>
+ * @generated SignedSource<<5a7e1cb03df2ef120318fba6e38c44f6>>
+ * @relayHash 7ed2abcc435f1da89ff279bf31ad56dc
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -7,6 +8,8 @@
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
+
+// @relayRequestID 7ed2abcc435f1da89ff279bf31ad56dc
 
 import { ConcreteRequest } from "relay-runtime";
 export type IdPostLikeMutation$variables = {
@@ -74,12 +77,11 @@ const node: ConcreteRequest = (function () {
       selections: v1 /*: any*/,
     },
     params: {
-      cacheID: "7ed2abcc435f1da89ff279bf31ad56dc",
-      id: null,
+      id: "7ed2abcc435f1da89ff279bf31ad56dc",
       metadata: {},
       name: "IdPostLikeMutation",
       operationKind: "mutation",
-      text: "mutation IdPostLikeMutation(\n  $id: ID!\n) {\n  bibleVersePostLike(id: $id) {\n    likedAt\n  }\n}\n",
+      text: null,
     },
   };
 })();

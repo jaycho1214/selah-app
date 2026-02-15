@@ -167,6 +167,10 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTime
 
+type DeleteMyAccountPayload {
+  success: Boolean!
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -177,13 +181,18 @@ type Mutation {
   bibleVersePostDelete(id: ID!): BibleVersePostDeletePayload!
   bibleVersePostLike(id: ID!): BibleVersePostLikePayload!
   bibleVersePostUnlike(id: ID!): BibleVersePostUnlikePayload!
+  deleteMyAccount: DeleteMyAccountPayload!
   notificationMarkAsRead: Boolean!
-  registerExpoPushToken(token: String!): Boolean!
-  unregisterExpoPushToken(token: String!): Boolean!
   pollUnvote(pollId: ID!): PollUnvotePayload!
   pollVote(optionId: ID!, pollId: ID!): PollVotePayload!
+  registerExpoPushToken(token: String!): Boolean!
+  reportPost(input: ReportPostInput!): ReportPostPayload!
+  reportUser(input: ReportUserInput!): ReportUserPayload!
+  unregisterExpoPushToken(token: String!): Boolean!
   updateUserSettings(input: UpdateUserSettingsInput!): UpdateUserSettingsPayload!
+  userBlock(userId: ID!): UserBlockPayload!
   userFollow(userId: ID!): UserFollowPayload!
+  userUnblock(userId: ID!): UserUnblockPayload!
   userUnfollow(userId: ID!): UserUnfollowPayload!
   userUpdate(input: UserUpdateInput!): UserUpdatePayload!
 }
@@ -282,6 +291,7 @@ type Query {
   bibleVerseByReference(book: BibleBook!, chapter: Int!, translation: BibleTranslation!, verse: Int!): BibleVerse
   bibleVersePostById(id: ID!): BibleVersePost
   bibleVersePosts(after: String, before: String, first: Int, last: Int): BibleVersePostConnection!
+  bibleVersePostsByVerseIds(after: String, before: String, first: Int, last: Int, verseIds: [ID!]!): BibleVersePostConnection!
   bibleVerses: [BibleVerse!]!
   bibleVersesByQuery(limit: Int, query: String!, translation: BibleTranslation!): [BibleVerse!]!
   bibleVersesByReference(book: BibleBook!, chapter: Int!, translation: BibleTranslation!): [BibleVerse!]!
@@ -303,6 +313,28 @@ type QueryUsersConnection {
 type QueryUsersConnectionEdge {
   cursor: String!
   node: User
+}
+
+input ReportPostInput {
+  anonymous: Boolean
+  description: String
+  postId: ID!
+  reason: String!
+}
+
+type ReportPostPayload {
+  success: Boolean!
+}
+
+input ReportUserInput {
+  anonymous: Boolean
+  description: String
+  reason: String!
+  userId: ID!
+}
+
+type ReportUserPayload {
+  success: Boolean!
 }
 
 type ThemeSettings {
@@ -336,6 +368,8 @@ type User implements Node {
   followingCount: Int!
   id: ID!
   image: Asset
+  isBlocked: Boolean!
+  isBlockingMe: Boolean!
   likedBibleVersePosts(after: String, before: String, first: Int, last: Int): BibleVersePostConnection!
   name: String
   notificationsReadAt: DateTime
@@ -351,6 +385,10 @@ type UserBibleReadState implements Node {
   createdAt: DateTime
   id: ID!
   translation: BibleTranslation
+}
+
+type UserBlockPayload {
+  user: User!
 }
 
 input UserFilterInput {
@@ -369,6 +407,10 @@ type UserSettings {
   theme: ThemeSettings
   updatedAt: DateTime
   version: Int
+}
+
+type UserUnblockPayload {
+  user: User!
 }
 
 type UserUnfollowPayload {

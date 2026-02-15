@@ -1,5 +1,5 @@
 import React, { forwardRef, useCallback } from "react";
-import { useColorScheme, StyleSheet, Platform } from "react-native";
+import { useColorScheme, StyleSheet, Platform, Linking } from "react-native";
 import { Image } from "expo-image";
 import {
   BottomSheetModal,
@@ -164,12 +164,16 @@ export const SignInSheet = forwardRef<BottomSheetModal, SignInSheetProps>(
               By continuing, you agree to our{" "}
               <Text
                 style={[styles.footerLink, { color: colors.textSecondary }]}
+                onPress={() => Linking.openURL("https://selah.kr/legal/terms")}
               >
-                Terms
+                Terms of Service
               </Text>{" "}
               and{" "}
               <Text
                 style={[styles.footerLink, { color: colors.textSecondary }]}
+                onPress={() =>
+                  Linking.openURL("https://selah.kr/legal/privacy")
+                }
               >
                 Privacy Policy
               </Text>

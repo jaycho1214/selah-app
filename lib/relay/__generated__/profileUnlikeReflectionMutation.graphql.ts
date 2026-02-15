@@ -1,5 +1,6 @@
 /**
- * @generated SignedSource<<b9401c0ce2d1448fbb901dc3e115ab0a>>
+ * @generated SignedSource<<183888439fe7f2e5a1e7c1fa671f1ef7>>
+ * @relayHash 97cc30212bbbce8c2fe28ad674dabaaf
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -7,6 +8,8 @@
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
+
+// @relayRequestID 97cc30212bbbce8c2fe28ad674dabaaf
 
 import { ConcreteRequest } from "relay-runtime";
 export type profileUnlikeReflectionMutation$variables = {
@@ -74,12 +77,11 @@ const node: ConcreteRequest = (function () {
       selections: v1 /*: any*/,
     },
     params: {
-      cacheID: "97cc30212bbbce8c2fe28ad674dabaaf",
-      id: null,
+      id: "97cc30212bbbce8c2fe28ad674dabaaf",
       metadata: {},
       name: "profileUnlikeReflectionMutation",
       operationKind: "mutation",
-      text: "mutation profileUnlikeReflectionMutation(\n  $id: ID!\n) {\n  bibleVersePostUnlike(id: $id) {\n    likedAt\n  }\n}\n",
+      text: null,
     },
   };
 })();

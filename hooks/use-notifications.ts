@@ -3,7 +3,7 @@ import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import { useRelayEnvironment } from "react-relay";
 import { useSession } from "@/components/providers/session-provider";
-import { storage } from "@/lib/storage";
+import { getStorage } from "@/lib/storage";
 import {
   registerForPushNotificationsAsync,
   registerTokenWithServer,
@@ -34,7 +34,7 @@ export function useNotificationSetup() {
         if (cancelled || !token) return;
 
         // Store token so we can unregister later
-        storage.set(PUSH_TOKEN_KEY, token);
+        getStorage().set(PUSH_TOKEN_KEY, token);
 
         await registerTokenWithServer(environment, token);
       } catch (error) {
@@ -62,10 +62,13 @@ export function useNotificationSetup() {
         const url = data?.url as string | undefined;
 
         if (url) {
-          // Deep link: expects "selah://post/123" or "/post/123" format
-          const path = url.startsWith("selah://")
-            ? url.replace("selah://", "/")
-            : url;
+          // Deep link: handle selah://, https://selah.kr/, or /path formats
+          let path = url;
+          if (url.startsWith("selah://")) {
+            path = url.replace("selah://", "/");
+          } else if (url.startsWith("https://selah.kr")) {
+            path = url.replace("https://selah.kr", "");
+          }
           router.push(path as never);
         }
       });
@@ -81,12 +84,12 @@ export function useNotificationSetup() {
  * Get the stored push token (for unregistration in settings).
  */
 export function getStoredPushToken(): string | null {
-  return storage.getString(PUSH_TOKEN_KEY) ?? null;
+  return getStorage().getString(PUSH_TOKEN_KEY) ?? null;
 }
 
 /**
  * Clear the stored push token.
  */
 export function clearStoredPushToken() {
-  storage.remove(PUSH_TOKEN_KEY);
+  getStorage().remove(PUSH_TOKEN_KEY);
 }
