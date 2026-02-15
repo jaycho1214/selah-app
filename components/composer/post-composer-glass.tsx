@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { forwardRef, useMemo } from "react";
 import {
   View,
   Pressable,
@@ -83,6 +83,31 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
       insets,
     } = state;
 
+    const dynamicStyles = useMemo(
+      () => ({
+        inlinePoll: { backgroundColor: colors.surfaceElevated },
+        pollBorder: {
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: colors.border,
+        },
+        pollTopBorder: {
+          borderTopWidth: StyleSheet.hairlineWidth,
+          borderTopColor: colors.border,
+        },
+        pollOptionInput: { color: colors.text },
+        pollAddText: { color: colors.textMuted },
+        pollDeadlineText: { color: colors.textMuted },
+        submitButtonActive: { backgroundColor: colors.text },
+        submitButtonInactive: { backgroundColor: colors.border },
+        modalContent: { backgroundColor: colors.surface },
+        modalTitle: { color: colors.text },
+        modalButton: { backgroundColor: colors.text },
+        modalButtonText: { color: colors.bg },
+        toolbarIconActive: { backgroundColor: colors.surfaceElevated },
+      }),
+      [colors],
+    );
+
     return (
       <KeyboardStickyView
         offset={keyboardOffset}
@@ -110,20 +135,14 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
               entering={FadeInDown.duration(200)}
               exiting={FadeOutDown.duration(200)}
               layout={LinearTransition.springify().damping(20)}
-              style={[
-                styles.inlinePoll,
-                { backgroundColor: colors.surfaceElevated },
-              ]}
+              style={[styles.inlinePoll, dynamicStyles.inlinePoll]}
             >
               {pollOptions.map((option, index) => (
                 <View
                   key={index}
                   style={[
                     styles.pollOptionRow,
-                    index < pollOptions.length - 1 && {
-                      borderBottomWidth: StyleSheet.hairlineWidth,
-                      borderBottomColor: colors.border,
-                    },
+                    index < pollOptions.length - 1 && dynamicStyles.pollBorder,
                   ]}
                 >
                   <TextInput
@@ -131,7 +150,10 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
                     onChangeText={(text) => updatePollOption(index, text)}
                     placeholder={`Choice ${index + 1}`}
                     placeholderTextColor={colors.textMuted}
-                    style={[styles.pollOptionInput, { color: colors.text }]}
+                    style={[
+                      styles.pollOptionInput,
+                      dynamicStyles.pollOptionInput,
+                    ]}
                     maxLength={100}
                   />
                   {pollOptions.length > 2 && (
@@ -148,34 +170,23 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
               {pollOptions.length < 5 && (
                 <Pressable
                   onPress={addPollOption}
-                  style={[
-                    styles.pollOptionRow,
-                    {
-                      borderTopWidth: StyleSheet.hairlineWidth,
-                      borderTopColor: colors.border,
-                    },
-                  ]}
+                  style={[styles.pollOptionRow, dynamicStyles.pollTopBorder]}
                 >
-                  <Text
-                    style={[styles.pollAddText, { color: colors.textMuted }]}
-                  >
+                  <Text style={[styles.pollAddText, dynamicStyles.pollAddText]}>
                     Add choice...
                   </Text>
                 </Pressable>
               )}
               <Pressable
                 onPress={() => setShowDatePicker(true)}
-                style={[
-                  styles.pollDeadlineRow,
-                  {
-                    borderTopWidth: StyleSheet.hairlineWidth,
-                    borderTopColor: colors.border,
-                  },
-                ]}
+                style={[styles.pollDeadlineRow, dynamicStyles.pollTopBorder]}
               >
                 <Clock size={14} color={colors.textMuted} />
                 <Text
-                  style={[styles.pollDeadlineText, { color: colors.textMuted }]}
+                  style={[
+                    styles.pollDeadlineText,
+                    dynamicStyles.pollDeadlineText,
+                  ]}
                 >
                   Ends in {formatDeadline(pollDeadline)}
                 </Text>
@@ -282,9 +293,7 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
                 <View
                   style={[
                     styles.toolbarIconWrap,
-                    images.length > 0 && {
-                      backgroundColor: colors.surfaceElevated,
-                    },
+                    images.length > 0 && dynamicStyles.toolbarIconActive,
                   ]}
                 >
                   <ImagePickerButton
@@ -309,9 +318,8 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
                 <View
                   style={[
                     styles.toolbarIconWrap,
-                    (poll || showPollCreator) && {
-                      backgroundColor: colors.surfaceElevated,
-                    },
+                    (poll || showPollCreator) &&
+                      dynamicStyles.toolbarIconActive,
                   ]}
                 >
                   <Pressable onPress={togglePollCreator}>
@@ -370,7 +378,7 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
 
         {/* Bottom spacer — lifts pill above home indicator */}
         {!isExpanded && <View style={{ height: insets.bottom + 40 }} />}
-        {isExpanded && <View style={{ height: 12 }} />}
+        {isExpanded && <View style={styles.expandedSpacer} />}
 
         {/* Deadline Picker Modal */}
         <Modal
@@ -384,10 +392,10 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
             onPress={() => setShowDatePicker(false)}
           >
             <Pressable
-              style={[styles.modalContent, { backgroundColor: colors.surface }]}
+              style={[styles.modalContent, dynamicStyles.modalContent]}
               onPress={(e) => e.stopPropagation()}
             >
-              <Text style={[styles.modalTitle, { color: colors.text }]}>
+              <Text style={[styles.modalTitle, dynamicStyles.modalTitle]}>
                 Poll ends
               </Text>
               <DateTimePicker
@@ -401,9 +409,14 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
               />
               <Pressable
                 onPress={confirmDeadline}
-                style={[styles.modalButton, { backgroundColor: colors.text }]}
+                style={[styles.modalButton, dynamicStyles.modalButton]}
               >
-                <Text style={[styles.modalButtonText, { color: colors.bg }]}>
+                <Text
+                  style={[
+                    styles.modalButtonText,
+                    dynamicStyles.modalButtonText,
+                  ]}
+                >
                   Done
                 </Text>
               </Pressable>
@@ -520,6 +533,9 @@ const styles = StyleSheet.create({
   modalButtonText: {
     fontSize: 16,
     fontWeight: "600",
+  },
+  expandedSpacer: {
+    height: 12,
   },
 });
 

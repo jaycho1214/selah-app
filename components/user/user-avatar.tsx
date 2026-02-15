@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { Image } from "expo-image";
 import { Pressable, StyleSheet, View } from "react-native";
 
@@ -27,7 +28,7 @@ function getInitials(name: string | null | undefined): string {
   return (parts[0][0] + (parts[1]?.[0] || "")).toUpperCase();
 }
 
-export function UserAvatar({
+export const UserAvatar = memo(function UserAvatar({
   imageUrl,
   name,
   size = 40,
@@ -35,20 +36,26 @@ export function UserAvatar({
 }: UserAvatarProps) {
   const colors = useColors();
 
-  const avatarStyle = {
-    width: size,
-    height: size,
-    borderRadius: size / 2,
-  };
-
-  const initialsStyle = {
-    fontSize: size * 0.4,
-  };
+  const dynamicStyles = useMemo(
+    () => ({
+      avatar: {
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+      },
+      initials: {
+        fontSize: size * 0.4,
+      },
+      placeholder: { backgroundColor: colors.accent + "18" },
+      initialsColor: { color: colors.accent },
+    }),
+    [size, colors.accent],
+  );
 
   const content = imageUrl ? (
     <Image
       source={{ uri: imageUrl }}
-      style={avatarStyle}
+      style={dynamicStyles.avatar}
       contentFit="cover"
       transition={150}
     />
@@ -56,11 +63,17 @@ export function UserAvatar({
     <View
       style={[
         styles.placeholder,
-        avatarStyle,
-        { backgroundColor: colors.accent + "18" },
+        dynamicStyles.avatar,
+        dynamicStyles.placeholder,
       ]}
     >
-      <Text style={[styles.initials, initialsStyle, { color: colors.accent }]}>
+      <Text
+        style={[
+          styles.initials,
+          dynamicStyles.initials,
+          dynamicStyles.initialsColor,
+        ]}
+      >
         {getInitials(name)}
       </Text>
     </View>
@@ -71,7 +84,7 @@ export function UserAvatar({
   }
 
   return content;
-}
+});
 
 const styles = StyleSheet.create({
   placeholder: {

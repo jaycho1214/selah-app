@@ -1,5 +1,13 @@
+import { memo, useCallback, useMemo } from "react";
 import { FONT_SIZES, useSettingsStore } from "@/lib/stores/settings-store";
-import { Platform, Pressable, Text, View, useColorScheme } from "react-native";
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useColorScheme,
+} from "react-native";
 
 // Serif font for bible reading - New York on iOS, Georgia on Android
 const serifFont = Platform.select({
@@ -20,7 +28,7 @@ interface VerseItemProps {
   onLongPress: () => void;
 }
 
-export function VerseItem({
+export const VerseItem = memo(function VerseItem({
   verse,
   isSelected,
   isFirstVerse,
@@ -50,81 +58,109 @@ export function VerseItem({
     ? `${highlightColor}${isDark ? "30" : "40"}`
     : undefined;
 
+  const dynamicStyles = useMemo(
+    () => ({
+      container: {
+        backgroundColor: highlightBg,
+      },
+      verseNum: {
+        color: verseNumColor,
+        fontSize: sizes.verse,
+        opacity: isFirstVerse ? 0 : 1,
+      },
+      verseText: {
+        color: textColor,
+        fontSize: sizes.text,
+        lineHeight: sizes.lineHeight,
+        textDecorationLine: (isSelected ? "underline" : "none") as
+          | "underline"
+          | "none",
+        textDecorationColor: underlineColor,
+      },
+      firstVerseText: {
+        color: textColor,
+        fontSize: sizes.text,
+        lineHeight: sizes.lineHeight,
+        paddingTop: sizes.lineHeight,
+        textDecorationLine: (isSelected ? "underline" : "none") as
+          | "underline"
+          | "none",
+        textDecorationColor: underlineColor,
+      },
+      dropCap: {
+        fontSize: sizes.text * 2.6,
+        lineHeight: sizes.lineHeight,
+        color: dropCapColor,
+      },
+    }),
+    [
+      highlightBg,
+      verseNumColor,
+      sizes,
+      isFirstVerse,
+      textColor,
+      isSelected,
+      underlineColor,
+      dropCapColor,
+    ],
+  );
+
   return (
     <Pressable
       onPress={onPress}
       onLongPress={onLongPress}
       delayLongPress={400}
-      style={{
-        flexDirection: "row",
-        gap: 12,
-        paddingHorizontal: 16,
-        paddingTop: 8,
-        paddingBottom: 8,
-        backgroundColor: highlightBg,
-      }}
+      style={[styles.container, dynamicStyles.container]}
     >
       {/* Verse number column */}
-      <Text
-        style={{
-          color: verseNumColor,
-          fontWeight: "600",
-          fontSize: sizes.verse,
-          minWidth: 28,
-          textAlign: "right",
-          opacity: isFirstVerse ? 0 : 1,
-        }}
-      >
+      <Text style={[styles.verseNum, dynamicStyles.verseNum]}>
         {verse.verse}
       </Text>
 
       {/* Verse text */}
-      <View style={{ flex: 1 }}>
+      <View style={styles.textColumn}>
         {isFirstVerse ? (
           <View>
-            <Text
-              style={{
-                color: textColor,
-                fontSize: sizes.text,
-                lineHeight: sizes.lineHeight,
-                fontFamily: serifFont,
-                paddingTop: sizes.lineHeight,
-                textDecorationLine: isSelected ? "underline" : "none",
-                textDecorationColor: underlineColor,
-                textDecorationStyle: "solid",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: sizes.text * 2.6,
-                  lineHeight: sizes.lineHeight,
-                  fontWeight: "500",
-                  fontFamily: serifFont,
-                  color: dropCapColor,
-                  letterSpacing: 2,
-                }}
-              >
+            <Text style={[styles.serifText, dynamicStyles.firstVerseText]}>
+              <Text style={[styles.dropCap, dynamicStyles.dropCap]}>
                 {firstChar}
               </Text>
               {restOfText}
             </Text>
           </View>
         ) : (
-          <Text
-            style={{
-              color: textColor,
-              fontSize: sizes.text,
-              lineHeight: sizes.lineHeight,
-              fontFamily: serifFont,
-              textDecorationLine: isSelected ? "underline" : "none",
-              textDecorationColor: underlineColor,
-              textDecorationStyle: "solid",
-            }}
-          >
+          <Text style={[styles.serifText, dynamicStyles.verseText]}>
             {verse.text}
           </Text>
         )}
       </View>
     </Pressable>
   );
-}
+});
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 8,
+  },
+  verseNum: {
+    fontWeight: "600",
+    minWidth: 28,
+    textAlign: "right",
+  },
+  textColumn: {
+    flex: 1,
+  },
+  serifText: {
+    fontFamily: serifFont,
+    textDecorationStyle: "solid",
+  },
+  dropCap: {
+    fontWeight: "500",
+    fontFamily: serifFont,
+    letterSpacing: 2,
+  },
+});

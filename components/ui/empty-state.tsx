@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -23,7 +24,7 @@ interface EmptyStateProps {
   style?: StyleProp<ViewStyle>;
 }
 
-export function EmptyState({
+export const EmptyState = memo(function EmptyState({
   variant = "default",
   title,
   message,
@@ -74,7 +75,7 @@ export function EmptyState({
       )}
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

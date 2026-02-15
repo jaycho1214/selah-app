@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { View, Pressable, StyleSheet } from "react-native";
 import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react-native";
 import { Text } from "@/components/ui/text";
@@ -13,7 +14,7 @@ interface BibleNavigatorBarProps {
   onNextChapter: () => void;
 }
 
-export function BibleNavigatorBar({
+export const BibleNavigatorBar = memo(function BibleNavigatorBar({
   onOpenNavigator,
   onPrevChapter,
   onNextChapter,
@@ -89,7 +90,7 @@ export function BibleNavigatorBar({
       </Pressable>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

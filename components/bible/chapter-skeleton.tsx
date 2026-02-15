@@ -6,7 +6,7 @@ import Animated, {
   withTiming,
   interpolate,
 } from "react-native-reanimated";
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -14,7 +14,9 @@ interface ChapterSkeletonProps {
   topInset?: number;
 }
 
-export function ChapterSkeleton({ topInset = 0 }: ChapterSkeletonProps) {
+export const ChapterSkeleton = memo(function ChapterSkeleton({
+  topInset = 0,
+}: ChapterSkeletonProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
 
@@ -111,7 +113,7 @@ export function ChapterSkeleton({ topInset = 0 }: ChapterSkeletonProps) {
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

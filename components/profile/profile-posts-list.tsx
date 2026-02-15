@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle } from "react";
+import { forwardRef, memo, useCallback, useImperativeHandle } from "react";
 import { StyleSheet, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { graphql, usePaginationFragment } from "react-relay";
@@ -24,190 +24,200 @@ export interface ProfilePostsListRef {
   connectionId: string | null;
 }
 
-export const ProfilePostsList = forwardRef<
-  ProfilePostsListRef,
-  ProfilePostsListProps
->(function ProfilePostsList(
-  { userRef, currentUserId, onLike, onUnlike, onDelete, onReport },
-  ref,
-) {
-  const colors = useColors();
-  const { data, loadNext, hasNext, isLoadingNext, refetch } =
-    usePaginationFragment(
-      graphql`
-        fragment profilePostsListFragment on User
-        @argumentDefinitions(
-          count: { type: "Int", defaultValue: 20 }
-          cursor: { type: "String" }
-        )
-        @refetchable(queryName: "profilePostsListPaginationQuery") {
-          bibleVersePosts(first: $count, after: $cursor)
-            @connection(key: "profilePostsList_bibleVersePosts") {
-            __id
-            edges {
-              node {
-                id
-                content
-                createdAt
-                likesCount
-                childPostsCount
-                likedAt
-                user {
-                  id
-                  name
-                  username
-                  image {
-                    url
-                  }
-                }
-                images {
-                  url
-                  width
-                  height
-                }
-                poll {
-                  id
-                  totalVotes
-                  isExpired
-                  deadline
-                  userVote {
+export const ProfilePostsList = memo(
+  forwardRef<ProfilePostsListRef, ProfilePostsListProps>(
+    function ProfilePostsList(
+      { userRef, currentUserId, onLike, onUnlike, onDelete, onReport },
+      ref,
+    ) {
+      const colors = useColors();
+      const { data, loadNext, hasNext, isLoadingNext, refetch } =
+        usePaginationFragment(
+          graphql`
+            fragment profilePostsListFragment on User
+            @argumentDefinitions(
+              count: { type: "Int", defaultValue: 20 }
+              cursor: { type: "String" }
+            )
+            @refetchable(queryName: "profilePostsListPaginationQuery") {
+              bibleVersePosts(first: $count, after: $cursor)
+                @connection(key: "profilePostsList_bibleVersePosts") {
+                __id
+                edges {
+                  node {
                     id
-                    text
+                    content
+                    createdAt
+                    likesCount
+                    childPostsCount
+                    likedAt
+                    user {
+                      id
+                      name
+                      username
+                      image {
+                        url
+                      }
+                    }
+                    images {
+                      url
+                      width
+                      height
+                    }
+                    poll {
+                      id
+                      totalVotes
+                      isExpired
+                      deadline
+                      userVote {
+                        id
+                        text
+                      }
+                      options {
+                        id
+                        text
+                        voteCount
+                        votePercentage
+                      }
+                    }
+                    verse {
+                      id
+                      book
+                      chapter
+                      verse
+                      translation
+                    }
                   }
-                  options {
-                    id
-                    text
-                    voteCount
-                    votePercentage
-                  }
-                }
-                verse {
-                  id
-                  book
-                  chapter
-                  verse
-                  translation
                 }
               }
             }
-          }
+          `,
+          userRef,
+        );
+
+      const posts = data.bibleVersePosts?.edges ?? [];
+      const connectionId = data.bibleVersePosts?.__id ?? null;
+
+      // Expose refetch and connectionId to parent
+      useImperativeHandle(
+        ref,
+        () => ({
+          refetch: () => {
+            refetch({}, { fetchPolicy: "store-and-network" });
+          },
+          connectionId,
+        }),
+        [refetch, connectionId],
+      );
+
+      const handleEndReached = useCallback(() => {
+        if (hasNext && !isLoadingNext) {
+          loadNext(20);
         }
-      `,
-      userRef,
-    );
+      }, [hasNext, isLoadingNext, loadNext]);
 
-  const posts = data.bibleVersePosts?.edges ?? [];
-  const connectionId = data.bibleVersePosts?.__id ?? null;
+      const keyExtractor = useCallback(
+        (item: (typeof posts)[0]) => item.node.id,
+        [],
+      );
 
-  // Expose refetch and connectionId to parent
-  useImperativeHandle(
-    ref,
-    () => ({
-      refetch: () => {
-        refetch({}, { fetchPolicy: "store-and-network" });
-      },
-      connectionId,
-    }),
-    [refetch, connectionId],
-  );
+      const renderItem = useCallback(
+        ({ item, index }: { item: (typeof posts)[0]; index: number }) => {
+          const post = item.node;
+          const verse = post.verse;
 
-  const handleEndReached = () => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(20);
-    }
-  };
+          // Get book name for verse reference
+          const bookName = verse?.book
+            ? (BIBLE_BOOK_DETAILS[verse.book as BibleBook]?.name ?? verse.book)
+            : null;
+          const verseReference =
+            bookName && verse
+              ? `${bookName} ${verse.chapter}:${verse.verse}`
+              : null;
 
-  if (posts.length === 0) {
-    return (
-      <EmptyState
-        title="No posts yet"
-        message="Share your reflections on Bible verses"
-        animationDelay={400}
-      />
-    );
-  }
-
-  const renderItem = ({
-    item,
-    index,
-  }: {
-    item: (typeof posts)[0];
-    index: number;
-  }) => {
-    const post = item.node;
-    const verse = post.verse;
-
-    // Get book name for verse reference
-    const bookName = verse?.book
-      ? (BIBLE_BOOK_DETAILS[verse.book as BibleBook]?.name ?? verse.book)
-      : null;
-    const verseReference =
-      bookName && verse ? `${bookName} ${verse.chapter}:${verse.verse}` : null;
-
-    return (
-      <View>
-        {/* Verse reference above post */}
-        {verseReference && (
-          <View
-            style={[
-              styles.verseReferenceContainer,
-              { borderBottomColor: colors.border },
-            ]}
-          >
-            <Text style={[styles.verseReference, { color: colors.textMuted }]}>
-              {verseReference}
-            </Text>
-            {verse?.translation && (
-              <View
-                style={[
-                  styles.translationBadge,
-                  { backgroundColor: colors.surfaceElevated },
-                ]}
-              >
-                <Text
-                  style={[styles.translationText, { color: colors.textMuted }]}
+          return (
+            <View>
+              {/* Verse reference above post */}
+              {verseReference && (
+                <View
+                  style={[
+                    styles.verseReferenceContainer,
+                    { borderBottomColor: colors.border },
+                  ]}
                 >
-                  {verse.translation}
-                </Text>
-              </View>
-            )}
-          </View>
-        )}
-        <ReflectionItem
-          id={post.id}
-          content={post.content}
-          user={post.user}
-          createdAt={post.createdAt}
-          images={post.images ?? []}
-          poll={post.poll}
-          likesCount={post.likesCount}
-          childPostsCount={post.childPostsCount}
-          likedAt={post.likedAt}
-          colors={colors}
-          index={index}
-          currentUserId={currentUserId}
-          onLike={onLike}
-          onUnlike={onUnlike}
-          onDelete={onDelete}
-          onReport={onReport}
-        />
-      </View>
-    );
-  };
+                  <Text
+                    style={[styles.verseReference, { color: colors.textMuted }]}
+                  >
+                    {verseReference}
+                  </Text>
+                  {verse?.translation && (
+                    <View
+                      style={[
+                        styles.translationBadge,
+                        { backgroundColor: colors.surfaceElevated },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.translationText,
+                          { color: colors.textMuted },
+                        ]}
+                      >
+                        {verse.translation}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              )}
+              <ReflectionItem
+                id={post.id}
+                content={post.content}
+                user={post.user}
+                createdAt={post.createdAt}
+                images={post.images ?? []}
+                poll={post.poll}
+                likesCount={post.likesCount}
+                childPostsCount={post.childPostsCount}
+                likedAt={post.likedAt}
+                colors={colors}
+                index={index}
+                currentUserId={currentUserId}
+                onLike={onLike}
+                onUnlike={onUnlike}
+                onDelete={onDelete}
+                onReport={onReport}
+              />
+            </View>
+          );
+        },
+        [colors, currentUserId, onLike, onUnlike, onDelete, onReport],
+      );
 
-  return (
-    <View style={styles.container}>
-      <FlashList
-        data={posts}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.node.id}
-        onEndReached={handleEndReached}
-        onEndReachedThreshold={0.5}
-        scrollEnabled={false}
-      />
-    </View>
-  );
-});
+      if (posts.length === 0) {
+        return (
+          <EmptyState
+            title="No posts yet"
+            message="Share your reflections on Bible verses"
+            animationDelay={400}
+          />
+        );
+      }
+
+      return (
+        <View style={styles.container}>
+          <FlashList
+            data={posts}
+            renderItem={renderItem}
+            keyExtractor={keyExtractor}
+            onEndReached={handleEndReached}
+            onEndReachedThreshold={0.5}
+            scrollEnabled={false}
+          />
+        </View>
+      );
+    },
+  ),
+);
 
 const styles = StyleSheet.create({
   container: {

@@ -1,3 +1,4 @@
+import { memo, useCallback, useMemo } from "react";
 import { Pressable, View, StyleSheet } from "react-native";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
@@ -29,42 +30,49 @@ interface UserRowProps {
   userRef: userRow_user$key;
 }
 
-export function UserRow({ userRef }: UserRowProps) {
+export const UserRow = memo(function UserRow({ userRef }: UserRowProps) {
   const colors = useColors();
   const { session } = useSession();
   const data = useFragment(fragment, userRef);
 
-  const handlePress = () => {
+  const handlePress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (data?.username) {
       router.push(`/user/${data.username}`);
     }
-  };
+  }, [data?.username]);
 
   const isOwnProfile = session?.user?.id === data?.id;
+
+  const dynamicStyles = useMemo(
+    () => ({
+      container: { borderBottomColor: colors.border },
+      name: { color: colors.text },
+      username: { color: colors.textMuted },
+      bio: { color: colors.textSecondary },
+    }),
+    [colors],
+  );
 
   return (
     <Pressable
       onPress={handlePress}
-      style={[styles.container, { borderBottomColor: colors.border }]}
+      style={[styles.container, dynamicStyles.container]}
     >
       <UserAvatar imageUrl={data?.image?.url} name={data?.name} size={48} />
       <View style={styles.content}>
         <View style={styles.textContainer}>
-          <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
+          <Text style={[styles.name, dynamicStyles.name]} numberOfLines={1}>
             {data?.name || data?.username}
           </Text>
           <Text
-            style={[styles.username, { color: colors.textMuted }]}
+            style={[styles.username, dynamicStyles.username]}
             numberOfLines={1}
           >
             @{data?.username}
           </Text>
           {data?.bio && (
-            <Text
-              style={[styles.bio, { color: colors.textSecondary }]}
-              numberOfLines={2}
-            >
+            <Text style={[styles.bio, dynamicStyles.bio]} numberOfLines={2}>
               {data.bio}
             </Text>
           )}
@@ -73,7 +81,7 @@ export function UserRow({ userRef }: UserRowProps) {
       </View>
     </Pressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

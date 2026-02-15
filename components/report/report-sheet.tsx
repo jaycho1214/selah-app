@@ -1,11 +1,13 @@
 import React, {
   forwardRef,
+  memo,
   useCallback,
   useImperativeHandle,
   useRef,
   useState,
 } from "react";
-import { Alert, Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Alert, Pressable, StyleSheet, View } from "react-native";
+import type { TextInput as GHTextInput } from "react-native-gesture-handler";
 import {
   BottomSheetModal,
   BottomSheetView,
@@ -53,8 +55,8 @@ export interface ReportSheetRef {
   present: (args: { type: "post" | "user"; targetId: string }) => void;
 }
 
-export const ReportSheet = forwardRef<ReportSheetRef>(
-  function ReportSheet(_, ref) {
+export const ReportSheet = memo(
+  forwardRef<ReportSheetRef>(function ReportSheet(_, ref) {
     const colors = useColors();
     const { capture } = useAnalytics();
     const bottomSheetRef = useRef<BottomSheetModal>(null);
@@ -63,6 +65,8 @@ export const ReportSheet = forwardRef<ReportSheetRef>(
     const [step, setStep] = useState<"reason" | "description">("reason");
     const [selectedReason, setSelectedReason] = useState("");
     const [description, setDescription] = useState("");
+
+    const descriptionInputRef = useRef<GHTextInput>(null);
 
     const [commitReportPost, isReportingPost] =
       useMutation<reportSheetReportPostMutation>(reportPostMutation);
@@ -77,6 +81,7 @@ export const ReportSheet = forwardRef<ReportSheetRef>(
         setStep("reason");
         setSelectedReason("");
         setDescription("");
+        descriptionInputRef.current?.clear();
         bottomSheetRef.current?.present();
       },
     }));
@@ -226,6 +231,7 @@ export const ReportSheet = forwardRef<ReportSheetRef>(
                 Reason: {selectedReason}
               </Text>
               <BottomSheetTextInput
+                ref={descriptionInputRef}
                 style={[
                   styles.textInput,
                   {
@@ -238,7 +244,7 @@ export const ReportSheet = forwardRef<ReportSheetRef>(
                 placeholderTextColor={colors.textMuted}
                 multiline
                 numberOfLines={4}
-                value={description}
+                defaultValue=""
                 onChangeText={setDescription}
                 textAlignVertical="top"
               />
@@ -262,7 +268,7 @@ export const ReportSheet = forwardRef<ReportSheetRef>(
         </BottomSheetView>
       </BottomSheetModal>
     );
-  },
+  }),
 );
 
 const styles = StyleSheet.create({

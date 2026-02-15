@@ -10,7 +10,7 @@ import {
 import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
 import * as Haptics from "expo-haptics";
 import { ChevronLeft } from "lucide-react-native";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   Pressable,
@@ -149,7 +149,7 @@ interface BibleNavigatorProps {
   onClose: () => void;
 }
 
-export function BibleNavigator({
+export const BibleNavigator = memo(function BibleNavigator({
   currentBook,
   currentChapter,
   onSelect,
@@ -482,7 +482,7 @@ export function BibleNavigator({
       )}
     </BottomSheetModal>
   );
-}
+});
 
 const styles = StyleSheet.create({
   // Testament Tabs

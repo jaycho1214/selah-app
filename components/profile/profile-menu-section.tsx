@@ -1,3 +1,4 @@
+import { memo } from "react";
 import * as Haptics from "expo-haptics";
 import { ChevronRight, LucideIcon } from "lucide-react-native";
 import { Pressable, StyleSheet, View } from "react-native";
@@ -70,7 +71,10 @@ interface ProfileMenuSectionProps {
   baseIndex?: number;
 }
 
-export function ProfileMenuSection({ title, items }: ProfileMenuSectionProps) {
+export const ProfileMenuSection = memo(function ProfileMenuSection({
+  title,
+  items,
+}: ProfileMenuSectionProps) {
   const colors = useColors();
 
   return (
@@ -98,7 +102,7 @@ export function ProfileMenuSection({ title, items }: ProfileMenuSectionProps) {
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   section: {

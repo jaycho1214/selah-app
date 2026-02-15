@@ -1,5 +1,5 @@
 import { FlashList } from "@shopify/flash-list";
-import { useCallback } from "react";
+import { memo, useCallback } from "react";
 import { View, StyleSheet, ActivityIndicator } from "react-native";
 import { EmptyState } from "@/components/ui/empty-state";
 import { UserRow } from "@/components/user/user-row";
@@ -18,7 +18,7 @@ interface UserListProps {
   emptySubMessage?: string;
 }
 
-export function UserList({
+export const UserList = memo(function UserList({
   users,
   hasNext,
   isLoadingNext,
@@ -40,8 +40,9 @@ export function UserList({
   );
 
   const keyExtractor = useCallback(
-    (_item: { readonly node: userRow_user$key }, index: number) => {
-      return String(index);
+    (item: { readonly node: userRow_user$key }) => {
+      // Relay fragment keys retain the underlying object shape at runtime
+      return (item.node as unknown as { id: string }).id;
     },
     [],
   );
@@ -78,7 +79,7 @@ export function UserList({
       }
     />
   );
-}
+});
 
 const styles = StyleSheet.create({
   footer: {

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import {
   useSettingsStore,
@@ -16,7 +17,9 @@ interface FontSizePickerProps {
   onClose?: () => void;
 }
 
-export function FontSizePicker({ onClose }: FontSizePickerProps) {
+export const FontSizePicker = memo(function FontSizePicker({
+  onClose,
+}: FontSizePickerProps) {
   const colors = useColors();
   const fontSize = useSettingsStore((s) => s.fontSize);
   const setFontSize = useSettingsStore((s) => s.setFontSize);
@@ -87,7 +90,7 @@ export function FontSizePicker({ onClose }: FontSizePickerProps) {
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

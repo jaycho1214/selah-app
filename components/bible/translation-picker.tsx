@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { memo, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -31,7 +31,9 @@ interface LocalTranslation {
   downloadedAt: Date | null;
 }
 
-export function TranslationPicker({ onClose }: TranslationPickerProps) {
+export const TranslationPicker = memo(function TranslationPicker({
+  onClose,
+}: TranslationPickerProps) {
   const colors = useColors();
   const currentTranslation = useBibleStore((s) => s.currentTranslation);
   const setTranslation = useBibleStore((s) => s.setTranslation);
@@ -252,7 +254,7 @@ export function TranslationPicker({ onClose }: TranslationPickerProps) {
       </Text>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

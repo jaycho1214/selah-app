@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -15,7 +15,7 @@ interface RichTextEditorProps {
   placeholder?: string;
 }
 
-export function RichTextEditor({
+export const RichTextEditor = memo(function RichTextEditor({
   initialContent = "",
   onContentChange,
   placeholder = "Start writing...",
@@ -56,7 +56,7 @@ export function RichTextEditor({
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

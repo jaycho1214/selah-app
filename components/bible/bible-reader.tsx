@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { View, StyleSheet, Dimensions, useColorScheme } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -50,7 +50,7 @@ interface BibleReaderProps {
   ) => void;
 }
 
-export function BibleReader({
+export const BibleReader = memo(function BibleReader({
   initialBook,
   initialChapter,
   scrollToVerse,
@@ -288,7 +288,7 @@ export function BibleReader({
       </Animated.View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

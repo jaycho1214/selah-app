@@ -1,3 +1,4 @@
+import { memo, useCallback, useRef, useState } from "react";
 import { View, TextInput, Pressable, StyleSheet } from "react-native";
 import { Search, X } from "lucide-react-native";
 import { useColors } from "@/hooks/use-colors";
@@ -12,7 +13,7 @@ interface SearchBarProps {
   autoFocus?: boolean;
 }
 
-export function SearchBar({
+export const SearchBar = memo(function SearchBar({
   value,
   onChangeText,
   onSubmit,
@@ -21,6 +22,22 @@ export function SearchBar({
   autoFocus = false,
 }: SearchBarProps) {
   const colors = useColors();
+  const inputRef = useRef<TextInput>(null);
+  const [hasText, setHasText] = useState(value.length > 0);
+
+  const handleChangeText = useCallback(
+    (text: string) => {
+      setHasText(text.length > 0);
+      onChangeText(text);
+    },
+    [onChangeText],
+  );
+
+  const handleClear = useCallback(() => {
+    inputRef.current?.clear();
+    setHasText(false);
+    onClear();
+  }, [onClear]);
 
   return (
     <View
@@ -36,8 +53,9 @@ export function SearchBar({
         style={styles.searchIcon}
       />
       <TextInput
-        value={value}
-        onChangeText={onChangeText}
+        ref={inputRef}
+        defaultValue={value}
+        onChangeText={handleChangeText}
         onSubmitEditing={onSubmit}
         placeholder={placeholder}
         placeholderTextColor={colors.mutedForeground}
@@ -47,14 +65,14 @@ export function SearchBar({
         autoCorrect={false}
         style={[styles.input, { color: colors.text }]}
       />
-      {value.length > 0 && (
-        <Pressable onPress={onClear} style={styles.clearButton}>
+      {hasText && (
+        <Pressable onPress={handleClear} style={styles.clearButton}>
           <X size={18} color={colors.mutedForeground} />
         </Pressable>
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

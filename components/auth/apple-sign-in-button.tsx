@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import {
   Alert,
   Platform,
@@ -17,7 +17,7 @@ interface AppleSignInButtonProps {
   onError?: (error: Error) => void;
 }
 
-export function AppleSignInButton({
+export const AppleSignInButton = memo(function AppleSignInButton({
   onSuccess,
   onError,
 }: AppleSignInButtonProps) {
@@ -112,7 +112,7 @@ export function AppleSignInButton({
       </Text>
     </Pressable>
   );
-}
+});
 
 function AppleIcon({ color }: { color: string }) {
   return (

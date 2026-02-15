@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useMemo } from "react";
+import { memo, useCallback, useEffect, useRef, useMemo } from "react";
 import { View, Pressable, useColorScheme, StyleSheet } from "react-native";
 import {
   BottomSheetBackdrop,
@@ -22,7 +22,7 @@ interface TranslationSelectorProps {
   onClose: () => void;
 }
 
-export function TranslationSelector({
+export const TranslationSelector = memo(function TranslationSelector({
   visible,
   onClose,
 }: TranslationSelectorProps) {
@@ -193,7 +193,7 @@ export function TranslationSelector({
       </BottomSheetView>
     </BottomSheetModal>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

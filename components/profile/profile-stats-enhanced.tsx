@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { RelativePathString, useRouter } from "expo-router";
-import { useCallback } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
@@ -12,7 +12,7 @@ interface ProfileStatsEnhancedProps {
   followingCount: number;
 }
 
-export function ProfileStatsEnhanced({
+export const ProfileStatsEnhanced = memo(function ProfileStatsEnhanced({
   userId,
   followerCount,
   followingCount,
@@ -30,28 +30,32 @@ export function ProfileStatsEnhanced({
     router.push(`/followers/${userId}` as RelativePathString);
   }, [userId, router]);
 
+  const dynamicStyles = useMemo(
+    () => ({
+      count: { color: colors.text },
+      label: { color: colors.textMuted },
+    }),
+    [colors],
+  );
+
   return (
     <View style={styles.container}>
       <Pressable onPress={handleFollowingPress} style={styles.stat}>
-        <Text style={[styles.count, { color: colors.text }]}>
+        <Text style={[styles.count, dynamicStyles.count]}>
           {followingCount}
         </Text>
-        <Text style={[styles.label, { color: colors.textMuted }]}>
-          {" following"}
-        </Text>
+        <Text style={[styles.label, dynamicStyles.label]}>{" following"}</Text>
       </Pressable>
 
       <Pressable onPress={handleFollowersPress} style={styles.stat}>
-        <Text style={[styles.count, { color: colors.text }]}>
-          {followerCount}
-        </Text>
-        <Text style={[styles.label, { color: colors.textMuted }]}>
+        <Text style={[styles.count, dynamicStyles.count]}>{followerCount}</Text>
+        <Text style={[styles.label, dynamicStyles.label]}>
           {followerCount === 1 ? " follower" : " followers"}
         </Text>
       </Pressable>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

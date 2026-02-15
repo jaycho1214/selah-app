@@ -1,3 +1,4 @@
+import { memo, useCallback, useMemo } from "react";
 import { ActivityIndicator, Pressable, StyleSheet } from "react-native";
 import { useFragment, useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
@@ -40,7 +41,9 @@ interface FollowButtonProps {
   userRef: followButton_user$key;
 }
 
-export function FollowButton({ userRef }: FollowButtonProps) {
+export const FollowButton = memo(function FollowButton({
+  userRef,
+}: FollowButtonProps) {
   const colors = useColors();
   const { capture } = useAnalytics();
   const data = useFragment(fragment, userRef);
@@ -49,7 +52,7 @@ export function FollowButton({ userRef }: FollowButtonProps) {
 
   const isFollowing = !!data?.followedAt;
 
-  const handlePress = () => {
+  const handlePress = useCallback(() => {
     if (!data?.id) return;
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -84,7 +87,17 @@ export function FollowButton({ userRef }: FollowButtonProps) {
         console.error("Follow/unfollow failed:", error);
       },
     });
-  };
+  }, [data?.id, isFollowing, capture, commit]);
+
+  const dynamicStyles = useMemo(
+    () => ({
+      followingButton: { borderColor: colors.border },
+      followButton: { backgroundColor: colors.text },
+      followingTextColor: colors.text,
+      followTextColor: colors.bg,
+    }),
+    [colors],
+  );
 
   return (
     <Pressable
@@ -93,21 +106,29 @@ export function FollowButton({ userRef }: FollowButtonProps) {
       style={[
         styles.button,
         isFollowing
-          ? [styles.followingButton, { borderColor: colors.border }]
-          : { backgroundColor: colors.text },
+          ? [styles.followingButton, dynamicStyles.followingButton]
+          : dynamicStyles.followButton,
         isMutationInFlight && styles.disabledButton,
       ]}
     >
       {isMutationInFlight ? (
         <ActivityIndicator
           size="small"
-          color={isFollowing ? colors.text : colors.bg}
+          color={
+            isFollowing
+              ? dynamicStyles.followingTextColor
+              : dynamicStyles.followTextColor
+          }
         />
       ) : (
         <Text
           style={[
             styles.buttonText,
-            { color: isFollowing ? colors.text : colors.bg },
+            {
+              color: isFollowing
+                ? dynamicStyles.followingTextColor
+                : dynamicStyles.followTextColor,
+            },
           ]}
         >
           {isFollowing ? "Following" : "Follow"}
@@ -115,7 +136,7 @@ export function FollowButton({ userRef }: FollowButtonProps) {
       )}
     </Pressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   button: {

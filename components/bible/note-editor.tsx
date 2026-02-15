@@ -1,4 +1,5 @@
 import {
+  memo,
   forwardRef,
   useImperativeHandle,
   useRef,
@@ -44,8 +45,11 @@ function parseVerseId(verseId: string) {
   };
 }
 
-export const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(
-  function NoteEditor({ onSave, onDelete }, ref) {
+export const NoteEditor = memo(
+  forwardRef<NoteEditorRef, NoteEditorProps>(function NoteEditor(
+    { onSave, onDelete },
+    ref,
+  ) {
     const colors = useColors();
     const [visible, setVisible] = useState(false);
     const [verseId, setVerseId] = useState<string | null>(null);
@@ -177,7 +181,7 @@ export const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(
             <View style={[CommonStyles.flex1, styles.inputContainer]}>
               <TextInput
                 ref={inputRef}
-                value={noteContent}
+                defaultValue={noteContent}
                 onChangeText={setNoteContent}
                 placeholder="Write your note..."
                 placeholderTextColor={colors.mutedForeground}
@@ -209,7 +213,7 @@ export const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(
         </SafeAreaView>
       </Modal>
     );
-  },
+  }),
 );
 
 const styles = StyleSheet.create({

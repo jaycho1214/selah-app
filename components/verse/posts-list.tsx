@@ -1,4 +1,4 @@
-import { forwardRef, startTransition, useImperativeHandle } from "react";
+import { memo, forwardRef, startTransition, useImperativeHandle } from "react";
 import { View, StyleSheet } from "react-native";
 import { graphql, usePaginationFragment } from "react-relay";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -29,8 +29,8 @@ export interface PostsListRef {
   connectionId: string | null;
 }
 
-export const PostsList = forwardRef<PostsListRef, PostsListProps>(
-  function PostsList(
+export const PostsList = memo(
+  forwardRef<PostsListRef, PostsListProps>(function PostsList(
     { verseRef, colors, currentUserId, onLike, onUnlike, onDelete, onReport },
     ref,
   ) {
@@ -143,7 +143,7 @@ export const PostsList = forwardRef<PostsListRef, PostsListProps>(
         ))}
       </View>
     );
-  },
+  }),
 );
 
 const styles = StyleSheet.create({

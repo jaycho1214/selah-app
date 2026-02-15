@@ -8,7 +8,7 @@ import {
   UserRoundPlus,
   type LucideIcon,
 } from "lucide-react-native";
-import { useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { graphql, useFragment } from "react-relay";
 
@@ -168,7 +168,9 @@ interface NotificationItemProps {
   notificationRef: notificationItemFragment$key;
 }
 
-export function NotificationItem({ notificationRef }: NotificationItemProps) {
+export const NotificationItem = memo(function NotificationItem({
+  notificationRef,
+}: NotificationItemProps) {
   const data = useFragment(NotificationFragment, notificationRef);
   const colors = useColors();
   const router = useRouter();
@@ -202,10 +204,25 @@ export function NotificationItem({ notificationRef }: NotificationItemProps) {
     }
   }, [verse, router]);
 
+  const dynamicStyles = useMemo(
+    () => ({
+      container: { borderBottomColor: colors.border },
+      avatarPlaceholder: { backgroundColor: colors.surfaceElevated },
+      avatarInitial: { color: colors.textMuted },
+      messageText: { color: colors.text },
+      timestamp: { color: colors.textMuted },
+      postCard: { borderColor: colors.border },
+      postContent: { color: colors.textSecondary },
+      verseButton: { borderColor: colors.border },
+      verseButtonText: { color: colors.textSecondary },
+    }),
+    [colors],
+  );
+
   return (
     <Pressable
       onPress={handlePress}
-      style={[styles.container, { borderBottomColor: colors.border }]}
+      style={[styles.container, dynamicStyles.container]}
     >
       {/* Type icon — small inline, matching web */}
       <View style={styles.iconWrap}>
@@ -232,10 +249,10 @@ export function NotificationItem({ notificationRef }: NotificationItemProps) {
             <View
               style={[
                 styles.avatarPlaceholder,
-                { backgroundColor: colors.surfaceElevated },
+                dynamicStyles.avatarPlaceholder,
               ]}
             >
-              <Text style={[styles.avatarInitial, { color: colors.textMuted }]}>
+              <Text style={[styles.avatarInitial, dynamicStyles.avatarInitial]}>
                 {senderName[0].toUpperCase()}
               </Text>
             </View>
@@ -243,13 +260,13 @@ export function NotificationItem({ notificationRef }: NotificationItemProps) {
           <View style={styles.messageColumn}>
             <View style={styles.messageTopRow}>
               <Text
-                style={[styles.messageText, { color: colors.text }]}
+                style={[styles.messageText, dynamicStyles.messageText]}
                 numberOfLines={2}
               >
                 <Text style={styles.senderName}>{senderName}</Text>
                 {config.getMessage(senderName)}
               </Text>
-              <Text style={[styles.timestamp, { color: colors.textMuted }]}>
+              <Text style={[styles.timestamp, dynamicStyles.timestamp]}>
                 {formattedDate}
               </Text>
             </View>
@@ -258,10 +275,10 @@ export function NotificationItem({ notificationRef }: NotificationItemProps) {
 
         {/* Post content preview card (matches web's bordered box) */}
         {(contentPreview || verseRef) && (
-          <View style={[styles.postCard, { borderColor: colors.border }]}>
+          <View style={[styles.postCard, dynamicStyles.postCard]}>
             {contentPreview ? (
               <Text
-                style={[styles.postContent, { color: colors.textSecondary }]}
+                style={[styles.postContent, dynamicStyles.postContent]}
                 numberOfLines={3}
               >
                 {contentPreview}
@@ -270,12 +287,12 @@ export function NotificationItem({ notificationRef }: NotificationItemProps) {
             {verseRef && (
               <Pressable
                 onPress={handleVersePress}
-                style={[styles.verseButton, { borderColor: colors.border }]}
+                style={[styles.verseButton, dynamicStyles.verseButton]}
               >
                 <Text
                   style={[
                     styles.verseButtonText,
-                    { color: colors.textSecondary },
+                    dynamicStyles.verseButtonText,
                   ]}
                 >
                   {verseRef}
@@ -287,7 +304,7 @@ export function NotificationItem({ notificationRef }: NotificationItemProps) {
       </View>
     </Pressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

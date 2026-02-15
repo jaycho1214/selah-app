@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { memo, useCallback } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
@@ -96,7 +96,7 @@ interface FeedListProps {
  * Renders post edges via FlashList with pull-to-refresh, infinite scroll,
  * and ReflectionItem rendering. Used by both For You and Following tabs.
  */
-function FeedList({
+const FeedList = memo(function FeedList({
   posts,
   isRefreshing,
   isLoadingNext,
@@ -200,7 +200,7 @@ function FeedList({
       />
     </View>
   );
-}
+});
 
 export default FeedList;
 

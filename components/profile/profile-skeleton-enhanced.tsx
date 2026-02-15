@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, {
   useSharedValue,
@@ -10,7 +10,7 @@ import Animated, {
 
 import { useColors } from "@/hooks/use-colors";
 
-export function ProfileSkeletonEnhanced() {
+export const ProfileSkeletonEnhanced = memo(function ProfileSkeletonEnhanced() {
   const colors = useColors();
   const shimmer = useSharedValue(0);
 
@@ -81,7 +81,7 @@ export function ProfileSkeletonEnhanced() {
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

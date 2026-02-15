@@ -5,26 +5,28 @@ import { useColors } from "@/hooks/use-colors";
 
 interface CardProps extends ViewProps {}
 
-const Card = React.forwardRef<View, CardProps>(({ style, ...props }, ref) => {
-  const colors = useColors();
-  return (
-    <View
-      ref={ref}
-      style={[
-        styles.card,
-        { borderColor: colors.border, backgroundColor: colors.card },
-        style,
-      ]}
-      {...props}
-    />
-  );
-});
+const Card = React.memo(
+  React.forwardRef<View, CardProps>(({ style, ...props }, ref) => {
+    const colors = useColors();
+    return (
+      <View
+        ref={ref}
+        style={[
+          styles.card,
+          { borderColor: colors.border, backgroundColor: colors.card },
+          style,
+        ]}
+        {...props}
+      />
+    );
+  }),
+);
 Card.displayName = "Card";
 
-const CardHeader = React.forwardRef<View, ViewProps>(
-  ({ style, ...props }, ref) => (
+const CardHeader = React.memo(
+  React.forwardRef<View, ViewProps>(({ style, ...props }, ref) => (
     <View ref={ref} style={[styles.cardHeader, style]} {...props} />
-  ),
+  )),
 );
 CardHeader.displayName = "CardHeader";
 
@@ -33,15 +35,15 @@ interface CardTitleProps {
   children?: React.ReactNode;
 }
 
-const CardTitle = ({ style, children }: CardTitleProps) => (
+const CardTitle = React.memo(({ style, children }: CardTitleProps) => (
   <Text style={[styles.cardTitle, style]}>{children}</Text>
-);
+));
 CardTitle.displayName = "CardTitle";
 
-const CardContent = React.forwardRef<View, ViewProps>(
-  ({ style, ...props }, ref) => (
+const CardContent = React.memo(
+  React.forwardRef<View, ViewProps>(({ style, ...props }, ref) => (
     <View ref={ref} style={[styles.cardContent, style]} {...props} />
-  ),
+  )),
 );
 CardContent.displayName = "CardContent";
 

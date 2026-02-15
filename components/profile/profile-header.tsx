@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { UserAvatar } from "@/components/user/user-avatar";
@@ -13,7 +14,7 @@ interface ProfileHeaderProps {
   children?: React.ReactNode;
 }
 
-export function ProfileHeader({
+export const ProfileHeader = memo(function ProfileHeader({
   name,
   username,
   bio,
@@ -54,7 +55,7 @@ export function ProfileHeader({
       {children && <View style={styles.actionSlot}>{children}</View>}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

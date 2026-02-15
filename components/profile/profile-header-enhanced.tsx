@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { Image } from "expo-image";
 import { Pressable, StyleSheet, View } from "react-native";
 
@@ -23,7 +24,7 @@ function getInitials(name: string | null | undefined): string {
     .toUpperCase();
 }
 
-export function ProfileHeaderEnhanced({
+export const ProfileHeaderEnhanced = memo(function ProfileHeaderEnhanced({
   name,
   username,
   bio,
@@ -33,16 +34,27 @@ export function ProfileHeaderEnhanced({
 }: ProfileHeaderEnhancedProps) {
   const colors = useColors();
 
+  const dynamicStyles = useMemo(
+    () => ({
+      name: { color: colors.text },
+      username: { color: colors.textMuted },
+      avatarPlaceholder: { backgroundColor: colors.border },
+      avatarInitials: { color: colors.textMuted },
+      bio: { color: colors.text },
+    }),
+    [colors],
+  );
+
   return (
     <View style={styles.container}>
       {/* Top row: name/username on left, avatar on right */}
       <View style={styles.topRow}>
         <View style={styles.nameSection}>
           {name && (
-            <Text style={[styles.name, { color: colors.text }]}>{name}</Text>
+            <Text style={[styles.name, dynamicStyles.name]}>{name}</Text>
           )}
           {username && (
-            <Text style={[styles.username, { color: colors.textMuted }]}>
+            <Text style={[styles.username, dynamicStyles.username]}>
               @{username}
             </Text>
           )}
@@ -63,11 +75,11 @@ export function ProfileHeaderEnhanced({
             <View
               style={[
                 styles.avatarPlaceholder,
-                { backgroundColor: colors.border },
+                dynamicStyles.avatarPlaceholder,
               ]}
             >
               <Text
-                style={[styles.avatarInitials, { color: colors.textMuted }]}
+                style={[styles.avatarInitials, dynamicStyles.avatarInitials]}
               >
                 {getInitials(name)}
               </Text>
@@ -77,13 +89,13 @@ export function ProfileHeaderEnhanced({
       </View>
 
       {/* Bio */}
-      {bio && <Text style={[styles.bio, { color: colors.text }]}>{bio}</Text>}
+      {bio && <Text style={[styles.bio, dynamicStyles.bio]}>{bio}</Text>}
 
       {/* Action slot */}
       {children && <View style={styles.actionSlot}>{children}</View>}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

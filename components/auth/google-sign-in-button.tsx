@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Alert, Pressable, useColorScheme, StyleSheet } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { Text } from "@/components/ui/text";
@@ -11,7 +11,7 @@ interface GoogleSignInButtonProps {
   onError?: (error: Error) => void;
 }
 
-export function GoogleSignInButton({
+export const GoogleSignInButton = memo(function GoogleSignInButton({
   onSuccess,
   onError,
 }: GoogleSignInButtonProps) {
@@ -82,7 +82,7 @@ export function GoogleSignInButton({
       </Text>
     </Pressable>
   );
-}
+});
 
 function GoogleIcon() {
   return (

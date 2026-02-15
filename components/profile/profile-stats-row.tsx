@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { RelativePathString, useRouter } from "expo-router";
-import { useCallback } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
@@ -12,7 +12,7 @@ interface ProfileStatsRowProps {
   followingCount: number;
 }
 
-export function ProfileStatsRow({
+export const ProfileStatsRow = memo(function ProfileStatsRow({
   userId,
   followerCount,
   followingCount,
@@ -30,6 +30,14 @@ export function ProfileStatsRow({
     router.push(`/followers/${userId}` as RelativePathString);
   }, [userId, router]);
 
+  const dynamicStyles = useMemo(
+    () => ({
+      count: { color: colors.text },
+      label: { color: colors.textMuted },
+    }),
+    [colors],
+  );
+
   return (
     <View style={styles.container}>
       {/* Following count */}
@@ -38,12 +46,10 @@ export function ProfileStatsRow({
         disabled={followingCount === 0}
         style={styles.stat}
       >
-        <Text style={[styles.count, { color: colors.text }]}>
+        <Text style={[styles.count, dynamicStyles.count]}>
           {followingCount}
         </Text>
-        <Text style={[styles.label, { color: colors.textMuted }]}>
-          {" Following"}
-        </Text>
+        <Text style={[styles.label, dynamicStyles.label]}>{" Following"}</Text>
       </Pressable>
 
       {/* Followers count */}
@@ -52,16 +58,14 @@ export function ProfileStatsRow({
         disabled={followerCount === 0}
         style={styles.stat}
       >
-        <Text style={[styles.count, { color: colors.text }]}>
-          {followerCount}
-        </Text>
-        <Text style={[styles.label, { color: colors.textMuted }]}>
+        <Text style={[styles.count, dynamicStyles.count]}>{followerCount}</Text>
+        <Text style={[styles.label, dynamicStyles.label]}>
           {followerCount === 1 ? " Follower" : " Followers"}
         </Text>
       </Pressable>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

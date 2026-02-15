@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import { StyleSheet, View, type ViewStyle } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -103,7 +103,7 @@ function SkeletonRow({
   );
 }
 
-export function NotificationsSkeleton() {
+export const NotificationsSkeleton = memo(function NotificationsSkeleton() {
   const colors = useColors();
   const shimmer = useSharedValue(0);
 
@@ -123,7 +123,7 @@ export function NotificationsSkeleton() {
       ))}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   row: {

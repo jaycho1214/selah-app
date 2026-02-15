@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, {
   useSharedValue,
@@ -14,7 +14,7 @@ import { useColors } from "@/hooks/use-colors";
  * Loading skeleton for profile screen.
  * Shows pulsing placeholders for avatar, name, username, bio, and stats.
  */
-export function ProfileSkeleton() {
+export const ProfileSkeleton = memo(function ProfileSkeleton() {
   const colors = useColors();
   const shimmer = useSharedValue(0);
 
@@ -94,7 +94,7 @@ export function ProfileSkeleton() {
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

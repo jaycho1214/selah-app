@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { memo, useState, useCallback } from "react";
 import { View, TextInput, Pressable, StyleSheet, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Animated, { FadeIn, FadeOut, Layout } from "react-native-reanimated";
@@ -26,7 +26,7 @@ interface PollCreatorProps {
   onClose: () => void;
 }
 
-export function PollCreator({
+export const PollCreator = memo(function PollCreator({
   colors,
   onPollChange,
   onClose,
@@ -240,7 +240,7 @@ export function PollCreator({
       </Pressable>
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

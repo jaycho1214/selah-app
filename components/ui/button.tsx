@@ -17,61 +17,63 @@ interface ButtonProps extends PressableProps {
   children?: React.ReactNode;
 }
 
-const Button = React.forwardRef<View, ButtonProps>(
-  (
-    { variant = "default", size = "default", children, style, ...props },
-    ref,
-  ) => {
-    const colors = useColors();
+const Button = React.memo(
+  React.forwardRef<View, ButtonProps>(
+    (
+      { variant = "default", size = "default", children, style, ...props },
+      ref,
+    ) => {
+      const colors = useColors();
 
-    const variantStyles: Record<ButtonVariant, any> = {
-      default: { backgroundColor: colors.primary },
-      secondary: { backgroundColor: colors.secondary },
-      destructive: { backgroundColor: colors.destructive },
-      outline: {
-        borderWidth: 1,
-        borderColor: colors.border,
-        backgroundColor: "transparent",
-      },
-      ghost: { backgroundColor: "transparent" },
-    };
+      const variantStyles: Record<ButtonVariant, any> = {
+        default: { backgroundColor: colors.primary },
+        secondary: { backgroundColor: colors.secondary },
+        destructive: { backgroundColor: colors.destructive },
+        outline: {
+          borderWidth: 1,
+          borderColor: colors.border,
+          backgroundColor: "transparent",
+        },
+        ghost: { backgroundColor: "transparent" },
+      };
 
-    const textColors: Record<ButtonVariant, string> = {
-      default: colors.primaryForeground,
-      secondary: colors.secondaryForeground,
-      destructive: colors.destructiveForeground,
-      outline: colors.text,
-      ghost: colors.text,
-    };
+      const textColors: Record<ButtonVariant, string> = {
+        default: colors.primaryForeground,
+        secondary: colors.secondaryForeground,
+        destructive: colors.destructiveForeground,
+        outline: colors.text,
+        ghost: colors.text,
+      };
 
-    const sizeStyles: Record<ButtonSize, any> = {
-      default: { height: 40, paddingHorizontal: 16, paddingVertical: 8 },
-      sm: { height: 36, paddingHorizontal: 12 },
-      lg: { height: 44, paddingHorizontal: 32 },
-      icon: { height: 40, width: 40 },
-    };
+      const sizeStyles: Record<ButtonSize, any> = {
+        default: { height: 40, paddingHorizontal: 16, paddingVertical: 8 },
+        sm: { height: 36, paddingHorizontal: 12 },
+        lg: { height: 44, paddingHorizontal: 32 },
+        icon: { height: 40, width: 40 },
+      };
 
-    return (
-      <Pressable
-        ref={ref}
-        style={[
-          styles.base,
-          sizeStyles[size],
-          variantStyles[variant],
-          style as any,
-        ]}
-        {...props}
-      >
-        {typeof children === "string" ? (
-          <Text style={[styles.text, { color: textColors[variant] }]}>
-            {children}
-          </Text>
-        ) : (
-          children
-        )}
-      </Pressable>
-    );
-  },
+      return (
+        <Pressable
+          ref={ref}
+          style={[
+            styles.base,
+            sizeStyles[size],
+            variantStyles[variant],
+            style as any,
+          ]}
+          {...props}
+        >
+          {typeof children === "string" ? (
+            <Text style={[styles.text, { color: textColors[variant] }]}>
+              {children}
+            </Text>
+          ) : (
+            children
+          )}
+        </Pressable>
+      );
+    },
+  ),
 );
 Button.displayName = "Button";
 

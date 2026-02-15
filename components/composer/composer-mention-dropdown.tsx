@@ -2,13 +2,14 @@ import {
   View,
   Pressable,
   StyleSheet,
-  ScrollView,
+  FlatList,
   ActivityIndicator,
   type ViewStyle,
 } from "react-native";
 import { Image } from "expo-image";
 import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
 
+import { memo, useCallback } from "react";
 import { Text } from "@/components/ui/text";
 import type { MentionUser } from "./use-composer-state";
 
@@ -26,13 +27,61 @@ interface ComposerMentionDropdownProps {
   style?: ViewStyle;
 }
 
-export function ComposerMentionDropdown({
+export const ComposerMentionDropdown = memo(function ComposerMentionDropdown({
   users,
   isLoading,
   onSelect,
   colors,
   style,
 }: ComposerMentionDropdownProps) {
+  const keyExtractor = useCallback((item: MentionUser) => item.id, []);
+
+  const renderItem = useCallback(
+    ({ item, index }: { item: MentionUser; index: number }) => (
+      <Pressable
+        onPress={() => onSelect(item)}
+        style={[
+          styles.item,
+          index < users.length - 1 && {
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            borderBottomColor: colors.border,
+          },
+        ]}
+      >
+        {item.imageUrl ? (
+          <Image
+            source={{ uri: item.imageUrl }}
+            style={styles.avatar}
+            contentFit="cover"
+          />
+        ) : (
+          <View
+            style={[
+              styles.avatarPlaceholder,
+              { backgroundColor: colors.accent + "20" },
+            ]}
+          >
+            <Text style={[styles.avatarInitial, { color: colors.accent }]}>
+              {(item.name || item.username || "?")[0].toUpperCase()}
+            </Text>
+          </View>
+        )}
+        <View style={styles.info}>
+          <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
+            {item.name || item.username}
+          </Text>
+          <Text
+            style={[styles.username, { color: colors.textMuted }]}
+            numberOfLines={1}
+          >
+            @{item.username}
+          </Text>
+        </View>
+      </Pressable>
+    ),
+    [onSelect, users.length, colors],
+  );
+
   return (
     <Animated.View
       entering={FadeInDown.duration(150)}
@@ -54,64 +103,18 @@ export function ComposerMentionDropdown({
           </Text>
         </View>
       ) : (
-        <ScrollView
+        <FlatList
+          data={users}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
           style={styles.list}
           keyboardShouldPersistTaps="always"
           showsVerticalScrollIndicator={false}
-        >
-          {users.map((user, index) => (
-            <Pressable
-              key={user.id}
-              onPress={() => onSelect(user)}
-              style={[
-                styles.item,
-                index < users.length - 1 && {
-                  borderBottomWidth: StyleSheet.hairlineWidth,
-                  borderBottomColor: colors.border,
-                },
-              ]}
-            >
-              {user.imageUrl ? (
-                <Image
-                  source={{ uri: user.imageUrl }}
-                  style={styles.avatar}
-                  contentFit="cover"
-                />
-              ) : (
-                <View
-                  style={[
-                    styles.avatarPlaceholder,
-                    { backgroundColor: colors.accent + "20" },
-                  ]}
-                >
-                  <Text
-                    style={[styles.avatarInitial, { color: colors.accent }]}
-                  >
-                    {(user.name || user.username || "?")[0].toUpperCase()}
-                  </Text>
-                </View>
-              )}
-              <View style={styles.info}>
-                <Text
-                  style={[styles.name, { color: colors.text }]}
-                  numberOfLines={1}
-                >
-                  {user.name || user.username}
-                </Text>
-                <Text
-                  style={[styles.username, { color: colors.textMuted }]}
-                  numberOfLines={1}
-                >
-                  @{user.username}
-                </Text>
-              </View>
-            </Pressable>
-          ))}
-        </ScrollView>
+        />
       )}
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   dropdown: {

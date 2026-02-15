@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { View, StyleSheet, useWindowDimensions } from "react-native";
 import WebView from "react-native-webview";
 
@@ -10,7 +10,9 @@ interface RichTextRendererProps {
  * Renders HTML content produced by RichTextEditor.
  * Uses WebView for consistent cross-platform rendering.
  */
-export function RichTextRenderer({ html }: RichTextRendererProps) {
+export const RichTextRenderer = memo(function RichTextRenderer({
+  html,
+}: RichTextRendererProps) {
   const { width } = useWindowDimensions();
 
   const wrappedHtml = `
@@ -83,7 +85,7 @@ export function RichTextRenderer({ html }: RichTextRendererProps) {
       />
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

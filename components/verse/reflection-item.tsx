@@ -9,7 +9,7 @@ import {
   Share as ShareIcon,
   Trash2,
 } from "lucide-react-native";
-import { useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -217,7 +217,7 @@ interface ReflectionItemProps {
   disableNavigation?: boolean;
 }
 
-export function ReflectionItem({
+export const ReflectionItem = memo(function ReflectionItem({
   id,
   content,
   user,
@@ -376,19 +376,19 @@ export function ReflectionItem({
 
           if (format & 1)
             textElement = (
-              <Text key={key++} style={{ fontWeight: "700" }}>
+              <Text key={key++} style={styles.boldText}>
                 {textElement}
               </Text>
             );
           if (format & 2)
             textElement = (
-              <Text key={key++} style={{ fontStyle: "italic" }}>
+              <Text key={key++} style={styles.italicText}>
                 {textElement}
               </Text>
             );
           if (format & 8)
             textElement = (
-              <Text key={key++} style={{ textDecorationLine: "underline" }}>
+              <Text key={key++} style={styles.underlineText}>
                 {textElement}
               </Text>
             );
@@ -400,11 +400,7 @@ export function ReflectionItem({
           return (
             <Text
               key={key++}
-              style={{
-                color: "#3b82f6",
-                fontWeight: "500",
-                textDecorationLine: "underline",
-              }}
+              style={styles.mentionText}
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 router.push(`/user/${node.username}`);
@@ -575,7 +571,7 @@ export function ReflectionItem({
                     >
                       <Image
                         source={{ uri: image.url }}
-                        style={{ width: "100%", height: "100%" }}
+                        style={styles.imageFill}
                         contentFit="cover"
                         transition={150}
                       />
@@ -835,7 +831,7 @@ export function ReflectionItem({
       </Pressable>
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -1036,5 +1032,25 @@ const styles = StyleSheet.create({
   },
   spacer: {
     flex: 1,
+  },
+  // Image fill for grid items
+  imageFill: {
+    width: "100%",
+    height: "100%",
+  },
+  // Text formatting styles
+  boldText: {
+    fontWeight: "700",
+  },
+  italicText: {
+    fontStyle: "italic",
+  },
+  underlineText: {
+    textDecorationLine: "underline",
+  },
+  mentionText: {
+    color: "#3b82f6",
+    fontWeight: "500",
+    textDecorationLine: "underline",
   },
 });

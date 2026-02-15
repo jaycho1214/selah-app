@@ -212,6 +212,48 @@ export function VerseActions() {
     [],
   );
 
+  const sheetBackgroundStyle = useMemo(
+    () => ({
+      backgroundColor: t.bg,
+      borderTopLeftRadius: 28,
+      borderTopRightRadius: 28,
+    }),
+    [t.bg],
+  );
+
+  const sheetHandleStyle = useMemo(
+    () => ({
+      backgroundColor: hasGlass
+        ? isDark
+          ? "rgba(255,255,255,0.5)"
+          : "rgba(0,0,0,0.3)"
+        : t.handle,
+      width: 40,
+      height: 5,
+      marginTop: 12,
+    }),
+    [isDark, t.handle],
+  );
+
+  const dynamicStyles = useMemo(
+    () => ({
+      tray: {
+        backgroundColor: hasGlass ? "transparent" : t.barBg,
+        borderColor: hasGlass ? "transparent" : t.barBorder,
+        shadowColor: isDark ? "#000" : "#78716c",
+      },
+      actionLabel: { color: t.textMuted },
+      divider: { backgroundColor: t.barBorder },
+      compareRef: { color: t.accent },
+      compareLoadingText: { color: t.textSubtle },
+      compareDivider: { backgroundColor: t.border },
+      compareAbbr: { color: t.accent },
+      compareName: { color: t.textSubtle },
+      compareText: { color: t.text, fontFamily: serifFont },
+    }),
+    [t, isDark],
+  );
+
   return (
     <>
       {/* Floating action tray */}
@@ -221,16 +263,7 @@ export function VerseActions() {
           exiting={SlideOutDown.duration(200)}
           glassEffectStyle="regular"
           isInteractive
-          style={[
-            styles.tray,
-            {
-              backgroundColor: hasGlass ? "transparent" : t.barBg,
-              borderColor: isLiquidGlassAvailable()
-                ? "transparent"
-                : t.barBorder,
-              shadowColor: isDark ? "#000" : "#78716c",
-            },
-          ]}
+          style={[styles.tray, dynamicStyles.tray]}
         >
           <Pressable
             onPress={handleCompare}
@@ -238,30 +271,30 @@ export function VerseActions() {
             style={styles.actionButton}
           >
             <ArrowLeftRight size={18} color={t.textMuted} strokeWidth={1.8} />
-            <Text style={[styles.actionLabel, { color: t.textMuted }]}>
+            <Text style={[styles.actionLabel, dynamicStyles.actionLabel]}>
               Compare
             </Text>
           </Pressable>
 
-          <View style={[styles.divider, { backgroundColor: t.barBorder }]} />
+          <View style={[styles.divider, dynamicStyles.divider]} />
 
           <Pressable onPress={handleShare} style={styles.actionButton}>
             <Share2 size={18} color={t.textMuted} strokeWidth={1.8} />
-            <Text style={[styles.actionLabel, { color: t.textMuted }]}>
+            <Text style={[styles.actionLabel, dynamicStyles.actionLabel]}>
               Share
             </Text>
           </Pressable>
 
-          <View style={[styles.divider, { backgroundColor: t.barBorder }]} />
+          <View style={[styles.divider, dynamicStyles.divider]} />
 
           <Pressable onPress={handleCopy} style={styles.actionButton}>
             <Copy size={18} color={t.textMuted} strokeWidth={1.8} />
-            <Text style={[styles.actionLabel, { color: t.textMuted }]}>
+            <Text style={[styles.actionLabel, dynamicStyles.actionLabel]}>
               Copy
             </Text>
           </Pressable>
 
-          <View style={[styles.divider, { backgroundColor: t.barBorder }]} />
+          <View style={[styles.divider, dynamicStyles.divider]} />
 
           <Pressable onPress={clearSelection} style={styles.closeButton}>
             <X size={18} color={t.textSubtle} strokeWidth={2} />
@@ -275,25 +308,12 @@ export function VerseActions() {
         enableDynamicSizing
         enablePanDownToClose
         backdropComponent={renderBackdrop}
-        backgroundStyle={{
-          backgroundColor: t.bg,
-          borderTopLeftRadius: 28,
-          borderTopRightRadius: 28,
-        }}
-        handleIndicatorStyle={{
-          backgroundColor: hasGlass
-            ? isDark
-              ? "rgba(255,255,255,0.5)"
-              : "rgba(0,0,0,0.3)"
-            : t.handle,
-          width: 40,
-          height: 5,
-          marginTop: 12,
-        }}
+        backgroundStyle={sheetBackgroundStyle}
+        handleIndicatorStyle={sheetHandleStyle}
       >
         <BottomSheetScrollView style={styles.compareSheet}>
           {/* Header */}
-          <Text style={[styles.compareRef, { color: t.accent }]}>
+          <Text style={[styles.compareRef, dynamicStyles.compareRef]}>
             {verseReference}
           </Text>
 
@@ -302,7 +322,10 @@ export function VerseActions() {
             <View style={styles.compareLoading}>
               <ActivityIndicator size="small" color={t.accent} />
               <Text
-                style={[styles.compareLoadingText, { color: t.textSubtle }]}
+                style={[
+                  styles.compareLoadingText,
+                  dynamicStyles.compareLoadingText,
+                ]}
               >
                 Loading translations...
               </Text>
@@ -324,22 +347,23 @@ export function VerseActions() {
                     <View
                       style={[
                         styles.compareDivider,
-                        { backgroundColor: t.border },
+                        dynamicStyles.compareDivider,
                       ]}
                     />
                   )}
                   <View style={styles.compareEntry}>
-                    <Text style={[styles.compareAbbr, { color: t.accent }]}>
+                    <Text
+                      style={[styles.compareAbbr, dynamicStyles.compareAbbr]}
+                    >
                       {translation.id}
                     </Text>
-                    <Text style={[styles.compareName, { color: t.textSubtle }]}>
+                    <Text
+                      style={[styles.compareName, dynamicStyles.compareName]}
+                    >
                       {translation.name}
                     </Text>
                     <Text
-                      style={[
-                        styles.compareText,
-                        { color: t.text, fontFamily: serifFont },
-                      ]}
+                      style={[styles.compareText, dynamicStyles.compareText]}
                     >
                       {texts.join(" ")}
                     </Text>
@@ -348,7 +372,7 @@ export function VerseActions() {
               );
             })}
 
-          <View style={{ height: 40 }} />
+          <View style={styles.bottomSpacer} />
         </BottomSheetScrollView>
       </BottomSheetModal>
     </>
@@ -442,5 +466,8 @@ const styles = StyleSheet.create({
   compareText: {
     fontSize: 18,
     lineHeight: 30,
+  },
+  bottomSpacer: {
+    height: 40,
   },
 });

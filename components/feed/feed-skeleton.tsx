@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import { StyleSheet, View, type ViewStyle } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -196,7 +196,9 @@ function SkeletonCard({
  * FeedSkeleton renders 4 shimmer skeleton cards matching the visual shape
  * of ReflectionItem post cards. Used as a Suspense fallback for feed loading.
  */
-export function FeedSkeleton({ style }: FeedSkeletonProps) {
+export const FeedSkeleton = memo(function FeedSkeleton({
+  style,
+}: FeedSkeletonProps) {
   const colors = useColors();
   const shimmer = useSharedValue(0);
 
@@ -215,7 +217,7 @@ export function FeedSkeleton({ style }: FeedSkeletonProps) {
       ))}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Platform, useColorScheme, StyleSheet } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { Text } from "@/components/ui/text";
@@ -15,7 +16,10 @@ interface ChapterHeaderProps {
   chapter: number;
 }
 
-export function ChapterHeader({ book, chapter }: ChapterHeaderProps) {
+export const ChapterHeader = memo(function ChapterHeader({
+  book,
+  chapter,
+}: ChapterHeaderProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
 
@@ -44,7 +48,7 @@ export function ChapterHeader({ book, chapter }: ChapterHeaderProps) {
       </Text>
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

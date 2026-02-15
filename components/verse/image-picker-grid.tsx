@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { memo, useCallback } from "react";
 import { View, Pressable, StyleSheet, Alert } from "react-native";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
@@ -31,7 +31,7 @@ interface ImagePickerGridProps {
   };
 }
 
-export function ImagePickerGrid({
+export const ImagePickerGrid = memo(function ImagePickerGrid({
   images,
   onImagesChange,
   colors,
@@ -95,10 +95,10 @@ export function ImagePickerGrid({
       </View>
     </Animated.View>
   );
-}
+});
 
 // Standalone button to trigger image picker
-export function ImagePickerButton({
+export const ImagePickerButton = memo(function ImagePickerButton({
   onImagesSelected,
   currentCount,
   colors,
@@ -174,7 +174,7 @@ export function ImagePickerButton({
       />
     </Pressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {
