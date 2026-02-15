@@ -68,18 +68,27 @@ export function ImagePickerGrid({
               images.length >= 3 && styles.gridImage,
             ]}
           >
-            <Image
-              source={{ uri: image.uri }}
-              style={styles.image}
-              contentFit="cover"
-              transition={200}
-            />
+            <View style={styles.imageClip}>
+              <Image
+                source={{ uri: image.uri }}
+                style={styles.image}
+                contentFit="cover"
+                transition={200}
+              />
+            </View>
             <Pressable
               onPress={() => removeImage(index)}
-              style={[styles.removeButton, { backgroundColor: colors.bg }]}
+              style={[
+                styles.removeButton,
+                {
+                  backgroundColor: colors.bg,
+                  borderWidth: 1.5,
+                  borderColor: colors.border,
+                },
+              ]}
               hitSlop={8}
             >
-              <X size={14} color={colors.text} />
+              <X size={10} color={colors.text} strokeWidth={3} />
             </Pressable>
           </Animated.View>
         ))}
@@ -173,12 +182,20 @@ const styles = StyleSheet.create({
   },
   grid: {
     flexDirection: "row",
-    gap: 8,
+    gap: 12,
+    paddingTop: 8,
+    paddingRight: 8,
   },
   imageContainer: {
     position: "relative",
+  },
+  imageClip: {
     borderRadius: 10,
     overflow: "hidden",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.15)",
+    width: "100%",
+    height: "100%",
   },
   singleImage: {
     width: 80,
@@ -198,11 +215,11 @@ const styles = StyleSheet.create({
   },
   removeButton: {
     position: "absolute",
-    top: 6,
-    right: 6,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    top: -8,
+    right: -8,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",

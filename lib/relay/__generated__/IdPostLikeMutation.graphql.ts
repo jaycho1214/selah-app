@@ -11,7 +11,7 @@
 
 // @relayRequestID 7ed2abcc435f1da89ff279bf31ad56dc
 
-import { ConcreteRequest } from "relay-runtime";
+import { ConcreteRequest } from 'relay-runtime';
 export type IdPostLikeMutation$variables = {
   id: string;
 };
@@ -25,65 +25,65 @@ export type IdPostLikeMutation = {
   variables: IdPostLikeMutation$variables;
 };
 
-const node: ConcreteRequest = (function () {
-  var v0 = [
+const node: ConcreteRequest = (function(){
+var v0 = [
+  {
+    "defaultValue": null,
+    "kind": "LocalArgument",
+    "name": "id"
+  }
+],
+v1 = [
+  {
+    "alias": null,
+    "args": [
       {
-        defaultValue: null,
-        kind: "LocalArgument",
-        name: "id",
-      },
+        "kind": "Variable",
+        "name": "id",
+        "variableName": "id"
+      }
     ],
-    v1 = [
+    "concreteType": "BibleVersePostLikePayload",
+    "kind": "LinkedField",
+    "name": "bibleVersePostLike",
+    "plural": false,
+    "selections": [
       {
-        alias: null,
-        args: [
-          {
-            kind: "Variable",
-            name: "id",
-            variableName: "id",
-          },
-        ],
-        concreteType: "BibleVersePostLikePayload",
-        kind: "LinkedField",
-        name: "bibleVersePostLike",
-        plural: false,
-        selections: [
-          {
-            alias: null,
-            args: null,
-            kind: "ScalarField",
-            name: "likedAt",
-            storageKey: null,
-          },
-        ],
-        storageKey: null,
-      },
-    ];
-  return {
-    fragment: {
-      argumentDefinitions: v0 /*: any*/,
-      kind: "Fragment",
-      metadata: null,
-      name: "IdPostLikeMutation",
-      selections: v1 /*: any*/,
-      type: "Mutation",
-      abstractKey: null,
-    },
-    kind: "Request",
-    operation: {
-      argumentDefinitions: v0 /*: any*/,
-      kind: "Operation",
-      name: "IdPostLikeMutation",
-      selections: v1 /*: any*/,
-    },
-    params: {
-      id: "7ed2abcc435f1da89ff279bf31ad56dc",
-      metadata: {},
-      name: "IdPostLikeMutation",
-      operationKind: "mutation",
-      text: null,
-    },
-  };
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "likedAt",
+        "storageKey": null
+      }
+    ],
+    "storageKey": null
+  }
+];
+return {
+  "fragment": {
+    "argumentDefinitions": (v0/*: any*/),
+    "kind": "Fragment",
+    "metadata": null,
+    "name": "IdPostLikeMutation",
+    "selections": (v1/*: any*/),
+    "type": "Mutation",
+    "abstractKey": null
+  },
+  "kind": "Request",
+  "operation": {
+    "argumentDefinitions": (v0/*: any*/),
+    "kind": "Operation",
+    "name": "IdPostLikeMutation",
+    "selections": (v1/*: any*/)
+  },
+  "params": {
+    "id": "7ed2abcc435f1da89ff279bf31ad56dc",
+    "metadata": {},
+    "name": "IdPostLikeMutation",
+    "operationKind": "mutation",
+    "text": null
+  }
+};
 })();
 
 (node as any).hash = "1ae86b55fb00128d422e19c68d965af8";

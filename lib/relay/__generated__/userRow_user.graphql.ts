@@ -8,18 +8,15 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ReaderFragment } from "relay-runtime";
+import { ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type userRow_user$data = {
   readonly bio: string | null | undefined;
   readonly followedAt: any | null | undefined;
   readonly id: string;
-  readonly image:
-    | {
-        readonly url: string | null | undefined;
-      }
-    | null
-    | undefined;
+  readonly image: {
+    readonly url: string | null | undefined;
+  } | null | undefined;
   readonly name: string | null | undefined;
   readonly username: string | null | undefined;
   readonly " $fragmentSpreads": FragmentRefs<"followButton_user">;
@@ -31,72 +28,72 @@ export type userRow_user$key = {
 };
 
 const node: ReaderFragment = {
-  argumentDefinitions: [],
-  kind: "Fragment",
-  metadata: null,
-  name: "userRow_user",
-  selections: [
+  "argumentDefinitions": [],
+  "kind": "Fragment",
+  "metadata": null,
+  "name": "userRow_user",
+  "selections": [
     {
-      alias: null,
-      args: null,
-      kind: "ScalarField",
-      name: "id",
-      storageKey: null,
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "id",
+      "storageKey": null
     },
     {
-      alias: null,
-      args: null,
-      kind: "ScalarField",
-      name: "username",
-      storageKey: null,
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "username",
+      "storageKey": null
     },
     {
-      alias: null,
-      args: null,
-      kind: "ScalarField",
-      name: "name",
-      storageKey: null,
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "name",
+      "storageKey": null
     },
     {
-      alias: null,
-      args: null,
-      kind: "ScalarField",
-      name: "bio",
-      storageKey: null,
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "bio",
+      "storageKey": null
     },
     {
-      alias: null,
-      args: null,
-      concreteType: "Asset",
-      kind: "LinkedField",
-      name: "image",
-      plural: false,
-      selections: [
+      "alias": null,
+      "args": null,
+      "concreteType": "Asset",
+      "kind": "LinkedField",
+      "name": "image",
+      "plural": false,
+      "selections": [
         {
-          alias: null,
-          args: null,
-          kind: "ScalarField",
-          name: "url",
-          storageKey: null,
-        },
+          "alias": null,
+          "args": null,
+          "kind": "ScalarField",
+          "name": "url",
+          "storageKey": null
+        }
       ],
-      storageKey: null,
+      "storageKey": null
     },
     {
-      alias: null,
-      args: null,
-      kind: "ScalarField",
-      name: "followedAt",
-      storageKey: null,
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "followedAt",
+      "storageKey": null
     },
     {
-      args: null,
-      kind: "FragmentSpread",
-      name: "followButton_user",
-    },
+      "args": null,
+      "kind": "FragmentSpread",
+      "name": "followButton_user"
+    }
   ],
-  type: "User",
-  abstractKey: null,
+  "type": "User",
+  "abstractKey": null
 };
 
 (node as any).hash = "03774e44ca9edbfaadb62cc7e8d07e89";

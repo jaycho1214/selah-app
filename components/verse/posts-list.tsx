@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle } from "react";
+import { forwardRef, startTransition, useImperativeHandle } from "react";
 import { View, StyleSheet } from "react-native";
 import { graphql, usePaginationFragment } from "react-relay";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -99,7 +99,9 @@ export const PostsList = forwardRef<PostsListRef, PostsListProps>(
       ref,
       () => ({
         refetch: () => {
-          refetch({}, { fetchPolicy: "store-and-network" });
+          startTransition(() => {
+            refetch({}, { fetchPolicy: "store-and-network" });
+          });
         },
         connectionId,
       }),

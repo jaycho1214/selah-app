@@ -33,9 +33,9 @@ import {
 import { Text } from "@/components/ui/text";
 import { PostsList, type PostsListRef } from "@/components/verse/posts-list";
 import {
-  ReflectionComposer,
-  type ReflectionComposerRef,
-} from "@/components/verse/reflection-composer";
+  PostComposer,
+  type PostComposerRef,
+} from "@/components/composer/post-composer";
 import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
 import { parseVerseId } from "@/lib/bible/utils";
 import { createLexicalState } from "@/lib/lexical/html-to-lexical";
@@ -255,7 +255,7 @@ function VerseContent({
   const contentPaddingTop = useTransparentHeaderPadding();
   const { session } = useSession();
   const { capture } = useAnalytics();
-  const composerRef = useRef<ReflectionComposerRef>(null);
+  const composerRef = useRef<PostComposerRef>(null);
   const postsListRef = useRef<PostsListRef>(null);
   const signInSheetRef = useRef<BottomSheetModal>(null);
   const reportSheetRef = useRef<ReportSheetRef>(null);
@@ -470,7 +470,9 @@ function VerseContent({
     <View style={styles.contentContainer}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={{ paddingTop: contentPaddingTop }}
+        contentInset={{ top: contentPaddingTop }}
+        contentOffset={{ x: 0, y: -contentPaddingTop }}
+        scrollIndicatorInsets={{ top: contentPaddingTop }}
         showsVerticalScrollIndicator={false}
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
@@ -480,6 +482,7 @@ function VerseContent({
             onRefresh={handleRefresh}
             tintColor={colors.textMuted}
             colors={[colors.accent]}
+            progressViewOffset={contentPaddingTop}
           />
         }
       >
@@ -553,7 +556,7 @@ function VerseContent({
       </ScrollView>
 
       {/* Bottom Composer */}
-      <ReflectionComposer
+      <PostComposer
         ref={composerRef}
         colors={colors}
         onSubmit={handleSubmitReflection}

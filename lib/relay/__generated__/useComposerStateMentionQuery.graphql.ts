@@ -1,6 +1,6 @@
 /**
- * @generated SignedSource<<93b64ebde6a78b512cd3155bd7a1a9b3>>
- * @relayHash 767b846a580becb53d4e6721617ed7b1
+ * @generated SignedSource<<0c1e380367ccd50be826e3e745dc7002>>
+ * @relayHash 89729387be946909cecf1ab94dd3449b
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,21 +9,19 @@
 /* eslint-disable */
 // @ts-nocheck
 
-// @relayRequestID 767b846a580becb53d4e6721617ed7b1
+// @relayRequestID 89729387be946909cecf1ab94dd3449b
 
 import { ConcreteRequest } from 'relay-runtime';
 export type UserFilterInput = {
   username?: string | null | undefined;
 };
-export type searchScreenUsersQuery$variables = {
+export type useComposerStateMentionQuery$variables = {
   filter: UserFilterInput;
-  first?: number | null | undefined;
 };
-export type searchScreenUsersQuery$data = {
+export type useComposerStateMentionQuery$data = {
   readonly users: {
     readonly edges: ReadonlyArray<{
       readonly node: {
-        readonly followerCount: number;
         readonly id: string;
         readonly image: {
           readonly url: string | null | undefined;
@@ -34,9 +32,9 @@ export type searchScreenUsersQuery$data = {
     } | null | undefined> | null | undefined;
   } | null | undefined;
 };
-export type searchScreenUsersQuery = {
-  response: searchScreenUsersQuery$data;
-  variables: searchScreenUsersQuery$variables;
+export type useComposerStateMentionQuery = {
+  response: useComposerStateMentionQuery$data;
+  variables: useComposerStateMentionQuery$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -45,11 +43,6 @@ var v0 = [
     "defaultValue": null,
     "kind": "LocalArgument",
     "name": "filter"
-  },
-  {
-    "defaultValue": null,
-    "kind": "LocalArgument",
-    "name": "first"
   }
 ],
 v1 = [
@@ -59,9 +52,9 @@ v1 = [
     "variableName": "filter"
   },
   {
-    "kind": "Variable",
+    "kind": "Literal",
     "name": "first",
-    "variableName": "first"
+    "value": 5
   }
 ],
 v2 = {
@@ -91,20 +84,13 @@ v5 = {
   "kind": "ScalarField",
   "name": "url",
   "storageKey": null
-},
-v6 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "followerCount",
-  "storageKey": null
 };
 return {
   "fragment": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "searchScreenUsersQuery",
+    "name": "useComposerStateMentionQuery",
     "selections": [
       {
         "alias": null,
@@ -144,8 +130,7 @@ return {
                       (v5/*: any*/)
                     ],
                     "storageKey": null
-                  },
-                  (v6/*: any*/)
+                  }
                 ],
                 "storageKey": null
               }
@@ -163,7 +148,7 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "searchScreenUsersQuery",
+    "name": "useComposerStateMentionQuery",
     "selections": [
       {
         "alias": null,
@@ -204,8 +189,7 @@ return {
                       (v2/*: any*/)
                     ],
                     "storageKey": null
-                  },
-                  (v6/*: any*/)
+                  }
                 ],
                 "storageKey": null
               }
@@ -218,15 +202,15 @@ return {
     ]
   },
   "params": {
-    "id": "767b846a580becb53d4e6721617ed7b1",
+    "id": "89729387be946909cecf1ab94dd3449b",
     "metadata": {},
-    "name": "searchScreenUsersQuery",
+    "name": "useComposerStateMentionQuery",
     "operationKind": "query",
     "text": null
   }
 };
 })();
 
-(node as any).hash = "8174384f81ba27077707544dce454b5a";
+(node as any).hash = "04263a144c17fa9f362dee1e69dfaaf9";
 
 export default node;

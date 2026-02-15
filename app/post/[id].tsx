@@ -3,6 +3,7 @@ import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { Stack, useLocalSearchParams } from "expo-router";
 import {
   forwardRef,
+  startTransition,
   Suspense,
   useCallback,
   useEffect,
@@ -39,9 +40,9 @@ import {
 import { EmptyState } from "@/components/ui/empty-state";
 import { Text } from "@/components/ui/text";
 import {
-  ReflectionComposer,
-  type ReflectionComposerRef,
-} from "@/components/verse/reflection-composer";
+  PostComposer,
+  type PostComposerRef,
+} from "@/components/composer/post-composer";
 import { ReflectionItem } from "@/components/verse/reflection-item";
 import { useAnalytics } from "@/lib/analytics";
 import { createLexicalState } from "@/lib/lexical/html-to-lexical";
@@ -309,7 +310,7 @@ function PostContent({
   const contentPaddingTop = useTransparentHeaderPadding();
   const { session } = useSession();
   const { capture } = useAnalytics();
-  const composerRef = useRef<ReflectionComposerRef>(null);
+  const composerRef = useRef<PostComposerRef>(null);
   const signInSheetRef = useRef<BottomSheetModal>(null);
   const childPostsRef = useRef<ChildPostsListRef>(null);
   const reportSheetRef = useRef<ReportSheetRef>(null);
@@ -503,7 +504,8 @@ function PostContent({
     <View style={styles.contentContainer}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={{ paddingTop: contentPaddingTop }}
+        contentInset={{ top: contentPaddingTop }}
+        scrollIndicatorInsets={{ top: contentPaddingTop }}
         showsVerticalScrollIndicator={false}
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
@@ -513,6 +515,7 @@ function PostContent({
             onRefresh={handleRefresh}
             tintColor={colors.textMuted}
             colors={[colors.accent]}
+            progressViewOffset={contentPaddingTop}
           />
         }
       >
@@ -565,7 +568,7 @@ function PostContent({
       </ScrollView>
 
       {/* Bottom Composer */}
-      <ReflectionComposer
+      <PostComposer
         ref={composerRef}
         colors={colors}
         onSubmit={handleSubmitReply}
@@ -630,7 +633,9 @@ const ChildPostsList = forwardRef<
     ref,
     () => ({
       refetch: () => {
-        refetch({}, { fetchPolicy: "store-and-network" });
+        startTransition(() => {
+          refetch({}, { fetchPolicy: "store-and-network" });
+        });
       },
     }),
     [refetch],

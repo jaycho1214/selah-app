@@ -8,7 +8,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ReaderFragment } from "relay-runtime";
+import { ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type postsListFragment$data = {
   readonly id: string;
@@ -27,39 +27,27 @@ export type postsListFragment$data = {
         }>;
         readonly likedAt: any | null | undefined;
         readonly likesCount: number;
-        readonly poll:
-          | {
-              readonly deadline: any | null | undefined;
-              readonly id: string;
-              readonly isExpired: boolean | null | undefined;
-              readonly options:
-                | ReadonlyArray<{
-                    readonly id: string;
-                    readonly text: string | null | undefined;
-                    readonly voteCount: number | null | undefined;
-                    readonly votePercentage: number | null | undefined;
-                  }>
-                | null
-                | undefined;
-              readonly totalVotes: number | null | undefined;
-              readonly userVote:
-                | {
-                    readonly id: string | null | undefined;
-                    readonly text: string | null | undefined;
-                  }
-                | null
-                | undefined;
-            }
-          | null
-          | undefined;
+        readonly poll: {
+          readonly deadline: any | null | undefined;
+          readonly id: string;
+          readonly isExpired: boolean | null | undefined;
+          readonly options: ReadonlyArray<{
+            readonly id: string;
+            readonly text: string | null | undefined;
+            readonly voteCount: number | null | undefined;
+            readonly votePercentage: number | null | undefined;
+          }> | null | undefined;
+          readonly totalVotes: number | null | undefined;
+          readonly userVote: {
+            readonly id: string | null | undefined;
+            readonly text: string | null | undefined;
+          } | null | undefined;
+        } | null | undefined;
         readonly user: {
           readonly id: string;
-          readonly image:
-            | {
-                readonly url: string | null | undefined;
-              }
-            | null
-            | undefined;
+          readonly image: {
+            readonly url: string | null | undefined;
+          } | null | undefined;
           readonly name: string | null | undefined;
           readonly username: string | null | undefined;
         };
@@ -73,330 +61,339 @@ export type postsListFragment$key = {
   readonly " $fragmentSpreads": FragmentRefs<"postsListFragment">;
 };
 
-import postsListPaginationQuery_graphql from "./postsListPaginationQuery.graphql";
+import postsListPaginationQuery_graphql from './postsListPaginationQuery.graphql';
 
-const node: ReaderFragment = (function () {
-  var v0 = ["posts"],
-    v1 = {
-      alias: null,
-      args: null,
-      kind: "ScalarField",
-      name: "id",
-      storageKey: null,
+const node: ReaderFragment = (function(){
+var v0 = [
+  "posts"
+],
+v1 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "id",
+  "storageKey": null
+},
+v2 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "url",
+  "storageKey": null
+},
+v3 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "text",
+  "storageKey": null
+};
+return {
+  "argumentDefinitions": [
+    {
+      "defaultValue": 20,
+      "kind": "LocalArgument",
+      "name": "count"
     },
-    v2 = {
-      alias: null,
-      args: null,
-      kind: "ScalarField",
-      name: "url",
-      storageKey: null,
-    },
-    v3 = {
-      alias: null,
-      args: null,
-      kind: "ScalarField",
-      name: "text",
-      storageKey: null,
-    };
-  return {
-    argumentDefinitions: [
+    {
+      "defaultValue": null,
+      "kind": "LocalArgument",
+      "name": "cursor"
+    }
+  ],
+  "kind": "Fragment",
+  "metadata": {
+    "connection": [
       {
-        defaultValue: 20,
-        kind: "LocalArgument",
-        name: "count",
-      },
-      {
-        defaultValue: null,
-        kind: "LocalArgument",
-        name: "cursor",
-      },
+        "count": "count",
+        "cursor": "cursor",
+        "direction": "forward",
+        "path": (v0/*: any*/)
+      }
     ],
-    kind: "Fragment",
-    metadata: {
-      connection: [
-        {
-          count: "count",
-          cursor: "cursor",
-          direction: "forward",
-          path: v0 /*: any*/,
+    "refetch": {
+      "connection": {
+        "forward": {
+          "count": "count",
+          "cursor": "cursor"
         },
+        "backward": null,
+        "path": (v0/*: any*/)
+      },
+      "fragmentPathInResult": [
+        "node"
       ],
-      refetch: {
-        connection: {
-          forward: {
-            count: "count",
-            cursor: "cursor",
-          },
-          backward: null,
-          path: v0 /*: any*/,
+      "operation": postsListPaginationQuery_graphql,
+      "identifierInfo": {
+        "identifierField": "id",
+        "identifierQueryVariableName": "id"
+      }
+    }
+  },
+  "name": "postsListFragment",
+  "selections": [
+    (v1/*: any*/),
+    {
+      "alias": "posts",
+      "args": null,
+      "concreteType": "BibleVersePostConnection",
+      "kind": "LinkedField",
+      "name": "__postsList_posts_connection",
+      "plural": false,
+      "selections": [
+        {
+          "alias": null,
+          "args": null,
+          "concreteType": "BibleVersePostEdge",
+          "kind": "LinkedField",
+          "name": "edges",
+          "plural": true,
+          "selections": [
+            {
+              "alias": null,
+              "args": null,
+              "concreteType": "BibleVersePost",
+              "kind": "LinkedField",
+              "name": "node",
+              "plural": false,
+              "selections": [
+                (v1/*: any*/),
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "content",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "createdAt",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "likesCount",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "childPostsCount",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "likedAt",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "concreteType": "User",
+                  "kind": "LinkedField",
+                  "name": "user",
+                  "plural": false,
+                  "selections": [
+                    (v1/*: any*/),
+                    {
+                      "alias": null,
+                      "args": null,
+                      "kind": "ScalarField",
+                      "name": "name",
+                      "storageKey": null
+                    },
+                    {
+                      "alias": null,
+                      "args": null,
+                      "kind": "ScalarField",
+                      "name": "username",
+                      "storageKey": null
+                    },
+                    {
+                      "alias": null,
+                      "args": null,
+                      "concreteType": "Asset",
+                      "kind": "LinkedField",
+                      "name": "image",
+                      "plural": false,
+                      "selections": [
+                        (v2/*: any*/)
+                      ],
+                      "storageKey": null
+                    }
+                  ],
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "concreteType": "Asset",
+                  "kind": "LinkedField",
+                  "name": "images",
+                  "plural": true,
+                  "selections": [
+                    (v2/*: any*/),
+                    {
+                      "alias": null,
+                      "args": null,
+                      "kind": "ScalarField",
+                      "name": "width",
+                      "storageKey": null
+                    },
+                    {
+                      "alias": null,
+                      "args": null,
+                      "kind": "ScalarField",
+                      "name": "height",
+                      "storageKey": null
+                    }
+                  ],
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "concreteType": "Poll",
+                  "kind": "LinkedField",
+                  "name": "poll",
+                  "plural": false,
+                  "selections": [
+                    (v1/*: any*/),
+                    {
+                      "alias": null,
+                      "args": null,
+                      "kind": "ScalarField",
+                      "name": "totalVotes",
+                      "storageKey": null
+                    },
+                    {
+                      "alias": null,
+                      "args": null,
+                      "kind": "ScalarField",
+                      "name": "isExpired",
+                      "storageKey": null
+                    },
+                    {
+                      "alias": null,
+                      "args": null,
+                      "kind": "ScalarField",
+                      "name": "deadline",
+                      "storageKey": null
+                    },
+                    {
+                      "alias": null,
+                      "args": null,
+                      "concreteType": "PollUserVote",
+                      "kind": "LinkedField",
+                      "name": "userVote",
+                      "plural": false,
+                      "selections": [
+                        (v1/*: any*/),
+                        (v3/*: any*/)
+                      ],
+                      "storageKey": null
+                    },
+                    {
+                      "alias": null,
+                      "args": null,
+                      "concreteType": "PollOption",
+                      "kind": "LinkedField",
+                      "name": "options",
+                      "plural": true,
+                      "selections": [
+                        (v1/*: any*/),
+                        (v3/*: any*/),
+                        {
+                          "alias": null,
+                          "args": null,
+                          "kind": "ScalarField",
+                          "name": "voteCount",
+                          "storageKey": null
+                        },
+                        {
+                          "alias": null,
+                          "args": null,
+                          "kind": "ScalarField",
+                          "name": "votePercentage",
+                          "storageKey": null
+                        }
+                      ],
+                      "storageKey": null
+                    }
+                  ],
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "__typename",
+                  "storageKey": null
+                }
+              ],
+              "storageKey": null
+            },
+            {
+              "alias": null,
+              "args": null,
+              "kind": "ScalarField",
+              "name": "cursor",
+              "storageKey": null
+            }
+          ],
+          "storageKey": null
         },
-        fragmentPathInResult: ["node"],
-        operation: postsListPaginationQuery_graphql,
-        identifierInfo: {
-          identifierField: "id",
-          identifierQueryVariableName: "id",
+        {
+          "alias": null,
+          "args": null,
+          "concreteType": "PageInfo",
+          "kind": "LinkedField",
+          "name": "pageInfo",
+          "plural": false,
+          "selections": [
+            {
+              "alias": null,
+              "args": null,
+              "kind": "ScalarField",
+              "name": "endCursor",
+              "storageKey": null
+            },
+            {
+              "alias": null,
+              "args": null,
+              "kind": "ScalarField",
+              "name": "hasNextPage",
+              "storageKey": null
+            }
+          ],
+          "storageKey": null
         },
-      },
-    },
-    name: "postsListFragment",
-    selections: [
-      v1 /*: any*/,
-      {
-        alias: "posts",
-        args: null,
-        concreteType: "BibleVersePostConnection",
-        kind: "LinkedField",
-        name: "__postsList_posts_connection",
-        plural: false,
-        selections: [
-          {
-            alias: null,
-            args: null,
-            concreteType: "BibleVersePostEdge",
-            kind: "LinkedField",
-            name: "edges",
-            plural: true,
-            selections: [
-              {
-                alias: null,
-                args: null,
-                concreteType: "BibleVersePost",
-                kind: "LinkedField",
-                name: "node",
-                plural: false,
-                selections: [
-                  v1 /*: any*/,
-                  {
-                    alias: null,
-                    args: null,
-                    kind: "ScalarField",
-                    name: "content",
-                    storageKey: null,
-                  },
-                  {
-                    alias: null,
-                    args: null,
-                    kind: "ScalarField",
-                    name: "createdAt",
-                    storageKey: null,
-                  },
-                  {
-                    alias: null,
-                    args: null,
-                    kind: "ScalarField",
-                    name: "likesCount",
-                    storageKey: null,
-                  },
-                  {
-                    alias: null,
-                    args: null,
-                    kind: "ScalarField",
-                    name: "childPostsCount",
-                    storageKey: null,
-                  },
-                  {
-                    alias: null,
-                    args: null,
-                    kind: "ScalarField",
-                    name: "likedAt",
-                    storageKey: null,
-                  },
-                  {
-                    alias: null,
-                    args: null,
-                    concreteType: "User",
-                    kind: "LinkedField",
-                    name: "user",
-                    plural: false,
-                    selections: [
-                      v1 /*: any*/,
-                      {
-                        alias: null,
-                        args: null,
-                        kind: "ScalarField",
-                        name: "name",
-                        storageKey: null,
-                      },
-                      {
-                        alias: null,
-                        args: null,
-                        kind: "ScalarField",
-                        name: "username",
-                        storageKey: null,
-                      },
-                      {
-                        alias: null,
-                        args: null,
-                        concreteType: "Asset",
-                        kind: "LinkedField",
-                        name: "image",
-                        plural: false,
-                        selections: [v2 /*: any*/],
-                        storageKey: null,
-                      },
-                    ],
-                    storageKey: null,
-                  },
-                  {
-                    alias: null,
-                    args: null,
-                    concreteType: "Asset",
-                    kind: "LinkedField",
-                    name: "images",
-                    plural: true,
-                    selections: [
-                      v2 /*: any*/,
-                      {
-                        alias: null,
-                        args: null,
-                        kind: "ScalarField",
-                        name: "width",
-                        storageKey: null,
-                      },
-                      {
-                        alias: null,
-                        args: null,
-                        kind: "ScalarField",
-                        name: "height",
-                        storageKey: null,
-                      },
-                    ],
-                    storageKey: null,
-                  },
-                  {
-                    alias: null,
-                    args: null,
-                    concreteType: "Poll",
-                    kind: "LinkedField",
-                    name: "poll",
-                    plural: false,
-                    selections: [
-                      v1 /*: any*/,
-                      {
-                        alias: null,
-                        args: null,
-                        kind: "ScalarField",
-                        name: "totalVotes",
-                        storageKey: null,
-                      },
-                      {
-                        alias: null,
-                        args: null,
-                        kind: "ScalarField",
-                        name: "isExpired",
-                        storageKey: null,
-                      },
-                      {
-                        alias: null,
-                        args: null,
-                        kind: "ScalarField",
-                        name: "deadline",
-                        storageKey: null,
-                      },
-                      {
-                        alias: null,
-                        args: null,
-                        concreteType: "PollUserVote",
-                        kind: "LinkedField",
-                        name: "userVote",
-                        plural: false,
-                        selections: [v1 /*: any*/, v3 /*: any*/],
-                        storageKey: null,
-                      },
-                      {
-                        alias: null,
-                        args: null,
-                        concreteType: "PollOption",
-                        kind: "LinkedField",
-                        name: "options",
-                        plural: true,
-                        selections: [
-                          v1 /*: any*/,
-                          v3 /*: any*/,
-                          {
-                            alias: null,
-                            args: null,
-                            kind: "ScalarField",
-                            name: "voteCount",
-                            storageKey: null,
-                          },
-                          {
-                            alias: null,
-                            args: null,
-                            kind: "ScalarField",
-                            name: "votePercentage",
-                            storageKey: null,
-                          },
-                        ],
-                        storageKey: null,
-                      },
-                    ],
-                    storageKey: null,
-                  },
-                  {
-                    alias: null,
-                    args: null,
-                    kind: "ScalarField",
-                    name: "__typename",
-                    storageKey: null,
-                  },
-                ],
-                storageKey: null,
-              },
-              {
-                alias: null,
-                args: null,
-                kind: "ScalarField",
-                name: "cursor",
-                storageKey: null,
-              },
-            ],
-            storageKey: null,
-          },
-          {
-            alias: null,
-            args: null,
-            concreteType: "PageInfo",
-            kind: "LinkedField",
-            name: "pageInfo",
-            plural: false,
-            selections: [
-              {
-                alias: null,
-                args: null,
-                kind: "ScalarField",
-                name: "endCursor",
-                storageKey: null,
-              },
-              {
-                alias: null,
-                args: null,
-                kind: "ScalarField",
-                name: "hasNextPage",
-                storageKey: null,
-              },
-            ],
-            storageKey: null,
-          },
-          {
-            kind: "ClientExtension",
-            selections: [
-              {
-                alias: null,
-                args: null,
-                kind: "ScalarField",
-                name: "__id",
-                storageKey: null,
-              },
-            ],
-          },
-        ],
-        storageKey: null,
-      },
-    ],
-    type: "BibleVerse",
-    abstractKey: null,
-  };
+        {
+          "kind": "ClientExtension",
+          "selections": [
+            {
+              "alias": null,
+              "args": null,
+              "kind": "ScalarField",
+              "name": "__id",
+              "storageKey": null
+            }
+          ]
+        }
+      ],
+      "storageKey": null
+    }
+  ],
+  "type": "BibleVerse",
+  "abstractKey": null
+};
 })();
 
 (node as any).hash = "d76646ad04fafa2a8f4e2704f6c92a24";
