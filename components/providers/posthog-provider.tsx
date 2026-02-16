@@ -6,7 +6,7 @@ import {
 
 import { useSession } from "@/components/providers/session-provider";
 
-const POSTHOG_API_KEY = process.env.EXPO_PUBLIC_POSTHOG_KEY!;
+const POSTHOG_API_KEY = process.env.EXPO_PUBLIC_POSTHOG_KEY;
 
 /**
  * Encode a raw DB user ID to match the web's Relay global ID format.
@@ -19,8 +19,13 @@ function encodeGlobalUserId(rawId: string): string {
 /**
  * PostHog analytics provider.
  * Wraps the app with PostHog context and handles user identification.
+ * Renders children directly if no API key is configured.
  */
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
+  if (!POSTHOG_API_KEY) {
+    return <>{children}</>;
+  }
+
   return (
     <PHProvider
       apiKey={POSTHOG_API_KEY}
