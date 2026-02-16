@@ -2,11 +2,16 @@ import { BibleNavigator } from "@/components/bible/bible-navigator";
 import { BibleReader } from "@/components/bible/bible-reader";
 import { TranslationSelector } from "@/components/bible/translation-selector";
 import { VerseActions } from "@/components/bible/verse-actions";
+import {
+  ReadingPlanPill,
+  ReadingPlanSheet,
+} from "@/components/reading-plans/ReadingPlanBanner";
 import { Text } from "@/components/ui/text";
 import { useColors } from "@/hooks/use-colors";
 import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
 import type { BibleBook } from "@/lib/bible/types";
 import { useBibleStore } from "@/lib/stores/bible-store";
+import { useReadingPlanStore } from "@/lib/stores/reading-plan-store";
 import { useVerseSelectionStore } from "@/lib/stores/verse-selection-store";
 import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
 import * as Haptics from "expo-haptics";
@@ -35,6 +40,7 @@ export default function HomeScreen() {
   const currentTranslation = useBibleStore((s) => s.currentTranslation);
   const setPosition = useBibleStore((s) => s.setPosition);
   const scrollToVerse = useBibleStore((s) => s.scrollToVerse);
+  const activePlanId = useReadingPlanStore((s) => s.activePlanId);
   const isSelecting = useVerseSelectionStore((s) => s.isSelecting);
   const toggleVerse = useVerseSelectionStore((s) => s.toggleVerse);
   const clearSelection = useVerseSelectionStore((s) => s.clearSelection);
@@ -42,6 +48,7 @@ export default function HomeScreen() {
   const [navigatorVisible, setNavigatorVisible] = useState(false);
   const [translationSelectorVisible, setTranslationSelectorVisible] =
     useState(false);
+  const [planSheetVisible, setPlanSheetVisible] = useState(false);
 
   // Key to force BibleReader remount on position change
   const [readerKey, setReaderKey] = useState(0);
@@ -99,6 +106,7 @@ export default function HomeScreen() {
 
   const bookDetails = BIBLE_BOOK_DETAILS[currentBook as BibleBook];
   const bookName = bookDetails?.name ?? currentBook;
+  const hasPlan = activePlanId != null;
 
   const colors = useMemo(
     () => ({
@@ -144,24 +152,43 @@ export default function HomeScreen() {
               },
             ]}
           >
-            <Pressable
-              onPress={() => setNavigatorVisible(true)}
-              style={styles.pillPressable}
-            >
-              <Text style={[styles.bookName, { color: colors.bookText }]}>
-                {bookName}
-              </Text>
-              <View
-                style={[
-                  styles.separator,
-                  { backgroundColor: colors.pillBorder },
-                ]}
-              />
-              <Text
-                style={[styles.chapterNumber, { color: colors.chapterText }]}
+            <View style={styles.pillPressable}>
+              {/* Plan badge on the left when active */}
+              {hasPlan && (
+                <>
+                  <ReadingPlanPill
+                    onPress={() => setPlanSheetVisible(true)}
+                  />
+                  <View
+                    style={[
+                      styles.separator,
+                      { backgroundColor: colors.pillBorder },
+                    ]}
+                  />
+                </>
+              )}
+
+              {/* Book picker */}
+              <Pressable
+                onPress={() => setNavigatorVisible(true)}
+                style={styles.bookPickerPressable}
               >
-                {currentChapter}
-              </Text>
+                <Text style={[styles.bookName, { color: colors.bookText }]}>
+                  {bookName}
+                </Text>
+                <View
+                  style={[
+                    styles.separator,
+                    { backgroundColor: colors.pillBorder },
+                  ]}
+                />
+                <Text
+                  style={[styles.chapterNumber, { color: colors.chapterText }]}
+                >
+                  {currentChapter}
+                </Text>
+              </Pressable>
+
               <Pressable
                 onPress={() => setTranslationSelectorVisible(true)}
                 style={[
@@ -179,7 +206,7 @@ export default function HomeScreen() {
                   {currentTranslation}
                 </Text>
               </Pressable>
-            </Pressable>
+            </View>
           </GlassView>
         </View>
       )}
@@ -200,6 +227,12 @@ export default function HomeScreen() {
       <TranslationSelector
         visible={translationSelectorVisible}
         onClose={() => setTranslationSelectorVisible(false)}
+      />
+
+      {/* Reading plan progress sheet */}
+      <ReadingPlanSheet
+        visible={planSheetVisible}
+        onClose={() => setPlanSheetVisible(false)}
       />
     </View>
   );
@@ -225,14 +258,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 12,
     elevation: 8,
-    overflow: "hidden",
   },
   pillPressable: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 10,
-    paddingLeft: 16,
+    paddingLeft: 14,
     paddingRight: 10,
+    gap: 10,
+  },
+  bookPickerPressable: {
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
   bookName: {

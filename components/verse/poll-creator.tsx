@@ -1,4 +1,4 @@
-import { memo, useState, useCallback } from "react";
+import { memo, useState, useCallback, useMemo } from "react";
 import { View, TextInput, Pressable, StyleSheet, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Animated, { FadeIn, FadeOut, Layout } from "react-native-reanimated";
@@ -39,8 +39,8 @@ export const PollCreator = memo(function PollCreator({
   });
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const minDeadline = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-  const maxDeadline = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+  const minDeadline = useMemo(() => new Date(Date.now() + 10 * 60 * 1000), []); // 10 minutes
+  const maxDeadline = useMemo(() => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), []); // 30 days
 
   const addOption = useCallback(() => {
     if (options.length < MAX_OPTIONS) {

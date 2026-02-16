@@ -28,7 +28,7 @@ import {
  * }
  */
 export default function FollowingScreen() {
-  const { userId } = useLocalSearchParams<{ userId: string }>();
+  useLocalSearchParams<{ userId: string }>();
   const colors = useColors();
   const contentPaddingTop = useTransparentHeaderPadding();
 

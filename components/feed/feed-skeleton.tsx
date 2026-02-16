@@ -204,7 +204,7 @@ export const FeedSkeleton = memo(function FeedSkeleton({
 
   useEffect(() => {
     shimmer.value = withRepeat(withTiming(1, { duration: 1200 }), -1, false);
-  }, []);
+  }, [shimmer]);
 
   return (
     <View style={style}>

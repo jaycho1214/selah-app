@@ -1,4 +1,4 @@
-import { View, useColorScheme, StyleSheet, Dimensions } from "react-native";
+import { View, useColorScheme, StyleSheet } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -7,8 +7,6 @@ import Animated, {
   interpolate,
 } from "react-native-reanimated";
 import { memo, useEffect } from "react";
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 interface ChapterSkeletonProps {
   topInset?: number;
@@ -24,7 +22,7 @@ export const ChapterSkeleton = memo(function ChapterSkeleton({
 
   useEffect(() => {
     shimmer.value = withRepeat(withTiming(1, { duration: 1200 }), -1, false);
-  }, []);
+  }, [shimmer]);
 
   const colors = isDark
     ? {

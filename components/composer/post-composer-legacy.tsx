@@ -18,6 +18,7 @@ import {
   EyeOff,
   Clock,
   Maximize2,
+  BookOpen,
 } from "lucide-react-native";
 import Animated, {
   FadeInDown,
@@ -29,6 +30,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Text } from "@/components/ui/text";
 import { ImagePickerGrid, ImagePickerButton } from "../verse/image-picker-grid";
 import { ComposerMentionDropdown } from "./composer-mention-dropdown";
+import { ComposerVerseReferenceDropdown } from "./composer-verse-reference-dropdown";
 import { ComposerFullscreenModal } from "./composer-fullscreen-modal";
 import { CircularProgress, AnimatedPressable } from "./composer-shared";
 import {
@@ -49,6 +51,7 @@ export const PostComposerLegacy = forwardRef<
     htmlContent,
     handleWebViewMessage,
     images,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setImages,
     poll,
     showPollCreator,
@@ -80,6 +83,11 @@ export const PostComposerLegacy = forwardRef<
     showProgress,
     progress,
     keyboardOffset,
+    showVerseRefDropdown,
+    verseRefResults,
+    isVerseRefLoading,
+    selectVerseReference,
+    insertVerseReference,
   } = state;
 
   return (
@@ -99,6 +107,16 @@ export const PostComposerLegacy = forwardRef<
             users={mentionUsers}
             isLoading={isMentionLoading}
             onSelect={selectMention}
+            colors={colors}
+          />
+        )}
+
+        {/* Verse Reference Dropdown */}
+        {showVerseRefDropdown && (
+          <ComposerVerseReferenceDropdown
+            verses={verseRefResults}
+            isLoading={isVerseRefLoading}
+            onSelect={selectVerseReference}
             colors={colors}
           />
         )}
@@ -330,6 +348,9 @@ export const PostComposerLegacy = forwardRef<
             </View>
             <Pressable onPress={insertMention}>
               <AtSign size={20} color={colors.textSecondary} />
+            </Pressable>
+            <Pressable onPress={insertVerseReference}>
+              <BookOpen size={18} color={colors.textSecondary} />
             </Pressable>
             <Pressable
               onPress={toggleSpoiler}

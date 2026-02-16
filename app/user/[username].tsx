@@ -179,7 +179,7 @@ function UserProfileContent() {
 
   const [activeTab, setActiveTab] = useState<ProfileTab>("posts");
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Fetch profile data

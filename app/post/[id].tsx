@@ -349,12 +349,12 @@ function PostContent({
   const handleSubmitReply = useCallback(
     (postData: {
       content: string;
-      images: Array<{
+      images: {
         uri: string;
         width: number;
         height: number;
         mimeType?: string;
-      }>;
+      }[];
       poll: { options: string[]; deadline: Date } | null;
     }) => {
       if (!post?.id) return;

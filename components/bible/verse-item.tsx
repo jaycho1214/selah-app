@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo } from "react";
+import { memo, useMemo } from "react";
 import { FONT_SIZES, useSettingsStore } from "@/lib/stores/settings-store";
 import {
   Platform,
@@ -24,6 +24,7 @@ interface VerseItemProps {
   isSelected?: boolean;
   isFirstVerse?: boolean;
   highlightColor?: string | null;
+  isInPlanRange?: boolean;
   onPress: () => void;
   onLongPress: () => void;
 }
@@ -33,6 +34,7 @@ export const VerseItem = memo(function VerseItem({
   isSelected,
   isFirstVerse,
   highlightColor,
+  isInPlanRange,
   onPress,
   onLongPress,
 }: VerseItemProps) {
@@ -58,10 +60,27 @@ export const VerseItem = memo(function VerseItem({
     ? `${highlightColor}${isDark ? "30" : "40"}`
     : undefined;
 
+  // Plan range background — ultra-subtle tint (only when no user highlight)
+  const planRangeBg =
+    isInPlanRange && !highlightColor
+      ? isDark
+        ? "rgba(255,255,255,0.03)"
+        : "rgba(0,0,0,0.02)"
+      : undefined;
+
+  // Plan range left border
+  const planBorderColor = isInPlanRange
+    ? isDark
+      ? "rgba(255,255,255,0.15)"
+      : "rgba(0,0,0,0.12)"
+    : undefined;
+
   const dynamicStyles = useMemo(
     () => ({
       container: {
-        backgroundColor: highlightBg,
+        backgroundColor: highlightBg ?? planRangeBg,
+        borderLeftWidth: planBorderColor ? 2 : 0,
+        borderLeftColor: planBorderColor,
       },
       verseNum: {
         color: verseNumColor,
@@ -95,6 +114,8 @@ export const VerseItem = memo(function VerseItem({
     }),
     [
       highlightBg,
+      planRangeBg,
+      planBorderColor,
       verseNumColor,
       sizes,
       isFirstVerse,

@@ -7,7 +7,6 @@ import { X, ImagePlus } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 
 const MAX_IMAGES = 4;
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export interface SelectedImage {
   uri: string;

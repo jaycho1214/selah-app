@@ -76,10 +76,8 @@ export function VerseActions() {
   > | null>(null);
   const [compareLoading, setCompareLoading] = useState(false);
 
-  const count = selectedIds.size;
-
   const verseReference = useMemo(() => {
-    if (!isSelecting) return "";
+    if (!isSelecting || selectedIds.size === 0) return "";
     const sorted = getSortedVerses();
     if (sorted.length === 0) return "";
 
@@ -92,7 +90,7 @@ export function VerseActions() {
       return `${bookName} ${first.chapter}:${first.verseNumber}`;
     }
     return `${bookName} ${first.chapter}:${first.verseNumber}–${last.verseNumber}`;
-  }, [isSelecting, getSortedVerses, count]);
+  }, [isSelecting, getSortedVerses, selectedIds]);
 
   const handleShare = useCallback(async () => {
     const sorted = getSortedVerses();

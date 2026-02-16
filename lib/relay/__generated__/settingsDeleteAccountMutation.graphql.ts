@@ -11,11 +11,8 @@
 
 // @relayRequestID 754171327513b43709b0dbd33c4468c9
 
-import { ConcreteRequest } from "relay-runtime";
-export type settingsDeleteAccountMutation$variables = Record<
-  PropertyKey,
-  never
->;
+import { ConcreteRequest } from 'relay-runtime';
+export type settingsDeleteAccountMutation$variables = Record<PropertyKey, never>;
 export type settingsDeleteAccountMutation$data = {
   readonly deleteMyAccount: {
     readonly success: boolean;
@@ -26,52 +23,52 @@ export type settingsDeleteAccountMutation = {
   variables: settingsDeleteAccountMutation$variables;
 };
 
-const node: ConcreteRequest = (function () {
-  var v0 = [
-    {
-      alias: null,
-      args: null,
-      concreteType: "DeleteMyAccountPayload",
-      kind: "LinkedField",
-      name: "deleteMyAccount",
-      plural: false,
-      selections: [
-        {
-          alias: null,
-          args: null,
-          kind: "ScalarField",
-          name: "success",
-          storageKey: null,
-        },
-      ],
-      storageKey: null,
-    },
-  ];
-  return {
-    fragment: {
-      argumentDefinitions: [],
-      kind: "Fragment",
-      metadata: null,
-      name: "settingsDeleteAccountMutation",
-      selections: v0 /*: any*/,
-      type: "Mutation",
-      abstractKey: null,
-    },
-    kind: "Request",
-    operation: {
-      argumentDefinitions: [],
-      kind: "Operation",
-      name: "settingsDeleteAccountMutation",
-      selections: v0 /*: any*/,
-    },
-    params: {
-      id: "754171327513b43709b0dbd33c4468c9",
-      metadata: {},
-      name: "settingsDeleteAccountMutation",
-      operationKind: "mutation",
-      text: null,
-    },
-  };
+const node: ConcreteRequest = (function(){
+var v0 = [
+  {
+    "alias": null,
+    "args": null,
+    "concreteType": "DeleteMyAccountPayload",
+    "kind": "LinkedField",
+    "name": "deleteMyAccount",
+    "plural": false,
+    "selections": [
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "success",
+        "storageKey": null
+      }
+    ],
+    "storageKey": null
+  }
+];
+return {
+  "fragment": {
+    "argumentDefinitions": [],
+    "kind": "Fragment",
+    "metadata": null,
+    "name": "settingsDeleteAccountMutation",
+    "selections": (v0/*: any*/),
+    "type": "Mutation",
+    "abstractKey": null
+  },
+  "kind": "Request",
+  "operation": {
+    "argumentDefinitions": [],
+    "kind": "Operation",
+    "name": "settingsDeleteAccountMutation",
+    "selections": (v0/*: any*/)
+  },
+  "params": {
+    "id": "754171327513b43709b0dbd33c4468c9",
+    "metadata": {},
+    "name": "settingsDeleteAccountMutation",
+    "operationKind": "mutation",
+    "text": null
+  }
+};
 })();
 
 (node as any).hash = "df02be9e6420fc89823fb27c5c98bbb9";

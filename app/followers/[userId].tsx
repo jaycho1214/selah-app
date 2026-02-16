@@ -28,7 +28,7 @@ import {
  * }
  */
 export default function FollowersScreen() {
-  const { userId } = useLocalSearchParams<{ userId: string }>();
+  useLocalSearchParams<{ userId: string }>();
   const colors = useColors();
   const contentPaddingTop = useTransparentHeaderPadding();
 

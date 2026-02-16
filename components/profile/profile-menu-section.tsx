@@ -61,13 +61,13 @@ function MenuItem({
 
 interface ProfileMenuSectionProps {
   title: string;
-  items: Array<{
+  items: {
     icon?: LucideIcon;
     label: string;
     count?: number;
     onPress: () => void;
     destructive?: boolean;
-  }>;
+  }[];
   baseIndex?: number;
 }
 

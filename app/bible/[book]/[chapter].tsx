@@ -54,7 +54,7 @@ export default function BibleChapterScreen() {
       chapter: parseInt(chapter, 10),
       translation: currentTranslation,
     });
-  }, [book, chapter]);
+  }, [book, chapter, capture, currentTranslation]);
 
   const bookDetails = BIBLE_BOOK_DETAILS[currentBook];
   const bookName = bookDetails?.name ?? book;

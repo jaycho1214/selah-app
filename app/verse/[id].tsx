@@ -278,7 +278,7 @@ function VerseContent({
     if (data.bibleVerseByReference?.id) {
       capture("verse_selected", { verse_id: verseId });
     }
-  }, [verseId]);
+  }, [verseId, capture, data.bibleVerseByReference?.id]);
 
   // Pull to refresh using the fragment's refetch
   const handleRefresh = useCallback(async () => {
@@ -330,12 +330,12 @@ function VerseContent({
   const handleSubmitReflection = useCallback(
     (postData: {
       content: string;
-      images: Array<{
+      images: {
         uri: string;
         width: number;
         height: number;
         mimeType?: string;
-      }>;
+      }[];
       poll: { options: string[]; deadline: Date } | null;
     }) => {
       if (!verse?.id) return;
@@ -395,7 +395,7 @@ function VerseContent({
         },
       });
     },
-    [verse?.id, commitCreateReflection],
+    [verse?.id, commitCreateReflection, capture],
   );
 
   const handleLike = useCallback(
@@ -413,7 +413,7 @@ function VerseContent({
         },
       });
     },
-    [commitLike],
+    [commitLike, capture],
   );
 
   const handleUnlike = useCallback(
@@ -431,7 +431,7 @@ function VerseContent({
         },
       });
     },
-    [commitUnlike],
+    [commitUnlike, capture],
   );
 
   const handleDelete = useCallback(
@@ -447,7 +447,7 @@ function VerseContent({
         },
       });
     },
-    [commitDelete],
+    [commitDelete, capture],
   );
 
   const handleAuthRequired = useCallback(() => {

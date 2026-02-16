@@ -49,6 +49,7 @@ interface ChapterViewProps {
   chapter: number;
   topInset?: number;
   scrollToVerse?: number | null;
+  planVerseRange?: { start: number; end: number } | null;
   onVersePress?: (verseId: string, verseText?: string) => void;
   onVerseLongPress?: (
     verseId: string,
@@ -64,6 +65,7 @@ export function ChapterView({
   chapter,
   topInset = 0,
   scrollToVerse,
+  planVerseRange,
   onVersePress,
   onVerseLongPress,
 }: ChapterViewProps) {
@@ -120,6 +122,7 @@ export function ChapterView({
         verses={offlineVerses}
         topInset={topInset}
         scrollToVerse={scrollToVerse}
+        planVerseRange={planVerseRange}
         onVersePress={onVersePress}
         onVerseLongPress={onVerseLongPress}
       />
@@ -134,6 +137,7 @@ export function ChapterView({
       currentTranslation={currentTranslation}
       topInset={topInset}
       scrollToVerse={scrollToVerse}
+      planVerseRange={planVerseRange}
       onVersePress={onVersePress}
       onVerseLongPress={onVerseLongPress}
     />
@@ -147,6 +151,7 @@ function ChapterViewRelay({
   currentTranslation,
   topInset,
   scrollToVerse,
+  planVerseRange,
   onVersePress,
   onVerseLongPress,
 }: {
@@ -155,6 +160,7 @@ function ChapterViewRelay({
   currentTranslation: string;
   topInset?: number;
   scrollToVerse?: number | null;
+  planVerseRange?: { start: number; end: number } | null;
   onVersePress?: (verseId: string, verseText?: string) => void;
   onVerseLongPress?: (
     verseId: string,
@@ -185,6 +191,7 @@ function ChapterViewRelay({
       verses={verses as Verse[]}
       topInset={topInset}
       scrollToVerse={scrollToVerse}
+      planVerseRange={planVerseRange}
       onVersePress={onVersePress}
       onVerseLongPress={onVerseLongPress}
     />
@@ -199,6 +206,7 @@ function ChapterViewContent({
   verses,
   topInset = 0,
   scrollToVerse,
+  planVerseRange,
   onVersePress,
   onVerseLongPress,
 }: {
@@ -208,6 +216,7 @@ function ChapterViewContent({
   verses: Verse[];
   topInset?: number;
   scrollToVerse?: number | null;
+  planVerseRange?: { start: number; end: number } | null;
   onVersePress?: (verseId: string, verseText?: string) => void;
   onVerseLongPress?: (
     verseId: string,
@@ -256,6 +265,9 @@ function ChapterViewContent({
         : () => onVersePress?.(verseId, item.text);
 
       const shouldHighlight = highlightEnabled && !!item.hasUserPost;
+      const isInPlanRange = planVerseRange
+        ? item.verse >= planVerseRange.start && item.verse <= planVerseRange.end
+        : false;
 
       return (
         <VerseItem
@@ -263,6 +275,7 @@ function ChapterViewContent({
           isSelected={selectedIds.has(item.id)}
           isFirstVerse={item.verse === 1}
           highlightColor={shouldHighlight ? highlightColor : null}
+          isInPlanRange={isInPlanRange}
           onPress={handlePress}
           onLongPress={() =>
             onVerseLongPress?.(item.id, item.text, book, chapter, item.verse)
@@ -275,6 +288,7 @@ function ChapterViewContent({
       isSelecting,
       highlightEnabled,
       highlightColor,
+      planVerseRange,
       onVersePress,
       onVerseLongPress,
       book,
@@ -291,8 +305,9 @@ function ChapterViewContent({
       isSelecting,
       highlightEnabled,
       highlightColor,
+      planVerseRange,
     }),
-    [selectedIds, isSelecting, highlightEnabled, highlightColor],
+    [selectedIds, isSelecting, highlightEnabled, highlightColor, planVerseRange],
   );
 
   if (verses.length === 0) {

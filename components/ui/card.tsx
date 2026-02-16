@@ -3,7 +3,7 @@ import { View, ViewProps, StyleSheet } from "react-native";
 import { Text } from "./text";
 import { useColors } from "@/hooks/use-colors";
 
-interface CardProps extends ViewProps {}
+type CardProps = ViewProps;
 
 const Card = React.memo(
   React.forwardRef<View, CardProps>(({ style, ...props }, ref) => {

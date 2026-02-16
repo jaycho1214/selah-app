@@ -213,6 +213,8 @@ export default function UserEditScreen() {
       if (action === "library") await launchLibrary();
       if (action === "remove") removeAvatar();
     },
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
@@ -287,7 +289,7 @@ export default function UserEditScreen() {
           "Could not upload image. Please try again.",
         );
       }
-    } catch (error) {
+    } catch {
       Alert.alert("Upload Failed", "Could not upload image. Please try again.");
     } finally {
       setIsUploading(false);

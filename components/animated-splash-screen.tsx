@@ -30,7 +30,7 @@ export function AnimatedSplashScreen({ onFinish }: { onFinish: () => void }) {
         runOnJS(onFinish)();
       }),
     );
-  }, []);
+  }, [onFinish, opacity, scale]);
 
   const containerStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,

@@ -10,6 +10,7 @@ import { ChevronDown } from "lucide-react-native";
 
 import { Text } from "@/components/ui/text";
 import { ComposerMentionDropdown } from "./composer-mention-dropdown";
+import { ComposerVerseReferenceDropdown } from "./composer-verse-reference-dropdown";
 import { CircularProgress } from "./composer-shared";
 import type { ComposerState } from "./use-composer-state";
 import { MAX_LENGTH } from "./use-composer-state";
@@ -33,6 +34,10 @@ export function ComposerFullscreenModal({
     mentionUsers,
     isMentionLoading,
     selectMentionFullscreen,
+    showVerseRefDropdown,
+    verseRefResults,
+    isVerseRefLoading,
+    selectVerseReferenceFullscreen,
     fullscreenWebViewRef,
     htmlContent,
     handleFullscreenWebViewMessage,
@@ -81,6 +86,17 @@ export function ComposerFullscreenModal({
             users={mentionUsers}
             isLoading={isMentionLoading}
             onSelect={selectMentionFullscreen}
+            colors={colors}
+            style={styles.mentionDropdown}
+          />
+        )}
+
+        {/* Verse Reference Dropdown */}
+        {showVerseRefDropdown && (
+          <ComposerVerseReferenceDropdown
+            verses={verseRefResults}
+            isLoading={isVerseRefLoading}
+            onSelect={selectVerseReferenceFullscreen}
             colors={colors}
             style={styles.mentionDropdown}
           />

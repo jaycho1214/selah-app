@@ -18,6 +18,7 @@ import {
   EyeOff,
   Clock,
   Maximize2,
+  BookOpen,
 } from "lucide-react-native";
 import Animated, {
   FadeInDown,
@@ -29,6 +30,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Text } from "@/components/ui/text";
 import { ImagePickerGrid, ImagePickerButton } from "../verse/image-picker-grid";
 import { ComposerMentionDropdown } from "./composer-mention-dropdown";
+import { ComposerVerseReferenceDropdown } from "./composer-verse-reference-dropdown";
 import { ComposerFullscreenModal } from "./composer-fullscreen-modal";
 import { CircularProgress, AnimatedPressable } from "./composer-shared";
 import {
@@ -47,6 +49,7 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
       htmlContent,
       handleWebViewMessage,
       images,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       setImages,
       poll,
       showPollCreator,
@@ -73,6 +76,7 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
       hasSelection,
       isInsideSpoiler,
       openFullscreen,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       handleDismissKeyboard,
       canSubmit,
       handleSubmit,
@@ -81,6 +85,11 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
       keyboardOffset,
       glassExpandResponder,
       insets,
+      showVerseRefDropdown,
+      verseRefResults,
+      isVerseRefLoading,
+      selectVerseReference,
+      insertVerseReference,
     } = state;
 
     const dynamicStyles = useMemo(
@@ -119,6 +128,17 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
             users={mentionUsers}
             isLoading={isMentionLoading}
             onSelect={selectMention}
+            colors={colors}
+            style={glassStyles.mentionDropdown}
+          />
+        )}
+
+        {/* Verse Reference Dropdown — outside GlassView to avoid clipping */}
+        {showVerseRefDropdown && (
+          <ComposerVerseReferenceDropdown
+            verses={verseRefResults}
+            isLoading={isVerseRefLoading}
+            onSelect={selectVerseReference}
             colors={colors}
             style={glassStyles.mentionDropdown}
           />
@@ -304,6 +324,9 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
                 </View>
                 <Pressable onPress={insertMention}>
                   <AtSign size={20} color={colors.textSecondary} />
+                </Pressable>
+                <Pressable onPress={insertVerseReference}>
+                  <BookOpen size={18} color={colors.textSecondary} />
                 </Pressable>
                 <Pressable
                   onPress={toggleSpoiler}

@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { View, StyleSheet, Dimensions, useColorScheme } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -11,11 +11,11 @@ import Animated, {
 } from "react-native-reanimated";
 import Svg, { Path } from "react-native-svg";
 import * as Haptics from "expo-haptics";
-import { Suspense } from "react";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { ChapterView } from "./chapter-view";
 import { ChapterSkeleton } from "./chapter-skeleton";
 import { useBibleStore } from "@/lib/stores/bible-store";
+import { useReadingPlanStore } from "@/lib/stores/reading-plan-store";
 import { BIBLE_BOOKS, BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
 import { BibleBook } from "@/lib/bible/types";
 
@@ -62,6 +62,16 @@ export const BibleReader = memo(function BibleReader({
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const setPosition = useBibleStore((s) => s.setPosition);
+  const setScrollToVerse = useBibleStore((s) => s.setScrollToVerse);
+
+  // Reading plan store
+  const planReadings = useReadingPlanStore((s) => s.readings);
+  const planCurrentIndex = useReadingPlanStore((s) => s.currentReadingIndex);
+  const planActive = useReadingPlanStore((s) => s.activePlanId) != null;
+  const setPlanIndex = useReadingPlanStore((s) => s.setCurrentReadingIndex);
+  const markReadingComplete = useReadingPlanStore(
+    (s) => s.markReadingComplete,
+  );
 
   // Timer ref for transition cleanup
   const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -85,6 +95,18 @@ export const BibleReader = memo(function BibleReader({
   const bookIndex = BIBLE_BOOKS.indexOf(currentBook);
 
   const getPrevChapter = (): { book: BibleBook; chapter: number } | null => {
+    // Plan-aware: navigate between readings
+    if (planActive && planReadings.length > 0) {
+      if (planCurrentIndex > 0) {
+        const prevReading = planReadings[planCurrentIndex - 1];
+        return {
+          book: prevReading.book as BibleBook,
+          chapter: prevReading.startChapter,
+        };
+      }
+      return null; // At first reading boundary
+    }
+
     if (currentChapter > 1) {
       return { book: currentBook, chapter: currentChapter - 1 };
     }
@@ -96,6 +118,18 @@ export const BibleReader = memo(function BibleReader({
   };
 
   const getNextChapter = (): { book: BibleBook; chapter: number } | null => {
+    // Plan-aware: navigate between readings
+    if (planActive && planReadings.length > 0) {
+      if (planCurrentIndex < planReadings.length - 1) {
+        const nextReading = planReadings[planCurrentIndex + 1];
+        return {
+          book: nextReading.book as BibleBook,
+          chapter: nextReading.startChapter,
+        };
+      }
+      return null; // At last reading boundary
+    }
+
     if (currentChapter < maxChapters) {
       return { book: currentBook, chapter: currentChapter + 1 };
     }
@@ -109,6 +143,37 @@ export const BibleReader = memo(function BibleReader({
   const prev = getPrevChapter();
   const next = getNextChapter();
 
+  // Compute plan verse range for current chapter
+  const planVerseRange = useMemo(() => {
+    if (!planActive || planReadings.length === 0) return null;
+    const reading = planReadings[planCurrentIndex];
+    if (!reading?.startVerse) return null;
+
+    const endCh = reading.endChapter ?? reading.startChapter;
+    if (currentChapter < reading.startChapter || currentChapter > endCh)
+      return null;
+
+    if (reading.startChapter === endCh) {
+      return {
+        start: reading.startVerse,
+        end: reading.endVerse ?? reading.startVerse,
+      };
+    }
+    // Cross-chapter range
+    if (currentChapter === reading.startChapter) {
+      return { start: reading.startVerse, end: Infinity };
+    }
+    if (currentChapter === endCh) {
+      return { start: 1, end: reading.endVerse ?? Infinity };
+    }
+    return { start: 1, end: Infinity };
+  }, [
+    planActive,
+    planReadings,
+    planCurrentIndex,
+    currentChapter,
+  ]);
+
   const triggerHaptic = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   }, []);
@@ -120,13 +185,22 @@ export const BibleReader = memo(function BibleReader({
       setCurrentChapter(prev.chapter);
       setPosition(prev.book, prev.chapter);
       onPositionChange?.(prev.book, prev.chapter);
-      // Brief delay to let new content load
+
+      // Update plan reading index and scroll to verse
+      if (planActive && planCurrentIndex > 0) {
+        const prevReading = planReadings[planCurrentIndex - 1];
+        if (prevReading?.startVerse) {
+          setScrollToVerse(prevReading.startVerse);
+        }
+        setPlanIndex(planCurrentIndex - 1);
+      }
+
       transitionTimerRef.current = setTimeout(
         () => setIsTransitioning(false),
         100,
       );
     }
-  }, [prev, setPosition, onPositionChange]);
+  }, [prev, setPosition, onPositionChange, planActive, planCurrentIndex, planReadings, setPlanIndex, setScrollToVerse]);
 
   const goToNext = useCallback(() => {
     if (next) {
@@ -135,12 +209,24 @@ export const BibleReader = memo(function BibleReader({
       setCurrentChapter(next.chapter);
       setPosition(next.book, next.chapter);
       onPositionChange?.(next.book, next.chapter);
+
+      // Plan-aware: mark current reading complete and advance index
+      if (planActive && planCurrentIndex < planReadings.length - 1) {
+        const currentReading = planReadings[planCurrentIndex];
+        markReadingComplete(currentReading.id);
+        const nextReading = planReadings[planCurrentIndex + 1];
+        if (nextReading?.startVerse) {
+          setScrollToVerse(nextReading.startVerse);
+        }
+        setPlanIndex(planCurrentIndex + 1);
+      }
+
       transitionTimerRef.current = setTimeout(
         () => setIsTransitioning(false),
         100,
       );
     }
-  }, [next, setPosition, onPositionChange]);
+  }, [next, setPosition, onPositionChange, planActive, planCurrentIndex, planReadings, markReadingComplete, setPlanIndex, setScrollToVerse]);
 
   // Pan gesture with sticky resistance
   const panGesture = Gesture.Pan()
@@ -248,6 +334,7 @@ export const BibleReader = memo(function BibleReader({
                   chapter={currentChapter}
                   topInset={insets.top}
                   scrollToVerse={scrollToVerse}
+                  planVerseRange={planVerseRange}
                   onVersePress={onVersePress}
                   onVerseLongPress={onVerseLongPress}
                 />

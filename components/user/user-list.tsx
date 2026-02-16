@@ -10,7 +10,7 @@ interface UserEdge {
 }
 
 interface UserListProps {
-  users: ReadonlyArray<UserEdge | null>;
+  users: readonly (UserEdge | null)[];
   hasNext: boolean;
   isLoadingNext: boolean;
   loadNext: () => void;

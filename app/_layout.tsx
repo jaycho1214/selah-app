@@ -28,6 +28,7 @@ Notifications.setNotificationHandler({
 // Suppress deprecation warning from dependencies (tentap-editor, expo-router)
 LogBox.ignoreLogs(["SafeAreaView has been deprecated"]);
 
+/* eslint-disable import/first */
 import {
   ThemeProvider as NavigationThemeProvider,
   DefaultTheme,
@@ -54,6 +55,7 @@ import { useNotificationSetup } from "@/hooks/use-notifications";
 import { AnimatedSplashScreen } from "@/components/animated-splash-screen";
 import { useColors } from "@/hooks/use-colors";
 import { PostHogProvider } from "@/components/providers/posthog-provider";
+import { VerseReferenceSheetProvider } from "@/components/providers/verse-reference-sheet-provider";
 import { CommonStyles } from "@/constants/styles";
 
 export const unstable_settings = {
@@ -151,7 +153,9 @@ export default function RootLayout() {
                   <SessionProvider>
                     <PostHogProvider>
                       <ThemeProvider>
-                        <RootLayoutNav />
+                        <VerseReferenceSheetProvider>
+                          <RootLayoutNav />
+                        </VerseReferenceSheetProvider>
                       </ThemeProvider>
                     </PostHogProvider>
                   </SessionProvider>

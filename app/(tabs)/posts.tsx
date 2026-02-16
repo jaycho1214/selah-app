@@ -154,7 +154,7 @@ function FeedTabBar({
 
   useEffect(() => {
     indicatorPosition.value = withTiming(activeTab, { duration: 250 });
-  }, [activeTab]);
+  }, [activeTab, indicatorPosition]);
 
   const indicatorStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: indicatorPosition.value * tabWidth }],
@@ -218,7 +218,6 @@ function FeedTabBar({
 // ---------- For You Feed ----------
 
 function ForYouFeed() {
-  const colors = useColors();
   const insets = useSafeAreaInsets();
   const { session } = useSession();
   const { capture } = useAnalytics();
@@ -233,7 +232,7 @@ function ForYouFeed() {
   const queryData = useLazyLoadQuery<postsScreenQuery>(PostsQuery, {});
 
   // Setup pagination
-  const { data, loadNext, hasNext, isLoadingNext, refetch } =
+  const { data, loadNext, hasNext, isLoadingNext } =
     usePaginationFragment<postsScreenQuery, postsScreenForYouFragment$key>(
       ForYouFragment,
       queryData,
@@ -263,7 +262,7 @@ function ForYouFeed() {
         },
       });
     },
-    [commitLike],
+    [commitLike, capture],
   );
 
   const handleUnlike = useCallback(
@@ -282,7 +281,7 @@ function ForYouFeed() {
         },
       });
     },
-    [commitUnlike],
+    [commitUnlike, capture],
   );
 
   const handleDelete = useCallback(
@@ -299,7 +298,7 @@ function ForYouFeed() {
         },
       });
     },
-    [commitDelete],
+    [commitDelete, capture],
   );
 
   useEffect(() => {
@@ -362,7 +361,6 @@ function ForYouFeed() {
 // ---------- Following Feed ----------
 
 function FollowingFeed({ onSwitchToForYou }: { onSwitchToForYou: () => void }) {
-  const colors = useColors();
   const insets = useSafeAreaInsets();
   const { isAuthenticated, presentSignIn } = useSession();
 

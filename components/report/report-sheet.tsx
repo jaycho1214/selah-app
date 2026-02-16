@@ -153,6 +153,7 @@ export const ReportSheet = memo(
       isSubmitting,
       commitReportPost,
       commitReportUser,
+      capture,
     ]);
 
     const renderBackdrop = useCallback(

@@ -5,7 +5,7 @@ import React, {
   useImperativeHandle,
   useRef,
 } from "react";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { Alert, Pressable, StyleSheet } from "react-native";
 import {
   BottomSheetModal,
   BottomSheetView,
@@ -111,7 +111,7 @@ export const UserActionsSheet = memo(
             },
           ],
         );
-      }, [userId, username, commitBlock, onBlockStatusChanged]);
+      }, [userId, username, commitBlock, onBlockStatusChanged, capture]);
 
       const handleUnblock = useCallback(() => {
         bottomSheetRef.current?.dismiss();
@@ -127,7 +127,7 @@ export const UserActionsSheet = memo(
             Alert.alert("Error", "Failed to unblock user. Please try again.");
           },
         });
-      }, [userId, commitUnblock, onBlockStatusChanged]);
+      }, [userId, commitUnblock, onBlockStatusChanged, capture]);
 
       const handleReport = useCallback(() => {
         bottomSheetRef.current?.dismiss();

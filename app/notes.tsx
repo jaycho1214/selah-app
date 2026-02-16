@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { FlashList } from "@shopify/flash-list";
-import { Stack, router } from "expo-router";
+import { Stack } from "expo-router";
 import { Trash2, FileText } from "lucide-react-native";
 import { NoteEditor, NoteEditorRef } from "@/components/bible/note-editor";
 import { useColors } from "@/hooks/use-colors";

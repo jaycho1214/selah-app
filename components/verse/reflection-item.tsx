@@ -22,6 +22,7 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import { graphql, useMutation } from "react-relay";
 
 import { Text } from "@/components/ui/text";
+import { useVerseReferenceSheet } from "@/components/providers/verse-reference-sheet-provider";
 import { useAnalytics } from "@/lib/analytics";
 import { createVerseId } from "@/lib/bible/utils";
 import type { BibleBook } from "@/lib/bible/types";
@@ -125,6 +126,9 @@ function extractPlainText(content: string | null | undefined): string {
       }
       if (node.type === "mention" && (node as { username?: string }).username) {
         texts.push(`@${(node as { username?: string }).username}`);
+      }
+      if (node.type === "verse-reference" && (node as { label?: string }).label) {
+        texts.push((node as { label?: string }).label!);
       }
       if (node.children && Array.isArray(node.children)) {
         for (const child of node.children) {
@@ -240,6 +244,7 @@ export const ReflectionItem = memo(function ReflectionItem({
 }: ReflectionItemProps) {
   const router = useRouter();
   const { capture } = useAnalytics();
+  const { openVerseReference } = useVerseReferenceSheet();
   const isLiked = !!likedAt;
   const isOwner = currentUserId === user.id;
   const [commitPollVote, isPollVoting] =
@@ -260,7 +265,7 @@ export const ReflectionItem = memo(function ReflectionItem({
         },
       });
     },
-    [poll, commitPollVote, isPollLoading],
+    [poll, commitPollVote, isPollLoading, capture, id],
   );
 
   const handlePollUnvote = useCallback(() => {
@@ -273,7 +278,7 @@ export const ReflectionItem = memo(function ReflectionItem({
         console.error("Poll unvote failed:", error);
       },
     });
-  }, [poll, commitPollUnvote, isPollLoading]);
+  }, [poll, commitPollUnvote, isPollLoading, capture, id]);
 
   const handleLikeToggle = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -368,6 +373,8 @@ export const ReflectionItem = memo(function ReflectionItem({
         format?: number;
         userId?: string;
         username?: string;
+        verseId?: string;
+        label?: string;
         children?: unknown[];
       }): React.ReactNode => {
         if (node.type === "text" && node.text) {
@@ -407,6 +414,23 @@ export const ReflectionItem = memo(function ReflectionItem({
               }}
             >
               @{node.username}
+            </Text>
+          );
+        }
+
+        if (node.type === "verse-reference" && node.label) {
+          return (
+            <Text
+              key={key++}
+              style={styles.verseReferenceText}
+              onPress={() => {
+                if (node.verseId) {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  openVerseReference(node.verseId, node.label!);
+                }
+              }}
+            >
+              {node.label}
             </Text>
           );
         }
@@ -458,7 +482,7 @@ export const ReflectionItem = memo(function ReflectionItem({
         </Text>
       );
     }
-  }, [content, colors, router]);
+  }, [content, colors, router, openVerseReference]);
 
   const handleCardPress = useCallback(() => {
     if (disableNavigation) return;
@@ -1052,5 +1076,10 @@ const styles = StyleSheet.create({
     color: "#3b82f6",
     fontWeight: "500",
     textDecorationLine: "underline",
+  },
+  verseReferenceText: {
+    color: "#0d9488",
+    fontWeight: "500",
+    fontStyle: "italic",
   },
 });

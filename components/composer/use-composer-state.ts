@@ -20,6 +20,10 @@ import type {
   useComposerStateMentionQuery,
   useComposerStateMentionQuery$data,
 } from "@/lib/relay/__generated__/useComposerStateMentionQuery.graphql";
+import type { useComposerStateVerseRefQuery } from "@/lib/relay/__generated__/useComposerStateVerseRefQuery.graphql";
+import type { VerseReferenceResult } from "./composer-verse-reference-dropdown";
+import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
+import type { BibleBook } from "@/lib/bible/types";
 
 // ─── Constants ───
 export const MAX_LENGTH = 10000;
@@ -39,6 +43,27 @@ const MentionSearchQuery = graphql`
           }
         }
       }
+    }
+  }
+`;
+
+const VerseReferenceSearchQuery = graphql`
+  query useComposerStateVerseRefQuery(
+    $translation: BibleTranslation!
+    $query: String!
+    $limit: Int
+  ) {
+    bibleVersesByReferenceSearch(
+      translation: $translation
+      query: $query
+      limit: $limit
+    ) {
+      id
+      book
+      chapter
+      verse
+      text
+      translation
     }
   }
 `;
@@ -117,6 +142,11 @@ export function useComposerState(
   const [mentionUsers, setMentionUsers] = useState<MentionUser[]>([]);
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
   const [isMentionLoading, setIsMentionLoading] = useState(false);
+  const [verseRefResults, setVerseRefResults] = useState<
+    VerseReferenceResult[]
+  >([]);
+  const [showVerseRefDropdown, setShowVerseRefDropdown] = useState(false);
+  const [isVerseRefLoading, setIsVerseRefLoading] = useState(false);
   const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
   const [pollDeadline, setPollDeadline] = useState(() => {
     const d = new Date();
@@ -166,6 +196,8 @@ export function useComposerState(
         placeholder: isAuthenticated ? placeholder : "Sign in to post...",
       });
     }
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editorReady, placeholder, isAuthenticated]);
 
   // Collapse immediately when keyboard starts hiding (before WebView blur fires)
@@ -276,6 +308,49 @@ export function useComposerState(
             setMentionUsers([]);
             break;
 
+          case "verseReferenceSearch":
+            if (data.query) {
+              setShowVerseRefDropdown(true);
+              setIsVerseRefLoading(true);
+              try {
+                const result = await fetchQuery<useComposerStateVerseRefQuery>(
+                  environment,
+                  VerseReferenceSearchQuery,
+                  {
+                    translation: "KJV" as "KJV" | "ASV",
+                    query: data.query,
+                    limit: 5,
+                  },
+                ).toPromise();
+
+                const verses =
+                  result?.bibleVersesByReferenceSearch?.map((v) => ({
+                    id: v.id,
+                    book: v.book,
+                    chapter: v.chapter,
+                    verse: v.verse,
+                    text: v.text,
+                    label: `${BIBLE_BOOK_DETAILS[v.book as BibleBook]?.name ?? v.book} ${v.chapter}:${v.verse}`,
+                  })) ?? [];
+
+                setVerseRefResults(verses);
+                setIsVerseRefLoading(false);
+              } catch (error) {
+                console.error("Verse reference search failed:", error);
+                setVerseRefResults([]);
+                setIsVerseRefLoading(false);
+              }
+            } else {
+              setShowVerseRefDropdown(false);
+              setVerseRefResults([]);
+            }
+            break;
+
+          case "verseReferenceHide":
+            setShowVerseRefDropdown(false);
+            setVerseRefResults([]);
+            break;
+
           case "selectionChange":
             setHasSelection(data.hasSelection ?? false);
             setIsInsideSpoiler(data.isInsideSpoiler ?? false);
@@ -369,6 +444,49 @@ export function useComposerState(
           case "mentionHide":
             setShowMentionDropdown(false);
             setMentionUsers([]);
+            break;
+
+          case "verseReferenceSearch":
+            if (data.query) {
+              setShowVerseRefDropdown(true);
+              setIsVerseRefLoading(true);
+              try {
+                const result = await fetchQuery<useComposerStateVerseRefQuery>(
+                  environment,
+                  VerseReferenceSearchQuery,
+                  {
+                    translation: "KJV" as "KJV" | "ASV",
+                    query: data.query,
+                    limit: 5,
+                  },
+                ).toPromise();
+
+                const verses =
+                  result?.bibleVersesByReferenceSearch?.map((v) => ({
+                    id: v.id,
+                    book: v.book,
+                    chapter: v.chapter,
+                    verse: v.verse,
+                    text: v.text,
+                    label: `${BIBLE_BOOK_DETAILS[v.book as BibleBook]?.name ?? v.book} ${v.chapter}:${v.verse}`,
+                  })) ?? [];
+
+                setVerseRefResults(verses);
+                setIsVerseRefLoading(false);
+              } catch (error) {
+                console.error("Verse reference search failed:", error);
+                setVerseRefResults([]);
+                setIsVerseRefLoading(false);
+              }
+            } else {
+              setShowVerseRefDropdown(false);
+              setVerseRefResults([]);
+            }
+            break;
+
+          case "verseReferenceHide":
+            setShowVerseRefDropdown(false);
+            setVerseRefResults([]);
             break;
 
           case "selectionChange":
@@ -585,6 +703,40 @@ export function useComposerState(
     postToWebView("insertAtSymbol");
   }, [isAuthenticated, onAuthRequired, postToWebView]);
 
+  const selectVerseReference = useCallback(
+    (verse: VerseReferenceResult) => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      postToWebView("selectVerseReference", {
+        verseId: verse.id,
+        label: verse.label,
+      });
+      setShowVerseRefDropdown(false);
+      setVerseRefResults([]);
+    },
+    [postToWebView],
+  );
+
+  const selectVerseReferenceFullscreen = useCallback(
+    (verse: VerseReferenceResult) => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      postToFullscreenWebView("selectVerseReference", {
+        verseId: verse.id,
+        label: verse.label,
+      });
+      setShowVerseRefDropdown(false);
+      setVerseRefResults([]);
+    },
+    [postToFullscreenWebView],
+  );
+
+  const insertVerseReference = useCallback(() => {
+    if (!isAuthenticated) {
+      onAuthRequired?.();
+      return;
+    }
+    postToWebView("insertHashSymbol");
+  }, [isAuthenticated, onAuthRequired, postToWebView]);
+
   const toggleSpoiler = useCallback(() => {
     if (!hasSelection) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -641,6 +793,9 @@ export function useComposerState(
     mentionUsers,
     showMentionDropdown,
     isMentionLoading,
+    verseRefResults,
+    showVerseRefDropdown,
+    isVerseRefLoading,
     pollOptions,
     pollDeadline,
     showDatePicker,
@@ -678,6 +833,9 @@ export function useComposerState(
     selectMention,
     selectMentionFullscreen,
     insertMention,
+    selectVerseReference,
+    selectVerseReferenceFullscreen,
+    insertVerseReference,
     toggleSpoiler,
 
     // Glass-specific

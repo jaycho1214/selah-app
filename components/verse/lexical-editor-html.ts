@@ -102,6 +102,14 @@ export function getLexicalEditorHtml(colors: {
       font-weight: 500;
     }
 
+    /* Verse reference node styling */
+    .verse-reference-node {
+      color: #0d9488;
+      font-style: italic;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
     /* Mention dropdown - handled natively in React Native */
     #mention-dropdown {
       display: none;
@@ -126,6 +134,9 @@ export function getLexicalEditorHtml(colors: {
       var selectedMentionIndex = 0;
       var isLoading = false;
       var mentionSearchTimeout = null;
+
+      var verseRefQuery = null;
+      var verseRefSearchTimeout = null;
 
       // Post message to React Native
       function postMessage(type, data) {
@@ -189,6 +200,13 @@ export function getLexicalEditorHtml(colors: {
                     type: 'mention',
                     userId: child.dataset.userId || '',
                     username: child.dataset.username || child.textContent.replace('@', ''),
+                    version: 1,
+                  });
+                } else if (child.classList && child.classList.contains('verse-reference-node')) {
+                  children.push({
+                    type: 'verse-reference',
+                    verseId: child.dataset.verseId || '',
+                    label: child.dataset.label || child.textContent || '',
                     version: 1,
                   });
                 } else if (child.tagName === 'STRONG' || child.tagName === 'B') {
@@ -356,6 +374,16 @@ export function getLexicalEditorHtml(colors: {
             mentionSpan.textContent = '@' + (node.username || '');
             mentionSpan.contentEditable = 'false';
             return mentionSpan;
+          }
+
+          if (node.type === 'verse-reference') {
+            var verseRefSpan = document.createElement('span');
+            verseRefSpan.className = 'verse-reference-node';
+            verseRefSpan.dataset.verseId = node.verseId || '';
+            verseRefSpan.dataset.label = node.label || '';
+            verseRefSpan.textContent = node.label || '';
+            verseRefSpan.contentEditable = 'false';
+            return verseRefSpan;
           }
 
           if (node.type === 'spoiler') {
@@ -542,7 +570,112 @@ export function getLexicalEditorHtml(colors: {
         postMessage('mentionHide', {});
       }
 
-      // renderMentionDropdown is no longer needed - using native React Native dropdown
+      // Verse reference functions
+      function checkVerseReferenceTrigger() {
+        var sel = window.getSelection();
+        if (!sel.rangeCount) return;
+
+        var range = sel.getRangeAt(0);
+        if (!range.collapsed) {
+          hideVerseReferenceDropdown();
+          return;
+        }
+
+        var textNode = range.startContainer;
+        if (textNode.nodeType !== Node.TEXT_NODE) {
+          hideVerseReferenceDropdown();
+          return;
+        }
+
+        var text = textNode.textContent;
+        var cursorPos = range.startOffset;
+
+        var hashPos = -1;
+        for (var i = cursorPos - 1; i >= 0; i--) {
+          var char = text[i];
+          if (char === '#') {
+            if (i === 0 || /\\s/.test(text[i - 1])) {
+              hashPos = i;
+            }
+            break;
+          }
+          // Allow spaces in verse references (e.g., "John 3:16")
+          if (char === '@') break;
+        }
+
+        if (hashPos >= 0) {
+          var query = text.slice(hashPos + 1, cursorPos);
+          if (query !== verseRefQuery) {
+            verseRefQuery = query;
+
+            clearTimeout(verseRefSearchTimeout);
+            if (query.length > 0) {
+              verseRefSearchTimeout = setTimeout(function() {
+                postMessage('verseReferenceSearch', { query: query });
+              }, 200);
+            } else {
+              postMessage('verseReferenceSearch', { query: '' });
+            }
+          }
+        } else {
+          if (verseRefQuery !== null) {
+            hideVerseReferenceDropdown();
+          }
+        }
+      }
+
+      function hideVerseReferenceDropdown() {
+        verseRefQuery = null;
+        postMessage('verseReferenceHide', {});
+      }
+
+      function insertVerseReference(verseId, label) {
+        var sel = window.getSelection();
+        if (!sel.rangeCount) return;
+
+        var range = sel.getRangeAt(0);
+
+        if (verseRefQuery !== null) {
+          var textNode = range.startContainer;
+          if (textNode.nodeType === Node.TEXT_NODE) {
+            var text = textNode.textContent;
+            var cursorPos = range.startOffset;
+
+            var hashPos = -1;
+            for (var i = cursorPos - 1; i >= 0; i--) {
+              if (text[i] === '#') {
+                hashPos = i;
+                break;
+              }
+            }
+
+            if (hashPos >= 0) {
+              textNode.textContent = text.slice(0, hashPos) + text.slice(cursorPos);
+              range.setStart(textNode, hashPos);
+              range.setEnd(textNode, hashPos);
+            }
+          }
+        }
+
+        var verseRefSpan = document.createElement('span');
+        verseRefSpan.className = 'verse-reference-node';
+        verseRefSpan.dataset.verseId = verseId;
+        verseRefSpan.dataset.label = label;
+        verseRefSpan.textContent = label;
+        verseRefSpan.contentEditable = 'false';
+
+        range.insertNode(verseRefSpan);
+
+        var space = document.createTextNode(' ');
+        verseRefSpan.after(space);
+        range.setStartAfter(space);
+        range.setEndAfter(space);
+        sel.removeAllRanges();
+        sel.addRange(range);
+
+        hideVerseReferenceDropdown();
+        onContentChange();
+      }
 
       function onContentChange() {
         var state = getEditorState();
@@ -636,6 +769,7 @@ export function getLexicalEditorHtml(colors: {
       editor.addEventListener('input', function() {
         onContentChange();
         checkMentionTrigger();
+        checkVerseReferenceTrigger();
       });
 
       editor.addEventListener('keydown', function(e) {
@@ -650,11 +784,13 @@ export function getLexicalEditorHtml(colors: {
       editor.addEventListener('keyup', function(e) {
         if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].indexOf(e.key) !== -1) {
           checkMentionTrigger();
+          checkVerseReferenceTrigger();
         }
       });
 
       editor.addEventListener('click', function() {
         setTimeout(checkMentionTrigger, 0);
+        setTimeout(checkVerseReferenceTrigger, 0);
       });
 
       editor.addEventListener('focus', function() {
@@ -702,6 +838,16 @@ export function getLexicalEditorHtml(colors: {
               focusEditor();
               document.execCommand('insertText', false, '@');
               checkMentionTrigger();
+              break;
+            case 'insertHashSymbol':
+              focusEditor();
+              document.execCommand('insertText', false, '#');
+              checkVerseReferenceTrigger();
+              break;
+            case 'selectVerseReference':
+              if (data.verseId && data.label) {
+                insertVerseReference(data.verseId, data.label);
+              }
               break;
             case 'toggleSpoiler':
               toggleSpoiler();

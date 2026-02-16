@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { RelativePathString, router } from "expo-router";
-import { Settings, Share2 } from "lucide-react-native";
+import { BookOpen, Settings, Share2 } from "lucide-react-native";
 import {
   Suspense,
   useCallback,
@@ -120,6 +120,13 @@ function UnauthenticatedProfile() {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       <View style={styles.topBar}>
         <View style={styles.topBarSpacer} />
+        <Pressable
+          onPress={() => router.push("/reading-plans")}
+          hitSlop={8}
+          style={styles.topBarIcon}
+        >
+          <BookOpen size={22} color={colors.text} strokeWidth={1.5} />
+        </Pressable>
         <Pressable onPress={() => router.push("/settings")} hitSlop={8}>
           <Settings size={24} color={colors.text} strokeWidth={1.5} />
         </Pressable>
@@ -142,7 +149,7 @@ function AuthenticatedProfile() {
   const likesListRef = useRef<ProfileLikesListRef>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<ProfileTab>("posts");
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const data = useLazyLoadQuery<profileOwnProfileQuery>(
@@ -180,7 +187,7 @@ function AuthenticatedProfile() {
         },
       });
     },
-    [commitLike],
+    [commitLike, capture],
   );
 
   const handleUnlike = useCallback(
@@ -199,7 +206,7 @@ function AuthenticatedProfile() {
         },
       });
     },
-    [commitUnlike],
+    [commitUnlike, capture],
   );
 
   const handleDelete = useCallback(
@@ -216,7 +223,7 @@ function AuthenticatedProfile() {
         },
       });
     },
-    [commitDelete],
+    [commitDelete, capture],
   );
 
   useEffect(() => {
@@ -272,6 +279,13 @@ function AuthenticatedProfile() {
     <>
       <View style={styles.topBar}>
         <View style={styles.topBarSpacer} />
+        <Pressable
+          onPress={() => router.push("/reading-plans")}
+          hitSlop={8}
+          style={styles.topBarIcon}
+        >
+          <BookOpen size={22} color={colors.text} strokeWidth={1.5} />
+        </Pressable>
         <Pressable onPress={() => router.push("/settings")} hitSlop={8}>
           <Settings size={24} color={colors.text} strokeWidth={1.5} />
         </Pressable>
@@ -487,6 +501,9 @@ const styles = StyleSheet.create({
   },
   topBarSpacer: {
     flex: 1,
+  },
+  topBarIcon: {
+    marginRight: 16,
   },
   bottomPadding: {
     height: 40,

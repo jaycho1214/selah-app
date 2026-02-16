@@ -185,6 +185,22 @@ type Mutation {
   notificationMarkAsRead: Boolean!
   pollUnvote(pollId: ID!): PollUnvotePayload!
   pollVote(optionId: ID!, pollId: ID!): PollVotePayload!
+  readingPlanCreate(input: ReadingPlanCreateInput!): ReadingPlan!
+  readingPlanDayComplete(dayId: ID!, planId: ID!): Boolean
+  readingPlanDayDelete(dayId: ID!, planId: ID!): Boolean
+  readingPlanDayReorder(dayOrder: [ReadingPlanDayReorderInput!]!, planId: ID!): Boolean
+  readingPlanDayUncomplete(dayId: ID!, planId: ID!): Boolean
+  readingPlanDayUpsert(contentItems: JSON, dayNumber: Int!, devotionalContent: JSON, planId: ID!, readings: [ReadingPlanDayReadingInput!]!, title: String): ReadingPlanDay
+  readingPlanDelete(id: ID!): Boolean
+  readingPlanJoin(planId: ID!): ReadingPlanParticipant!
+  readingPlanLeave(planId: ID!): Boolean
+  readingPlanNewVersion(changelog: String, planId: ID!): ReadingPlanVersion!
+  readingPlanPublish(id: ID!): ReadingPlan
+  readingPlanReadingComplete(dayId: ID!, planId: ID!, readingId: ID!): Boolean
+  readingPlanReadingUncomplete(dayId: ID!, planId: ID!, readingId: ID!): Boolean
+  readingPlanSetFeatured(featured: Boolean!, id: ID!): ReadingPlan
+  readingPlanToggleProgressVisibility(planId: ID!): ReadingPlanParticipant
+  readingPlanUpdate(id: ID!, input: ReadingPlanUpdateInput!): ReadingPlan
   registerExpoPushToken(token: String!): Boolean!
   reportPost(input: ReportPostInput!): ReportPostPayload!
   reportUser(input: ReportUserInput!): ReportUserPayload!
@@ -295,9 +311,15 @@ type Query {
   bibleVerses: [BibleVerse!]!
   bibleVersesByQuery(limit: Int, query: String!, translation: BibleTranslation!): [BibleVerse!]!
   bibleVersesByReference(book: BibleBook!, chapter: Int!, translation: BibleTranslation!): [BibleVerse!]!
+  bibleVersesByReferenceSearch(limit: Int, query: String!, translation: BibleTranslation!): [BibleVerse!]!
+  myJoinedReadingPlans(after: ID, first: Int): [ReadingPlan!]!
+  myReadingPlans(after: ID, first: Int, status: ReadingPlanStatus): [ReadingPlan!]!
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
   notifications(after: String, before: String, first: Int, last: Int): NotificationConnection!
+  readingPlanById(id: ID!): ReadingPlan
+  readingPlanByUrlId(urlId: String!): ReadingPlan
+  readingPlans(after: ID, featured: Boolean, first: Int): [ReadingPlan!]!
   user: User
   userById(id: ID!): User
   userByUsername(username: String!): User
@@ -313,6 +335,119 @@ type QueryUsersConnection {
 type QueryUsersConnectionEdge {
   cursor: String!
   node: User
+}
+
+type ReadingPlan implements Node {
+  author: User!
+  coverImage: Asset
+  createdAt: DateTime!
+  currentVersion: ReadingPlanVersion
+  dayCount: Int!
+  description: String
+  id: ID!
+  isFeatured: Boolean!
+  isOfficial: Boolean!
+  myParticipation: ReadingPlanParticipant
+  participantCount: Int!
+  publishedAt: DateTime
+  status: ReadingPlanStatus!
+  title: String!
+  updatedAt: DateTime!
+  urlId: String
+  versions: [ReadingPlanVersion!]!
+  visibility: ReadingPlanVisibility!
+}
+
+input ReadingPlanCreateInput {
+  description: String
+  title: String!
+  urlId: String
+  visibility: ReadingPlanVisibility
+}
+
+type ReadingPlanDay implements Node {
+  contentItems: JSON
+  createdAt: DateTime!
+  dayNumber: Int!
+  devotionalContent: JSON
+  id: ID!
+  readings: [ReadingPlanDayReading!]!
+  title: String
+}
+
+type ReadingPlanDayReading implements Node {
+  book: String!
+  endChapter: Int
+  endVerse: Int
+  id: ID!
+  readingOrder: Int!
+  startChapter: Int!
+  startVerse: Int
+}
+
+input ReadingPlanDayReadingInput {
+  book: BibleBook!
+  endChapter: Int
+  endVerse: Int
+  readingOrder: Int!
+  startChapter: Int!
+  startVerse: Int
+}
+
+input ReadingPlanDayReorderInput {
+  dayId: ID!
+  newDayNumber: Int!
+}
+
+type ReadingPlanParticipant implements Node {
+  completedAt: DateTime
+  completedDaysCount: Int!
+  hideProgress: Boolean!
+  id: ID!
+  joinedAt: DateTime!
+  progress: [ReadingPlanProgress!]!
+  readingProgress: [ReadingPlanReadingProgress!]!
+  user: User!
+  version: ReadingPlanVersion
+}
+
+type ReadingPlanProgress {
+  completedAt: DateTime!
+  dayId: ID!
+  id: ID!
+}
+
+type ReadingPlanReadingProgress {
+  completedAt: DateTime
+  id: ID
+  readingId: ID
+}
+
+enum ReadingPlanStatus {
+  ARCHIVED
+  DRAFT
+  PUBLISHED
+}
+
+input ReadingPlanUpdateInput {
+  description: String
+  title: String
+  urlId: String
+  visibility: ReadingPlanVisibility
+}
+
+type ReadingPlanVersion implements Node {
+  changelog: String
+  createdAt: DateTime!
+  days: [ReadingPlanDay!]!
+  id: ID!
+  versionNumber: Int!
+}
+
+enum ReadingPlanVisibility {
+  PRIVATE
+  PUBLIC
+  UNLISTED
 }
 
 input ReportPostInput {

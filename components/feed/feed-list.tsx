@@ -44,7 +44,7 @@ interface PostPoll {
     readonly id?: string | null;
     readonly text?: string | null;
   } | null;
-  readonly options?: ReadonlyArray<PostPollOption> | null;
+  readonly options?: readonly PostPollOption[] | null;
 }
 
 interface PostVerse {
@@ -63,7 +63,7 @@ interface PostNode {
   readonly childPostsCount: number;
   readonly likedAt?: string | null;
   readonly user: PostUser;
-  readonly images: ReadonlyArray<PostImage>;
+  readonly images: readonly PostImage[];
   readonly poll?: PostPoll | null;
   readonly verse?: PostVerse | null;
 }
@@ -73,7 +73,7 @@ interface PostEdge {
 }
 
 interface FeedListProps {
-  posts: ReadonlyArray<PostEdge>;
+  posts: readonly PostEdge[];
   isRefreshing: boolean;
   isLoadingNext: boolean;
   hasNext: boolean;
