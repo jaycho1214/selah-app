@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { RelativePathString, router } from "expo-router";
-import { BookOpen, Settings, Share2 } from "lucide-react-native";
+import { Bell, Settings, Share2 } from "lucide-react-native";
 import { Suspense, useCallback, useRef, useState, useTransition } from "react";
 import { ErrorBoundary } from "@/components/error-boundary";
 import {
@@ -119,11 +119,11 @@ function UnauthenticatedProfile() {
       <View style={styles.topBar}>
         <View style={styles.topBarSpacer} />
         <Pressable
-          onPress={() => router.push("/reading-plans")}
+          onPress={() => router.push("/notifications")}
           hitSlop={8}
           style={styles.topBarIcon}
         >
-          <BookOpen size={22} color={colors.text} strokeWidth={1.5} />
+          <Bell size={22} color={colors.text} strokeWidth={1.5} />
         </Pressable>
         <Pressable onPress={() => router.push("/settings")} hitSlop={8}>
           <Settings size={24} color={colors.text} strokeWidth={1.5} />
@@ -273,11 +273,11 @@ function AuthenticatedProfile() {
       <View style={styles.topBar}>
         <View style={styles.topBarSpacer} />
         <Pressable
-          onPress={() => router.push("/reading-plans")}
+          onPress={() => router.push("/notifications")}
           hitSlop={8}
           style={styles.topBarIcon}
         >
-          <BookOpen size={22} color={colors.text} strokeWidth={1.5} />
+          <Bell size={22} color={colors.text} strokeWidth={1.5} />
         </Pressable>
         <Pressable onPress={() => router.push("/settings")} hitSlop={8}>
           <Settings size={24} color={colors.text} strokeWidth={1.5} />

@@ -33,13 +33,11 @@ export default function TabLayout() {
           androidSrc={<VectorIcon family={MaterialIcons} name="forum" />}
         />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="notifications">
+      <NativeTabs.Trigger name="plans">
         <Label hidden />
         <Icon
-          sf={{ default: "bell", selected: "bell.fill" }}
-          androidSrc={
-            <VectorIcon family={MaterialIcons} name="notifications" />
-          }
+          sf={{ default: "book", selected: "book.fill" }}
+          androidSrc={<VectorIcon family={MaterialIcons} name="menu-book" />}
         />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">

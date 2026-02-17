@@ -1,7 +1,6 @@
 import { Suspense, useCallback, useState } from "react";
-import { ErrorBoundary } from "@/components/error-boundary";
 import { RefreshControl, StyleSheet, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Stack } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import {
   graphql,
@@ -13,12 +12,16 @@ import {
 import { fetchQuery } from "relay-runtime";
 import { useFocusEffect } from "@react-navigation/native";
 
+import { ErrorBoundary } from "@/components/error-boundary";
 import { useSession } from "@/components/providers/session-provider";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Text } from "@/components/ui/text";
 import { useColors } from "@/hooks/use-colors";
 import { NotificationItem } from "@/components/notifications/notification-item";
 import { NotificationsSkeleton } from "@/components/notifications/notifications-skeleton";
+import {
+  IS_LIQUID_GLASS,
+  useTransparentHeaderPadding,
+} from "@/hooks/use-transparent-header";
 import type { notificationsScreenQuery } from "@/lib/relay/__generated__/notificationsScreenQuery.graphql";
 import type { notificationsScreenListFragment$key } from "@/lib/relay/__generated__/notificationsScreenListFragment.graphql";
 import type { notificationsScreenMarkAsReadMutation } from "@/lib/relay/__generated__/notificationsScreenMarkAsReadMutation.graphql";
@@ -63,7 +66,6 @@ const MarkAsReadMutation = graphql`
 
 function NotificationList() {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
   const environment = useRelayEnvironment();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -144,16 +146,19 @@ function NotificationList() {
           tintColor={colors.textMuted}
         />
       }
-      contentContainerStyle={{
-        paddingBottom: insets.bottom + 100,
-      }}
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={styles.listContent}
     />
   );
 }
 
 // ---------- Unauthenticated State ----------
 
-function UnauthenticatedState() {
+function UnauthenticatedState({
+  style,
+}: {
+  style?: import("react-native").StyleProp<import("react-native").ViewStyle>;
+}) {
   const { presentSignIn } = useSession();
 
   return (
@@ -161,6 +166,7 @@ function UnauthenticatedState() {
       title="Don't miss a thing"
       message="Sign in to get notified when others respond to your reflections."
       action={{ label: "Sign In", onPress: presentSignIn }}
+      style={style}
     />
   );
 }
@@ -169,31 +175,36 @@ function UnauthenticatedState() {
 
 export default function NotificationsScreen() {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
   const { isAuthenticated } = useSession();
+  const contentPaddingTop = useTransparentHeaderPadding();
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.bg }]}>
-      <View
-        style={[
-          styles.header,
-          {
-            paddingTop: insets.top + 8,
-            backgroundColor: colors.bg,
-            borderBottomColor: colors.border,
+      <Stack.Screen
+        options={{
+          title: "Notifications",
+          headerTransparent: IS_LIQUID_GLASS,
+          headerStyle: {
+            backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg,
           },
-        ]}
-      >
-        <Text style={[styles.headerTitle, { color: colors.text }]}>
-          Notifications
-        </Text>
-      </View>
+          headerTintColor: colors.text,
+          headerShadowVisible: false,
+          headerBackTitle: "",
+          headerBackButtonDisplayMode: "minimal",
+        }}
+      />
 
       {!isAuthenticated ? (
-        <UnauthenticatedState />
+        <UnauthenticatedState style={{ paddingTop: contentPaddingTop }} />
       ) : (
         <ErrorBoundary propagateServerErrors>
-          <Suspense fallback={<NotificationsSkeleton />}>
+          <Suspense
+            fallback={
+              <View style={{ paddingTop: contentPaddingTop }}>
+                <NotificationsSkeleton />
+              </View>
+            }
+          >
             <NotificationList />
           </Suspense>
         </ErrorBoundary>
@@ -206,14 +217,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
-  header: {
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    letterSpacing: -0.3,
+  listContent: {
+    paddingBottom: 40,
   },
 });
