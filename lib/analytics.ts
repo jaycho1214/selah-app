@@ -1,5 +1,5 @@
-import { usePostHog } from "posthog-react-native";
 import { useCallback, useMemo } from "react";
+import { usePostHogClient } from "@/components/providers/posthog-provider";
 
 // ─── Event property types ────────────────────────────────────────────
 
@@ -94,7 +94,7 @@ type AnalyticsEventMap = {
 // ─── Hook ────────────────────────────────────────────────────────────
 
 export function useAnalytics() {
-  const posthog = usePostHog();
+  const posthog = usePostHogClient();
 
   const capture = useCallback(
     <E extends keyof AnalyticsEventMap>(
