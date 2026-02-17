@@ -9,7 +9,6 @@ import { Ban, EllipsisVertical } from "lucide-react-native";
 import React, {
   Suspense,
   useCallback,
-  useEffect,
   useRef,
   useState,
   useTransition,
@@ -23,7 +22,13 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
+import {
+  graphql,
+  useLazyLoadQuery,
+  useMutation,
+  useRelayEnvironment,
+} from "react-relay";
+import { fetchQuery } from "relay-runtime";
 
 import { ProfileHeaderEnhanced } from "@/components/profile/profile-header-enhanced";
 import {
@@ -180,7 +185,7 @@ function UserProfileContent() {
   const [activeTab, setActiveTab] = useState<ProfileTab>("posts");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [, startTransition] = useTransition();
-  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const environment = useRelayEnvironment();
 
   // Fetch profile data
   const data = useLazyLoadQuery<UsernameQuery>(
@@ -288,23 +293,16 @@ function UserProfileContent() {
     });
   }, []);
 
-  const handleRefresh = useCallback(() => {
+  const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    startTransition(() => {
-      postsListRef.current?.refetch();
-      repliesListRef.current?.refetch();
-      likesListRef.current?.refetch();
-    });
-    refreshTimerRef.current = setTimeout(() => setIsRefreshing(false), 500);
-  }, [startTransition]);
-
-  useEffect(() => {
-    return () => {
-      if (refreshTimerRef.current) {
-        clearTimeout(refreshTimerRef.current);
-      }
-    };
-  }, []);
+    try {
+      await fetchQuery(environment, userProfileQuery, {
+        username: username ?? "",
+      }).toPromise();
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [environment, username]);
 
   // User not found
   if (!user) {

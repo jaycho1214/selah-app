@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useState } from "react";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { RefreshControl, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -66,7 +66,6 @@ function NotificationList() {
   const insets = useSafeAreaInsets();
   const environment = useRelayEnvironment();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const refreshSubRef = useRef<{ unsubscribe: () => void } | null>(null);
 
   const queryData = useLazyLoadQuery<notificationsScreenQuery>(
     NotificationsQuery,
@@ -95,23 +94,13 @@ function NotificationList() {
     }, [queryData.user?.unreadNotificationCount, commitMarkAsRead]),
   );
 
-  useEffect(() => {
-    return () => {
-      refreshSubRef.current?.unsubscribe();
-    };
-  }, []);
-
-  const handleRefresh = useCallback(() => {
-    refreshSubRef.current?.unsubscribe();
+  const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    refreshSubRef.current = fetchQuery(
-      environment,
-      NotificationsQuery,
-      {},
-    ).subscribe({
-      complete: () => setIsRefreshing(false),
-      error: () => setIsRefreshing(false),
-    });
+    try {
+      await fetchQuery(environment, NotificationsQuery, {}).toPromise();
+    } finally {
+      setIsRefreshing(false);
+    }
   }, [environment]);
 
   const handleLoadMore = useCallback(() => {

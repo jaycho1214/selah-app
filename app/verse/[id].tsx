@@ -7,9 +7,9 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
-  useTransition,
 } from "react";
 import {
   ActivityIndicator,
@@ -27,7 +27,13 @@ import {
   IS_LIQUID_GLASS,
   useTransparentHeaderPadding,
 } from "@/hooks/use-transparent-header";
-import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
+import {
+  graphql,
+  useLazyLoadQuery,
+  useMutation,
+  useRelayEnvironment,
+} from "react-relay";
+import { fetchQuery } from "relay-runtime";
 
 import { SignInSheet } from "@/components/auth/sign-in-sheet";
 import { useSession } from "@/components/providers/session-provider";
@@ -266,24 +272,24 @@ function VerseContent({
   const postsListRef = useRef<PostsListRef>(null);
   const signInSheetRef = useRef<BottomSheetModal>(null);
   const reportSheetRef = useRef<ReportSheetRef>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const [fetchKey, setFetchKey] = useState(0);
+  const environment = useRelayEnvironment();
 
   const isAuthenticated = !!session?.user;
 
-  const queryVariables = {
-    translation: parsed.translation as IdQuery$variables["translation"],
-    book: parsed.book as IdQuery$variables["book"],
-    chapter: parsed.chapter,
-    verse: parsed.verse,
-  };
+  const queryVariables = useMemo(
+    () => ({
+      translation: parsed.translation as IdQuery$variables["translation"],
+      book: parsed.book as IdQuery$variables["book"],
+      chapter: parsed.chapter,
+      verse: parsed.verse,
+    }),
+    [parsed.translation, parsed.book, parsed.chapter, parsed.verse],
+  );
 
-  // Fetch verse data — fetchKey forces re-fetch on pull-to-refresh
-  const data = useLazyLoadQuery<IdQuery>(verseQuery, queryVariables, {
-    fetchKey,
-    fetchPolicy: fetchKey > 0 ? "network-only" : "store-or-network",
-  });
+  // Fetch verse data
+  const data = useLazyLoadQuery<IdQuery>(verseQuery, queryVariables);
 
   useEffect(() => {
     if (data.bibleVerseByReference?.id) {
@@ -291,12 +297,15 @@ function VerseContent({
     }
   }, [verseId, capture, data.bibleVerseByReference?.id]);
 
-  // Pull to refresh — re-fetches entire query, isPending tracks completion
-  const handleRefresh = useCallback(() => {
-    startTransition(() => {
-      setFetchKey((prev) => prev + 1);
-    });
-  }, []);
+  // Pull to refresh — uses fetchQuery to force a network fetch
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await fetchQuery(environment, verseQuery, queryVariables).toPromise();
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [environment, queryVariables]);
 
   // Mutations
   const [commitCreateReflection, isCreatingReflection] =
@@ -509,7 +518,7 @@ function VerseContent({
         keyboardShouldPersistTaps="handled"
         refreshControl={
           <RefreshControl
-            refreshing={isPending}
+            refreshing={isRefreshing}
             onRefresh={handleRefresh}
             tintColor={colors.textMuted}
             colors={[colors.accent]}

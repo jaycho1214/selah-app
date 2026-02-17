@@ -225,18 +225,16 @@ function ForYouFeed() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const environment = useRelayEnvironment();
   const connectionIdRef = useRef<string | null>(null);
-  const refreshSubRef = useRef<{ unsubscribe: () => void } | null>(null);
   const reportSheetRef = useRef<ReportSheetRef>(null);
 
   // Fetch initial data
   const queryData = useLazyLoadQuery<postsScreenQuery>(PostsQuery, {});
 
   // Setup pagination
-  const { data, loadNext, hasNext, isLoadingNext } =
-    usePaginationFragment<postsScreenQuery, postsScreenForYouFragment$key>(
-      ForYouFragment,
-      queryData,
-    );
+  const { data, loadNext, hasNext, isLoadingNext } = usePaginationFragment<
+    postsScreenQuery,
+    postsScreenForYouFragment$key
+  >(ForYouFragment, queryData);
 
   const posts = data.bibleVersePosts?.edges ?? [];
   connectionIdRef.current = data.bibleVersePosts?.__id ?? null;
@@ -301,19 +299,13 @@ function ForYouFeed() {
     [commitDelete, capture],
   );
 
-  useEffect(() => {
-    return () => {
-      refreshSubRef.current?.unsubscribe();
-    };
-  }, []);
-
-  const handleRefresh = useCallback(() => {
-    refreshSubRef.current?.unsubscribe();
+  const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    refreshSubRef.current = fetchQuery(environment, PostsQuery, {}).subscribe({
-      complete: () => setIsRefreshing(false),
-      error: () => setIsRefreshing(false),
-    });
+    try {
+      await fetchQuery(environment, PostsQuery, {}).toPromise();
+    } finally {
+      setIsRefreshing(false);
+    }
   }, [environment]);
 
   const handleLoadMore = useCallback(() => {

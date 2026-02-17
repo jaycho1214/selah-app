@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useRef, useState } from "react";
+import { Suspense, useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -69,19 +69,18 @@ export default function MyReadingPlansPage() {
 function MyPlansContent({ colors }: { colors: ReturnType<typeof useColors> }) {
   const contentPaddingTop = useTransparentHeaderPadding();
   const environment = useRelayEnvironment();
-  const refreshSubRef = useRef<{ unsubscribe: () => void } | null>(null);
   const data = useLazyLoadQuery<myPlansQuery>(joinedQuery, {});
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const plans = data.myJoinedReadingPlans ?? [];
 
-  const handleRefresh = useCallback(() => {
-    refreshSubRef.current?.unsubscribe();
+  const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    refreshSubRef.current = fetchQuery(environment, joinedQuery, {}).subscribe({
-      complete: () => setIsRefreshing(false),
-      error: () => setIsRefreshing(false),
-    });
+    try {
+      await fetchQuery(environment, joinedQuery, {}).toPromise();
+    } finally {
+      setIsRefreshing(false);
+    }
   }, [environment]);
 
   return (

@@ -1,14 +1,7 @@
 import * as Haptics from "expo-haptics";
 import { RelativePathString, router } from "expo-router";
 import { BookOpen, Settings, Share2 } from "lucide-react-native";
-import {
-  Suspense,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  useTransition,
-} from "react";
+import { Suspense, useCallback, useRef, useState, useTransition } from "react";
 import { ErrorBoundary } from "@/components/error-boundary";
 import {
   Pressable,
@@ -19,7 +12,13 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
+import {
+  graphql,
+  useLazyLoadQuery,
+  useMutation,
+  useRelayEnvironment,
+} from "react-relay";
+import { fetchQuery } from "relay-runtime";
 
 import { useSession } from "@/components/providers/session-provider";
 import { useAnalytics } from "@/lib/analytics";
@@ -149,7 +148,7 @@ function AuthenticatedProfile() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<ProfileTab>("posts");
   const [, startTransition] = useTransition();
-  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const environment = useRelayEnvironment();
 
   const data = useLazyLoadQuery<profileOwnProfileQuery>(
     ownProfileQuery,
@@ -225,23 +224,14 @@ function AuthenticatedProfile() {
     [commitDelete, capture],
   );
 
-  useEffect(() => {
-    return () => {
-      if (refreshTimerRef.current) {
-        clearTimeout(refreshTimerRef.current);
-      }
-    };
-  }, []);
-
-  const handleRefresh = useCallback(() => {
+  const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    startTransition(() => {
-      postsListRef.current?.refetch();
-      repliesListRef.current?.refetch();
-      likesListRef.current?.refetch();
-    });
-    refreshTimerRef.current = setTimeout(() => setIsRefreshing(false), 500);
-  }, [startTransition]);
+    try {
+      await fetchQuery(environment, ownProfileQuery, {}).toPromise();
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [environment]);
 
   const handleEditProfile = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -123,22 +123,19 @@ function DetailContent({
   const contentPaddingTop = useTransparentHeaderPadding();
   const router = useRouter();
   const environment = useRelayEnvironment();
-  const refreshSubRef = useRef<{ unsubscribe: () => void } | null>(null);
   const data = useLazyLoadQuery<IdReadingPlanQuery>(detailQuery, { id });
   const [isRefreshing, setIsRefreshing] = useState(false);
   const startPlanSession = useReadingPlanStore((s) => s.startPlanSession);
   const setPosition = useBibleStore((s) => s.setPosition);
   const setScrollToVerse = useBibleStore((s) => s.setScrollToVerse);
 
-  const handleRefresh = useCallback(() => {
-    refreshSubRef.current?.unsubscribe();
+  const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    refreshSubRef.current = fetchQuery(environment, detailQuery, {
-      id,
-    }).subscribe({
-      complete: () => setIsRefreshing(false),
-      error: () => setIsRefreshing(false),
-    });
+    try {
+      await fetchQuery(environment, detailQuery, { id }).toPromise();
+    } finally {
+      setIsRefreshing(false);
+    }
   }, [environment, id]);
 
   const plan = data.readingPlanById;

@@ -28,7 +28,9 @@ import {
   useLazyLoadQuery,
   useMutation,
   usePaginationFragment,
+  useRelayEnvironment,
 } from "react-relay";
+import { fetchQuery } from "relay-runtime";
 
 import { SignInSheet } from "@/components/auth/sign-in-sheet";
 import { useSession } from "@/components/providers/session-provider";
@@ -314,10 +316,10 @@ function PostContent({
   const signInSheetRef = useRef<BottomSheetModal>(null);
   const childPostsRef = useRef<ChildPostsListRef>(null);
   const reportSheetRef = useRef<ReportSheetRef>(null);
-  const refreshTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [connectionId, setConnectionId] = useState<string | null>(null);
+  const environment = useRelayEnvironment();
 
   const isAuthenticated = !!session?.user;
 
@@ -335,17 +337,12 @@ function PostContent({
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    childPostsRef.current?.refetch();
-    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
-    refreshTimerRef.current = setTimeout(() => setIsRefreshing(false), 500);
-  }, []);
-
-  // Cleanup refresh timer on unmount
-  useEffect(() => {
-    return () => {
-      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
-    };
-  }, []);
+    try {
+      await fetchQuery(environment, postQuery, { postId }).toPromise();
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [environment, postId]);
 
   const submitReply = useCallback(
     (

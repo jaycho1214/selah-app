@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useRef, useState } from "react";
+import { Suspense, useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -71,7 +71,6 @@ function BrowseContent({ colors }: { colors: ReturnType<typeof useColors> }) {
   const [showFeatured, setShowFeatured] = useState(false);
 
   const environment = useRelayEnvironment();
-  const refreshSubRef = useRef<{ unsubscribe: () => void } | null>(null);
 
   const data = useLazyLoadQuery<readingPlansBrowseQuery>(browseQuery, {
     featured: showFeatured || null,
@@ -80,15 +79,15 @@ function BrowseContent({ colors }: { colors: ReturnType<typeof useColors> }) {
   const plans = data.readingPlans ?? [];
 
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const handleRefresh = useCallback(() => {
-    refreshSubRef.current?.unsubscribe();
+  const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    refreshSubRef.current = fetchQuery(environment, browseQuery, {
-      featured: showFeatured || null,
-    }).subscribe({
-      complete: () => setIsRefreshing(false),
-      error: () => setIsRefreshing(false),
-    });
+    try {
+      await fetchQuery(environment, browseQuery, {
+        featured: showFeatured || null,
+      }).toPromise();
+    } finally {
+      setIsRefreshing(false);
+    }
   }, [environment, showFeatured]);
 
   return (
