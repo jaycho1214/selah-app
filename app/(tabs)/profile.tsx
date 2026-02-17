@@ -11,7 +11,6 @@ import {
 } from "react";
 import { ErrorBoundary } from "@/components/error-boundary";
 import {
-  ActivityIndicator,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -141,7 +140,7 @@ function UnauthenticatedProfile() {
 }
 
 function AuthenticatedProfile() {
-  const { session } = useSession();
+  const { session, presentSignIn } = useSession();
   const colors = useColors();
   const { capture } = useAnalytics();
   const postsListRef = useRef<ProfilePostsListRef>(null);
@@ -270,7 +269,11 @@ function AuthenticatedProfile() {
   if (!user) {
     return (
       <View style={[styles.container, styles.center]}>
-        <ActivityIndicator size="large" color={colors.accent} />
+        <EmptyState
+          title="Could not load profile"
+          message="Your session may have expired. Please sign in again."
+          action={{ label: "Sign In", onPress: presentSignIn }}
+        />
       </View>
     );
   }

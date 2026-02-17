@@ -1,6 +1,6 @@
 import { GraphQLResponse, RequestParameters, Variables } from "relay-runtime";
 import { Platform } from "react-native";
-import * as SecureStore from "expo-secure-store";
+import { authClient } from "../auth-client";
 
 const API_URL =
   (__DEV__
@@ -8,25 +8,17 @@ const API_URL =
     : "https://selah.kr") + "/api/graphql";
 
 /**
- * Read the auth cookie stored by better-auth's expo client in SecureStore.
- * On native, better-auth sets `credentials: "omit"` on its own requests and
- * manages cookies via SecureStore, so the native cookie jar never has them.
- * We need to manually include them in Relay requests.
+ * Get the auth cookie for Relay requests.
+ *
+ * On native, Better Auth's expo plugin manages cookies via SecureStore
+ * (not the native cookie jar). We use authClient.getCookie() to retrieve
+ * them and manually include them in request headers.
+ *
+ * @see https://www.better-auth.com/docs/integrations/expo
  */
 function getAuthCookie(): string {
   if (Platform.OS === "web") return "";
-  const raw = SecureStore.getItem("selah_cookie");
-  if (!raw) return "";
-  try {
-    const parsed: Record<string, { value: string; expires: string | null }> =
-      JSON.parse(raw);
-    return Object.entries(parsed)
-      .filter(([, v]) => !v.expires || new Date(v.expires) > new Date())
-      .map(([k, v]) => `${k}=${v.value}`)
-      .join("; ");
-  } catch {
-    return "";
-  }
+  return authClient.getCookie() ?? "";
 }
 
 export async function fetchGraphQL(
@@ -51,7 +43,9 @@ export async function fetchGraphQL(
       "Content-Type": "application/json",
       ...(cookie ? { cookie } : {}),
     },
-    credentials: "include",
+    // On native, cookies are provided manually from SecureStore.
+    // "include" would let the native cookie jar interfere with our headers.
+    credentials: Platform.OS === "web" ? "include" : "omit",
     body: JSON.stringify(body),
   });
 
