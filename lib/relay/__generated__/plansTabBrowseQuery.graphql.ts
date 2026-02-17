@@ -1,6 +1,6 @@
 /**
- * @generated SignedSource<<ea67285eb06cb53bdf8aaf9d575b3762>>
- * @relayHash b0e4ae50d6537d1654e7a04ba6e5c5f1
+ * @generated SignedSource<<d760e32a4b86790ded2a9b2743a73d0f>>
+ * @relayHash 2e4e1ed17f690a7cc52490745109ac50
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,18 +9,18 @@
 /* eslint-disable */
 // @ts-nocheck
 
-// @relayRequestID b0e4ae50d6537d1654e7a04ba6e5c5f1
+// @relayRequestID 2e4e1ed17f690a7cc52490745109ac50
 
 import { ConcreteRequest } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type plansTabBrowseQuery$variables = {
-  featured?: boolean | null | undefined;
+  official?: boolean | null | undefined;
 };
 export type plansTabBrowseQuery$data = {
   readonly readingPlans: ReadonlyArray<{
     readonly id: string;
     readonly " $fragmentSpreads": FragmentRefs<"ReadingPlanCardFragment">;
-  }>;
+  }> | null | undefined;
 };
 export type plansTabBrowseQuery = {
   response: plansTabBrowseQuery$data;
@@ -32,19 +32,19 @@ var v0 = [
   {
     "defaultValue": null,
     "kind": "LocalArgument",
-    "name": "featured"
+    "name": "official"
   }
 ],
 v1 = [
   {
-    "kind": "Variable",
-    "name": "featured",
-    "variableName": "featured"
-  },
-  {
     "kind": "Literal",
     "name": "first",
     "value": 50
+  },
+  {
+    "kind": "Variable",
+    "name": "official",
+    "variableName": "official"
   }
 ],
 v2 = {
@@ -53,7 +53,17 @@ v2 = {
   "kind": "ScalarField",
   "name": "id",
   "storageKey": null
-};
+},
+v3 = [
+  {
+    "alias": null,
+    "args": null,
+    "kind": "ScalarField",
+    "name": "url",
+    "storageKey": null
+  },
+  (v2/*: any*/)
+];
 return {
   "fragment": {
     "argumentDefinitions": (v0/*: any*/),
@@ -136,7 +146,24 @@ return {
             "alias": null,
             "args": null,
             "kind": "ScalarField",
+            "name": "isOfficial",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
             "name": "status",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "Asset",
+            "kind": "LinkedField",
+            "name": "coverImage",
+            "plural": false,
+            "selections": (v3/*: any*/),
             "storageKey": null
           },
           {
@@ -169,16 +196,7 @@ return {
                 "kind": "LinkedField",
                 "name": "image",
                 "plural": false,
-                "selections": [
-                  {
-                    "alias": null,
-                    "args": null,
-                    "kind": "ScalarField",
-                    "name": "url",
-                    "storageKey": null
-                  },
-                  (v2/*: any*/)
-                ],
+                "selections": (v3/*: any*/),
                 "storageKey": null
               }
             ],
@@ -190,7 +208,7 @@ return {
     ]
   },
   "params": {
-    "id": "b0e4ae50d6537d1654e7a04ba6e5c5f1",
+    "id": "2e4e1ed17f690a7cc52490745109ac50",
     "metadata": {},
     "name": "plansTabBrowseQuery",
     "operationKind": "query",
@@ -199,6 +217,6 @@ return {
 };
 })();
 
-(node as any).hash = "37b8a087532291b66e7afc244dce4e2d";
+(node as any).hash = "8a0626eec9643caa2375b87c9183bdb8";
 
 export default node;

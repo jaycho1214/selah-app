@@ -1,6 +1,6 @@
 /**
- * @generated SignedSource<<28ea0328bb39394d152841d34e72f2e7>>
- * @relayHash 4965e60b079eb628bb66691aac20085e
+ * @generated SignedSource<<d27f636f23ae5daea56f05dd5f6b5b1d>>
+ * @relayHash acd9e28cbb33ef3a38a0196a074ad280
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,7 +9,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-// @relayRequestID 4965e60b079eb628bb66691aac20085e
+// @relayRequestID acd9e28cbb33ef3a38a0196a074ad280
 
 import { ConcreteRequest } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
@@ -28,44 +28,48 @@ export type IdReadingPlanQuery$data = {
       readonly name: string | null | undefined;
       readonly username: string | null | undefined;
     };
+    readonly coverImage: {
+      readonly url: string | null | undefined;
+    } | null | undefined;
     readonly currentVersion: {
       readonly days: ReadonlyArray<{
-        readonly dayNumber: number;
+        readonly dayNumber: number | null | undefined;
         readonly id: string;
         readonly readings: ReadonlyArray<{
-          readonly book: string;
+          readonly book: string | null | undefined;
           readonly endChapter: number | null | undefined;
           readonly endVerse: number | null | undefined;
           readonly id: string;
-          readonly startChapter: number;
+          readonly startChapter: number | null | undefined;
           readonly startVerse: number | null | undefined;
-        }>;
+        }> | null | undefined;
         readonly " $fragmentSpreads": FragmentRefs<"ReadingPlanDayCardFragment">;
-      }>;
+      }> | null | undefined;
       readonly id: string;
     } | null | undefined;
-    readonly dayCount: number;
+    readonly dayCount: number | null | undefined;
     readonly description: string | null | undefined;
     readonly id: string;
-    readonly isFeatured: boolean;
+    readonly isFeatured: boolean | null | undefined;
+    readonly isOfficial: boolean | null | undefined;
     readonly myParticipation: {
       readonly completedAt: any | null | undefined;
-      readonly completedDaysCount: number;
-      readonly hideProgress: boolean;
+      readonly completedDaysCount: number | null | undefined;
+      readonly hideProgress: boolean | null | undefined;
       readonly id: string;
       readonly progress: ReadonlyArray<{
-        readonly completedAt: any;
-        readonly dayId: string;
-      }>;
+        readonly completedAt: any | null | undefined;
+        readonly dayId: string | null | undefined;
+      }> | null | undefined;
       readonly readingProgress: ReadonlyArray<{
         readonly completedAt: any | null | undefined;
         readonly readingId: string | null | undefined;
-      }>;
+      }> | null | undefined;
     } | null | undefined;
-    readonly participantCount: number;
-    readonly status: ReadingPlanStatus;
-    readonly title: string;
-    readonly visibility: ReadingPlanVisibility;
+    readonly participantCount: number | null | undefined;
+    readonly status: ReadingPlanStatus | null | undefined;
+    readonly title: string | null | undefined;
+    readonly visibility: ReadingPlanVisibility | null | undefined;
   } | null | undefined;
 };
 export type IdReadingPlanQuery = {
@@ -134,45 +138,55 @@ v8 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "participantCount",
+  "name": "isOfficial",
   "storageKey": null
 },
 v9 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "dayCount",
+  "name": "participantCount",
   "storageKey": null
 },
 v10 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "name",
+  "name": "dayCount",
   "storageKey": null
 },
 v11 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "username",
-  "storageKey": null
-},
-v12 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
   "name": "url",
   "storageKey": null
 },
+v12 = [
+  (v11/*: any*/)
+],
 v13 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "name",
+  "storageKey": null
+},
+v14 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "username",
+  "storageKey": null
+},
+v15 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "dayNumber",
   "storageKey": null
 },
-v14 = {
+v16 = {
   "alias": null,
   "args": null,
   "concreteType": "ReadingPlanDayReading",
@@ -219,41 +233,45 @@ v14 = {
   ],
   "storageKey": null
 },
-v15 = {
+v17 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "completedDaysCount",
   "storageKey": null
 },
-v16 = {
+v18 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "hideProgress",
   "storageKey": null
 },
-v17 = {
+v19 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "completedAt",
   "storageKey": null
 },
-v18 = {
+v20 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "dayId",
   "storageKey": null
 },
-v19 = {
+v21 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "readingId",
   "storageKey": null
-};
+},
+v22 = [
+  (v11/*: any*/),
+  (v2/*: any*/)
+];
 return {
   "fragment": {
     "argumentDefinitions": (v0/*: any*/),
@@ -277,6 +295,17 @@ return {
           (v7/*: any*/),
           (v8/*: any*/),
           (v9/*: any*/),
+          (v10/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "Asset",
+            "kind": "LinkedField",
+            "name": "coverImage",
+            "plural": false,
+            "selections": (v12/*: any*/),
+            "storageKey": null
+          },
           {
             "alias": null,
             "args": null,
@@ -286,8 +315,8 @@ return {
             "plural": false,
             "selections": [
               (v2/*: any*/),
-              (v10/*: any*/),
-              (v11/*: any*/),
+              (v13/*: any*/),
+              (v14/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -295,9 +324,7 @@ return {
                 "kind": "LinkedField",
                 "name": "image",
                 "plural": false,
-                "selections": [
-                  (v12/*: any*/)
-                ],
+                "selections": (v12/*: any*/),
                 "storageKey": null
               }
             ],
@@ -321,8 +348,8 @@ return {
                 "plural": true,
                 "selections": [
                   (v2/*: any*/),
-                  (v13/*: any*/),
-                  (v14/*: any*/),
+                  (v15/*: any*/),
+                  (v16/*: any*/),
                   {
                     "args": null,
                     "kind": "FragmentSpread",
@@ -343,9 +370,9 @@ return {
             "plural": false,
             "selections": [
               (v2/*: any*/),
-              (v15/*: any*/),
-              (v16/*: any*/),
               (v17/*: any*/),
+              (v18/*: any*/),
+              (v19/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -354,8 +381,8 @@ return {
                 "name": "progress",
                 "plural": true,
                 "selections": [
-                  (v18/*: any*/),
-                  (v17/*: any*/)
+                  (v20/*: any*/),
+                  (v19/*: any*/)
                 ],
                 "storageKey": null
               },
@@ -367,8 +394,8 @@ return {
                 "name": "readingProgress",
                 "plural": true,
                 "selections": [
-                  (v19/*: any*/),
-                  (v17/*: any*/)
+                  (v21/*: any*/),
+                  (v19/*: any*/)
                 ],
                 "storageKey": null
               }
@@ -404,6 +431,17 @@ return {
           (v7/*: any*/),
           (v8/*: any*/),
           (v9/*: any*/),
+          (v10/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "Asset",
+            "kind": "LinkedField",
+            "name": "coverImage",
+            "plural": false,
+            "selections": (v22/*: any*/),
+            "storageKey": null
+          },
           {
             "alias": null,
             "args": null,
@@ -413,8 +451,8 @@ return {
             "plural": false,
             "selections": [
               (v2/*: any*/),
-              (v10/*: any*/),
-              (v11/*: any*/),
+              (v13/*: any*/),
+              (v14/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -422,10 +460,7 @@ return {
                 "kind": "LinkedField",
                 "name": "image",
                 "plural": false,
-                "selections": [
-                  (v12/*: any*/),
-                  (v2/*: any*/)
-                ],
+                "selections": (v22/*: any*/),
                 "storageKey": null
               }
             ],
@@ -449,8 +484,8 @@ return {
                 "plural": true,
                 "selections": [
                   (v2/*: any*/),
-                  (v13/*: any*/),
-                  (v14/*: any*/),
+                  (v15/*: any*/),
+                  (v16/*: any*/),
                   (v3/*: any*/)
                 ],
                 "storageKey": null
@@ -467,9 +502,9 @@ return {
             "plural": false,
             "selections": [
               (v2/*: any*/),
-              (v15/*: any*/),
-              (v16/*: any*/),
               (v17/*: any*/),
+              (v18/*: any*/),
+              (v19/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -478,8 +513,8 @@ return {
                 "name": "progress",
                 "plural": true,
                 "selections": [
-                  (v18/*: any*/),
-                  (v17/*: any*/),
+                  (v20/*: any*/),
+                  (v19/*: any*/),
                   (v2/*: any*/)
                 ],
                 "storageKey": null
@@ -492,8 +527,8 @@ return {
                 "name": "readingProgress",
                 "plural": true,
                 "selections": [
+                  (v21/*: any*/),
                   (v19/*: any*/),
-                  (v17/*: any*/),
                   (v2/*: any*/)
                 ],
                 "storageKey": null
@@ -507,7 +542,7 @@ return {
     ]
   },
   "params": {
-    "id": "4965e60b079eb628bb66691aac20085e",
+    "id": "acd9e28cbb33ef3a38a0196a074ad280",
     "metadata": {},
     "name": "IdReadingPlanQuery",
     "operationKind": "query",
@@ -516,6 +551,6 @@ return {
 };
 })();
 
-(node as any).hash = "383976c3731f3b5d4ffa8303a5728a62";
+(node as any).hash = "4074381012ed8fda5301c1eefcd6ac7d";
 
 export default node;

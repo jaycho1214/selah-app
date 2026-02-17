@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<8fb42e60001c1313bf0052c3f558ee1a>>
+ * @generated SignedSource<<81c4e5f68251c3f2b53a154501bf5a67>>
  * @relayHash e95c73cda7f6457236af96419b138f80
  * @lightSyntaxTransform
  * @nogrep
@@ -18,18 +18,18 @@ export type ReadingPlanJoinButtonJoinMutation$variables = {
 export type ReadingPlanJoinButtonJoinMutation$data = {
   readonly readingPlanJoin: {
     readonly completedAt: any | null | undefined;
-    readonly completedDaysCount: number;
-    readonly hideProgress: boolean;
+    readonly completedDaysCount: number | null | undefined;
+    readonly hideProgress: boolean | null | undefined;
     readonly id: string;
-    readonly joinedAt: any;
+    readonly joinedAt: any | null | undefined;
     readonly progress: ReadonlyArray<{
-      readonly completedAt: any;
-      readonly dayId: string;
-    }>;
+      readonly completedAt: any | null | undefined;
+      readonly dayId: string | null | undefined;
+    }> | null | undefined;
     readonly readingProgress: ReadonlyArray<{
       readonly completedAt: any | null | undefined;
       readonly readingId: string | null | undefined;
-    }>;
+    }> | null | undefined;
     readonly user: {
       readonly id: string;
     };

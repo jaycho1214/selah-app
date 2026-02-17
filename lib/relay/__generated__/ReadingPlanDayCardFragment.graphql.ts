@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<cbed760a5f8d4fb96b0092fa064e3f92>>
+ * @generated SignedSource<<9d03f5da01b4b39e7b464dbcbdd575ec>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,16 +11,16 @@
 import { ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type ReadingPlanDayCardFragment$data = {
-  readonly dayNumber: number;
+  readonly dayNumber: number | null | undefined;
   readonly id: string;
   readonly readings: ReadonlyArray<{
-    readonly book: string;
+    readonly book: string | null | undefined;
     readonly endChapter: number | null | undefined;
     readonly endVerse: number | null | undefined;
     readonly id: string;
-    readonly startChapter: number;
+    readonly startChapter: number | null | undefined;
     readonly startVerse: number | null | undefined;
-  }>;
+  }> | null | undefined;
   readonly title: string | null | undefined;
   readonly " $fragmentType": "ReadingPlanDayCardFragment";
 };

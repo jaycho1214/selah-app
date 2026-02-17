@@ -1,6 +1,6 @@
 /**
- * @generated SignedSource<<63b5e933d964cc6e0d028b6541d482df>>
- * @relayHash 6260bf1d170980d533088dac1a7a5ae7
+ * @generated SignedSource<<4324d6827942bcdf3f1f3b3a66ee32f3>>
+ * @relayHash 1b4ea9cbea472ebc52430675eefae5e1
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,7 +9,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-// @relayRequestID 6260bf1d170980d533088dac1a7a5ae7
+// @relayRequestID 1b4ea9cbea472ebc52430675eefae5e1
 
 import { ConcreteRequest } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
@@ -20,7 +20,7 @@ export type readingPlansBrowseQuery$data = {
   readonly readingPlans: ReadonlyArray<{
     readonly id: string;
     readonly " $fragmentSpreads": FragmentRefs<"ReadingPlanCardFragment">;
-  }>;
+  }> | null | undefined;
 };
 export type readingPlansBrowseQuery = {
   response: readingPlansBrowseQuery$data;
@@ -53,7 +53,17 @@ v2 = {
   "kind": "ScalarField",
   "name": "id",
   "storageKey": null
-};
+},
+v3 = [
+  {
+    "alias": null,
+    "args": null,
+    "kind": "ScalarField",
+    "name": "url",
+    "storageKey": null
+  },
+  (v2/*: any*/)
+];
 return {
   "fragment": {
     "argumentDefinitions": (v0/*: any*/),
@@ -136,7 +146,24 @@ return {
             "alias": null,
             "args": null,
             "kind": "ScalarField",
+            "name": "isOfficial",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
             "name": "status",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "Asset",
+            "kind": "LinkedField",
+            "name": "coverImage",
+            "plural": false,
+            "selections": (v3/*: any*/),
             "storageKey": null
           },
           {
@@ -169,16 +196,7 @@ return {
                 "kind": "LinkedField",
                 "name": "image",
                 "plural": false,
-                "selections": [
-                  {
-                    "alias": null,
-                    "args": null,
-                    "kind": "ScalarField",
-                    "name": "url",
-                    "storageKey": null
-                  },
-                  (v2/*: any*/)
-                ],
+                "selections": (v3/*: any*/),
                 "storageKey": null
               }
             ],
@@ -190,7 +208,7 @@ return {
     ]
   },
   "params": {
-    "id": "6260bf1d170980d533088dac1a7a5ae7",
+    "id": "1b4ea9cbea472ebc52430675eefae5e1",
     "metadata": {},
     "name": "readingPlansBrowseQuery",
     "operationKind": "query",

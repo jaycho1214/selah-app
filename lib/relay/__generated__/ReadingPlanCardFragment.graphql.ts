@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<fefc10578fd6bd8e9161a316962740af>>
+ * @generated SignedSource<<855baf9e82b1b2f9a3783a0bf9f3ccd0>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -20,13 +20,17 @@ export type ReadingPlanCardFragment$data = {
     readonly name: string | null | undefined;
     readonly username: string | null | undefined;
   };
-  readonly dayCount: number;
+  readonly coverImage: {
+    readonly url: string | null | undefined;
+  } | null | undefined;
+  readonly dayCount: number | null | undefined;
   readonly description: string | null | undefined;
   readonly id: string;
-  readonly isFeatured: boolean;
-  readonly participantCount: number;
-  readonly status: ReadingPlanStatus;
-  readonly title: string;
+  readonly isFeatured: boolean | null | undefined;
+  readonly isOfficial: boolean | null | undefined;
+  readonly participantCount: number | null | undefined;
+  readonly status: ReadingPlanStatus | null | undefined;
+  readonly title: string | null | undefined;
   readonly " $fragmentType": "ReadingPlanCardFragment";
 };
 export type ReadingPlanCardFragment$key = {
@@ -41,7 +45,16 @@ var v0 = {
   "kind": "ScalarField",
   "name": "id",
   "storageKey": null
-};
+},
+v1 = [
+  {
+    "alias": null,
+    "args": null,
+    "kind": "ScalarField",
+    "name": "url",
+    "storageKey": null
+  }
+];
 return {
   "argumentDefinitions": [],
   "kind": "Fragment",
@@ -88,7 +101,24 @@ return {
       "alias": null,
       "args": null,
       "kind": "ScalarField",
+      "name": "isOfficial",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
       "name": "status",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "concreteType": "Asset",
+      "kind": "LinkedField",
+      "name": "coverImage",
+      "plural": false,
+      "selections": (v1/*: any*/),
       "storageKey": null
     },
     {
@@ -121,15 +151,7 @@ return {
           "kind": "LinkedField",
           "name": "image",
           "plural": false,
-          "selections": [
-            {
-              "alias": null,
-              "args": null,
-              "kind": "ScalarField",
-              "name": "url",
-              "storageKey": null
-            }
-          ],
+          "selections": (v1/*: any*/),
           "storageKey": null
         }
       ],
@@ -141,6 +163,6 @@ return {
 };
 })();
 
-(node as any).hash = "faec0c1dc510a57913c3bedb475bbc46";
+(node as any).hash = "3ac9218cabc500f212ada1f8dec55ce7";
 
 export default node;

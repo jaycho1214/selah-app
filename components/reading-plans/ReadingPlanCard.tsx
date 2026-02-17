@@ -1,6 +1,7 @@
 import { memo, useCallback, useMemo } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
+import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
 import { Calendar, Users } from "lucide-react-native";
 import { graphql, useFragment } from "react-relay";
@@ -18,7 +19,11 @@ const fragment = graphql`
     dayCount
     participantCount
     isFeatured
+    isOfficial
     status
+    coverImage {
+      url
+    }
     author {
       id
       name
@@ -65,57 +70,89 @@ export const ReadingPlanCard = memo(function ReadingPlanCard({
   return (
     <Pressable
       onPress={handlePress}
-      style={[styles.card, dynamicStyles.card]}
+      style={[
+        styles.card,
+        dynamicStyles.card,
+        data.coverImage?.url && styles.cardWithImage,
+      ]}
     >
-      <View style={styles.header}>
-        <View style={styles.titleRow}>
-          <Text
-            style={[styles.title, { color: colors.text }]}
-            numberOfLines={1}
-          >
-            {data.title}
-          </Text>
-          {data.isFeatured && (
-            <View style={[styles.badge, dynamicStyles.featuredBadge]}>
-              <Text style={[styles.badgeText, dynamicStyles.featuredText]}>
-                Featured
-              </Text>
-            </View>
+      {data.coverImage?.url && (
+        <Image
+          source={{ uri: data.coverImage.url }}
+          style={styles.coverImage}
+          contentFit="cover"
+        />
+      )}
+      <View
+        style={[
+          styles.content,
+          !data.coverImage?.url && styles.contentNoPadding,
+        ]}
+      >
+        <View style={styles.header}>
+          <View style={styles.titleRow}>
+            <Text
+              style={[styles.title, { color: colors.text }]}
+              numberOfLines={1}
+            >
+              {data.title}
+            </Text>
+            {data.isOfficial && (
+              <View style={[styles.badge, dynamicStyles.featuredBadge]}>
+                <Text style={[styles.badgeText, dynamicStyles.featuredText]}>
+                  Official
+                </Text>
+              </View>
+            )}
+          </View>
+          {data.description && (
+            <Text
+              style={[styles.description, { color: colors.textSecondary }]}
+              numberOfLines={2}
+            >
+              {data.description}
+            </Text>
           )}
         </View>
-        {data.description && (
-          <Text
-            style={[styles.description, { color: colors.textSecondary }]}
-            numberOfLines={2}
-          >
-            {data.description}
-          </Text>
-        )}
-      </View>
 
-      <View style={styles.footer}>
-        <View style={styles.authorRow}>
-          <UserAvatar
-            imageUrl={data.author.image?.url}
-            name={data.author.name}
-            size={20}
-          />
-          <Text style={[styles.authorName, { color: colors.textMuted }]}>
-            {data.author.name || data.author.username}
-          </Text>
-        </View>
-        <View style={styles.stats}>
-          <View style={styles.stat}>
-            <Calendar size={12} color={colors.textMuted} />
-            <Text style={[styles.statText, { color: colors.textMuted }]}>
-              {data.dayCount}
-            </Text>
+        <View style={styles.footer}>
+          <View style={styles.authorRow}>
+            {data.isOfficial ? (
+              <>
+                <Image
+                  source={require("@/assets/images/icon.png")}
+                  style={styles.selahLogo}
+                />
+                <Text style={[styles.authorName, { color: colors.textMuted }]}>
+                  Selah
+                </Text>
+              </>
+            ) : (
+              <>
+                <UserAvatar
+                  imageUrl={data.author.image?.url}
+                  name={data.author.name}
+                  size={20}
+                />
+                <Text style={[styles.authorName, { color: colors.textMuted }]}>
+                  {data.author.name || data.author.username}
+                </Text>
+              </>
+            )}
           </View>
-          <View style={styles.stat}>
-            <Users size={12} color={colors.textMuted} />
-            <Text style={[styles.statText, { color: colors.textMuted }]}>
-              {data.participantCount}
-            </Text>
+          <View style={styles.stats}>
+            <View style={styles.stat}>
+              <Calendar size={12} color={colors.textMuted} />
+              <Text style={[styles.statText, { color: colors.textMuted }]}>
+                {data.dayCount}
+              </Text>
+            </View>
+            <View style={styles.stat}>
+              <Users size={12} color={colors.textMuted} />
+              <Text style={[styles.statText, { color: colors.textMuted }]}>
+                {data.participantCount}
+              </Text>
+            </View>
           </View>
         </View>
       </View>
@@ -129,6 +166,22 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 14,
     gap: 10,
+    overflow: "hidden",
+  },
+  cardWithImage: {
+    padding: 0,
+    gap: 0,
+  },
+  coverImage: {
+    width: "100%",
+    aspectRatio: 16 / 9,
+  },
+  content: {
+    padding: 14,
+    gap: 10,
+  },
+  contentNoPadding: {
+    padding: 0,
   },
   header: {
     gap: 4,
@@ -166,6 +219,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+  },
+  selahLogo: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
   },
   authorName: {
     fontSize: 12,

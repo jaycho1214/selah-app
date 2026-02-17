@@ -1,6 +1,6 @@
 /**
- * @generated SignedSource<<b2cc92e19f4afb9bc7b60ae26388b5d3>>
- * @relayHash f1d447f85f70fd5d72f5a1d148324ff7
+ * @generated SignedSource<<f36746f9c1b8abff111b309bb5d027cd>>
+ * @relayHash 885a421995e1e8451005c47c1cdcbe2f
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,21 +9,21 @@
 /* eslint-disable */
 // @ts-nocheck
 
-// @relayRequestID f1d447f85f70fd5d72f5a1d148324ff7
+// @relayRequestID 885a421995e1e8451005c47c1cdcbe2f
 
 import { ConcreteRequest } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type plansTabMyPlansQuery$variables = Record<PropertyKey, never>;
 export type plansTabMyPlansQuery$data = {
   readonly myJoinedReadingPlans: ReadonlyArray<{
-    readonly dayCount: number;
+    readonly dayCount: number | null | undefined;
     readonly id: string;
     readonly myParticipation: {
-      readonly completedDaysCount: number;
+      readonly completedDaysCount: number | null | undefined;
       readonly id: string;
     } | null | undefined;
     readonly " $fragmentSpreads": FragmentRefs<"ReadingPlanCardFragment">;
-  }>;
+  }> | null | undefined;
 };
 export type plansTabMyPlansQuery = {
   response: plansTabMyPlansQuery$data;
@@ -70,7 +70,17 @@ v3 = {
     }
   ],
   "storageKey": null
-};
+},
+v4 = [
+  {
+    "alias": null,
+    "args": null,
+    "kind": "ScalarField",
+    "name": "url",
+    "storageKey": null
+  },
+  (v1/*: any*/)
+];
 return {
   "fragment": {
     "argumentDefinitions": [],
@@ -150,7 +160,24 @@ return {
             "alias": null,
             "args": null,
             "kind": "ScalarField",
+            "name": "isOfficial",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
             "name": "status",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "Asset",
+            "kind": "LinkedField",
+            "name": "coverImage",
+            "plural": false,
+            "selections": (v4/*: any*/),
             "storageKey": null
           },
           {
@@ -183,16 +210,7 @@ return {
                 "kind": "LinkedField",
                 "name": "image",
                 "plural": false,
-                "selections": [
-                  {
-                    "alias": null,
-                    "args": null,
-                    "kind": "ScalarField",
-                    "name": "url",
-                    "storageKey": null
-                  },
-                  (v1/*: any*/)
-                ],
+                "selections": (v4/*: any*/),
                 "storageKey": null
               }
             ],
@@ -204,7 +222,7 @@ return {
     ]
   },
   "params": {
-    "id": "f1d447f85f70fd5d72f5a1d148324ff7",
+    "id": "885a421995e1e8451005c47c1cdcbe2f",
     "metadata": {},
     "name": "plansTabMyPlansQuery",
     "operationKind": "query",

@@ -13,6 +13,7 @@ import { graphql, useLazyLoadQuery, useRelayEnvironment } from "react-relay";
 import { fetchQuery } from "relay-runtime";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
+import { Image } from "expo-image";
 import { Text } from "@/components/ui/text";
 import { UserAvatar } from "@/components/user/user-avatar";
 import { ReadingPlanProgressBar } from "@/components/reading-plans/ReadingPlanProgressBar";
@@ -37,8 +38,12 @@ const detailQuery = graphql`
       visibility
       status
       isFeatured
+      isOfficial
       participantCount
       dayCount
+      coverImage {
+        url
+      }
       author {
         id
         name
@@ -219,6 +224,15 @@ function DetailContent({
         />
       }
     >
+      {/* Cover image */}
+      {plan.coverImage?.url && (
+        <Image
+          source={{ uri: plan.coverImage.url }}
+          style={styles.heroImage}
+          contentFit="cover"
+        />
+      )}
+
       {/* Header */}
       <Animated.View
         entering={FadeInDown.duration(400).delay(100)}
@@ -228,12 +242,12 @@ function DetailContent({
           <Text style={[styles.title, { color: colors.text }]}>
             {plan.title}
           </Text>
-          {plan.isFeatured && (
+          {plan.isOfficial && (
             <View
               style={[styles.badge, { backgroundColor: colors.accent + "18" }]}
             >
               <Text style={[styles.badgeText, { color: colors.accent }]}>
-                Featured
+                Official
               </Text>
             </View>
           )}
@@ -248,14 +262,28 @@ function DetailContent({
         {/* Author + stats */}
         <View style={styles.metaRow}>
           <View style={styles.authorRow}>
-            <UserAvatar
-              imageUrl={plan.author.image?.url}
-              name={plan.author.name}
-              size={22}
-            />
-            <Text style={[styles.authorName, { color: colors.textMuted }]}>
-              {plan.author.name || plan.author.username}
-            </Text>
+            {plan.isOfficial ? (
+              <>
+                <Image
+                  source={require("@/assets/images/icon.png")}
+                  style={{ width: 22, height: 22, borderRadius: 11 }}
+                />
+                <Text style={[styles.authorName, { color: colors.textMuted }]}>
+                  Selah
+                </Text>
+              </>
+            ) : (
+              <>
+                <UserAvatar
+                  imageUrl={plan.author.image?.url}
+                  name={plan.author.name}
+                  size={22}
+                />
+                <Text style={[styles.authorName, { color: colors.textMuted }]}>
+                  {plan.author.name || plan.author.username}
+                </Text>
+              </>
+            )}
           </View>
           <View style={styles.statsRow}>
             <View style={styles.stat}>
@@ -337,6 +365,10 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  heroImage: {
+    width: "100%",
+    aspectRatio: 16 / 9,
   },
   headerSection: {
     paddingHorizontal: 16,
