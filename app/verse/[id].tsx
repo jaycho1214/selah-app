@@ -3,10 +3,16 @@ import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import * as Haptics from "expo-haptics";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { Share2 } from "lucide-react-native";
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import {
   ActivityIndicator,
-  Keyboard,
   Platform,
   Pressable,
   RefreshControl,
@@ -47,6 +53,7 @@ import type {
   IdQuery$variables,
 } from "@/lib/relay/__generated__/IdQuery.graphql";
 import type { IdUnlikeReflectionMutation } from "@/lib/relay/__generated__/IdUnlikeReflectionMutation.graphql";
+import { uploadPostImages } from "@/lib/upload-images";
 import { getVerseShareUrl } from "@/lib/utils";
 
 // Serif font for verse text - classic devotional feel
@@ -259,8 +266,9 @@ function VerseContent({
   const postsListRef = useRef<PostsListRef>(null);
   const signInSheetRef = useRef<BottomSheetModal>(null);
   const reportSheetRef = useRef<ReportSheetRef>(null);
-  const refreshTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [fetchKey, setFetchKey] = useState(0);
 
   const isAuthenticated = !!session?.user;
 
@@ -271,8 +279,11 @@ function VerseContent({
     verse: parsed.verse,
   };
 
-  // Fetch verse data
-  const data = useLazyLoadQuery<IdQuery>(verseQuery, queryVariables);
+  // Fetch verse data — fetchKey forces re-fetch on pull-to-refresh
+  const data = useLazyLoadQuery<IdQuery>(verseQuery, queryVariables, {
+    fetchKey,
+    fetchPolicy: fetchKey > 0 ? "network-only" : "store-or-network",
+  });
 
   useEffect(() => {
     if (data.bibleVerseByReference?.id) {
@@ -280,20 +291,11 @@ function VerseContent({
     }
   }, [verseId, capture, data.bibleVerseByReference?.id]);
 
-  // Pull to refresh using the fragment's refetch
-  const handleRefresh = useCallback(async () => {
-    setIsRefreshing(true);
-    postsListRef.current?.refetch();
-    // Small delay to show the refresh indicator
-    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
-    refreshTimerRef.current = setTimeout(() => setIsRefreshing(false), 500);
-  }, []);
-
-  // Cleanup refresh timer on unmount
-  useEffect(() => {
-    return () => {
-      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
-    };
+  // Pull to refresh — re-fetches entire query, isPending tracks completion
+  const handleRefresh = useCallback(() => {
+    startTransition(() => {
+      setFetchKey((prev) => prev + 1);
+    });
   }, []);
 
   // Mutations
@@ -326,6 +328,52 @@ function VerseContent({
       // User cancelled
     }
   }, [verse, fullReference, parsed.translation]);
+
+  const submitReflection = useCallback(
+    (
+      lexicalContent: string,
+      connections: string[],
+      imageIds: string[] | undefined,
+      postData: {
+        images: { uri: string }[];
+        poll: { options: string[]; deadline: Date } | null;
+      },
+    ) => {
+      if (!verse) return;
+      commitCreateReflection({
+        variables: {
+          input: {
+            parentId: verse.id,
+            content: lexicalContent,
+            ...(imageIds && imageIds.length > 0 && { imageIds }),
+            ...(postData.poll && {
+              poll: {
+                options: postData.poll.options,
+                deadline: postData.poll.deadline.toISOString(),
+              },
+            }),
+          },
+          connections,
+        },
+        onCompleted: (response) => {
+          composerRef.current?.clear();
+          const postId = response.bibleVersePostCreate?.bibleVersePost?.id;
+          if (postId) {
+            capture("post_created", {
+              post_id: postId,
+              has_images: postData.images.length > 0,
+              has_poll: postData.poll !== null,
+              is_reply: false,
+            });
+          }
+        },
+        onError: (error) => {
+          console.error("Failed to create post:", error);
+        },
+      });
+    },
+    [verse, commitCreateReflection, capture],
+  );
 
   const handleSubmitReflection = useCallback(
     (postData: {
@@ -361,41 +409,24 @@ function VerseContent({
       const connectionId = postsListRef.current?.connectionId;
       const connections = connectionId ? [connectionId] : [];
 
-      // Dismiss keyboard immediately when posting
-      Keyboard.dismiss();
-
-      commitCreateReflection({
-        variables: {
-          input: {
-            parentId: verse.id,
-            content: lexicalContent,
-            ...(postData.poll && {
-              poll: {
-                options: postData.poll.options,
-                deadline: postData.poll.deadline.toISOString(),
-              },
-            }),
-          },
-          connections,
-        },
-        onCompleted: (response) => {
-          composerRef.current?.clear();
-          const postId = response.bibleVersePostCreate?.bibleVersePost?.id;
-          if (postId) {
-            capture("post_created", {
-              post_id: postId,
-              has_images: postData.images.length > 0,
-              has_poll: postData.poll !== null,
-              is_reply: false,
-            });
-          }
-        },
-        onError: (error) => {
-          console.error("Failed to create post:", error);
-        },
-      });
+      // Upload images first, then create the post
+      if (postData.images.length > 0) {
+        setIsUploading(true);
+        uploadPostImages(postData.images)
+          .then((imageIds) => {
+            submitReflection(lexicalContent, connections, imageIds, postData);
+          })
+          .catch((error) => {
+            console.error("Failed to upload images:", error);
+            // Still create the post without images
+            submitReflection(lexicalContent, connections, undefined, postData);
+          })
+          .finally(() => setIsUploading(false));
+      } else {
+        submitReflection(lexicalContent, connections, undefined, postData);
+      }
     },
-    [verse?.id, commitCreateReflection, capture],
+    [verse?.id, submitReflection],
   );
 
   const handleLike = useCallback(
@@ -478,7 +509,7 @@ function VerseContent({
         keyboardShouldPersistTaps="handled"
         refreshControl={
           <RefreshControl
-            refreshing={isRefreshing}
+            refreshing={isPending}
             onRefresh={handleRefresh}
             tintColor={colors.textMuted}
             colors={[colors.accent]}
@@ -563,7 +594,7 @@ function VerseContent({
         placeholder="What does this verse mean to you?"
         isAuthenticated={isAuthenticated}
         onAuthRequired={handleAuthRequired}
-        isSubmitting={isCreatingReflection}
+        isSubmitting={isUploading || isCreatingReflection}
       />
 
       {/* Sign-in Sheet */}

@@ -14,7 +14,6 @@ import {
 import { ErrorBoundary } from "@/components/error-boundary";
 import {
   ActivityIndicator,
-  Keyboard,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -46,6 +45,7 @@ import {
 import { ReflectionItem } from "@/components/verse/reflection-item";
 import { useAnalytics } from "@/lib/analytics";
 import { createLexicalState } from "@/lib/lexical/html-to-lexical";
+import { uploadPostImages } from "@/lib/upload-images";
 import type { IdChildrenFragment$key } from "@/lib/relay/__generated__/IdChildrenFragment.graphql";
 import type { IdCreateReplyMutation } from "@/lib/relay/__generated__/IdCreateReplyMutation.graphql";
 import type { IdPostDeleteMutation } from "@/lib/relay/__generated__/IdPostDeleteMutation.graphql";
@@ -316,6 +316,7 @@ function PostContent({
   const reportSheetRef = useRef<ReportSheetRef>(null);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [connectionId, setConnectionId] = useState<string | null>(null);
 
   const isAuthenticated = !!session?.user;
@@ -346,6 +347,60 @@ function PostContent({
     };
   }, []);
 
+  const submitReply = useCallback(
+    (
+      lexicalContent: string,
+      connections: string[],
+      imageIds: string[] | undefined,
+      postData: {
+        images: { uri: string }[];
+        poll: { options: string[]; deadline: Date } | null;
+      },
+    ) => {
+      if (!post) return;
+      commitCreateReply({
+        variables: {
+          input: {
+            parentId: post.id,
+            content: lexicalContent,
+            ...(imageIds && imageIds.length > 0 && { imageIds }),
+            ...(postData.poll && {
+              poll: {
+                options: postData.poll.options,
+                deadline: postData.poll.deadline.toISOString(),
+              },
+            }),
+          },
+          connections,
+        },
+        optimisticUpdater: (store) => {
+          const parentPost = store.get(post.id);
+          if (parentPost) {
+            const currentCount =
+              (parentPost.getValue("childPostsCount") as number) ?? 0;
+            parentPost.setValue(currentCount + 1, "childPostsCount");
+          }
+        },
+        onCompleted: (response) => {
+          const newPostId = response.bibleVersePostCreate?.bibleVersePost?.id;
+          if (newPostId) {
+            capture("post_created", {
+              post_id: newPostId,
+              has_images: postData.images.length > 0,
+              has_poll: !!postData.poll,
+              is_reply: true,
+            });
+          }
+          composerRef.current?.clear();
+        },
+        onError: (error) => {
+          console.error("Failed to create reply:", error);
+        },
+      });
+    },
+    [post, commitCreateReply, capture],
+  );
+
   const handleSubmitReply = useCallback(
     (postData: {
       content: string;
@@ -373,48 +428,24 @@ function PostContent({
 
       const connections = connectionId ? [connectionId] : [];
 
-      Keyboard.dismiss();
-
-      commitCreateReply({
-        variables: {
-          input: {
-            parentId: post.id,
-            content: lexicalContent,
-            ...(postData.poll && {
-              poll: {
-                options: postData.poll.options,
-                deadline: postData.poll.deadline.toISOString(),
-              },
-            }),
-          },
-          connections,
-        },
-        optimisticUpdater: (store) => {
-          const parentPost = store.get(post.id);
-          if (parentPost) {
-            const currentCount =
-              (parentPost.getValue("childPostsCount") as number) ?? 0;
-            parentPost.setValue(currentCount + 1, "childPostsCount");
-          }
-        },
-        onCompleted: (response) => {
-          const newPostId = response.bibleVersePostCreate?.bibleVersePost?.id;
-          if (newPostId) {
-            capture("post_created", {
-              post_id: newPostId,
-              has_images: false,
-              has_poll: !!postData.poll,
-              is_reply: true,
-            });
-          }
-          composerRef.current?.clear();
-        },
-        onError: (error) => {
-          console.error("Failed to create reply:", error);
-        },
-      });
+      // Upload images first, then create the reply
+      if (postData.images.length > 0) {
+        setIsUploading(true);
+        uploadPostImages(postData.images)
+          .then((imageIds) => {
+            submitReply(lexicalContent, connections, imageIds, postData);
+          })
+          .catch((error) => {
+            console.error("Failed to upload images:", error);
+            // Still create the reply without images
+            submitReply(lexicalContent, connections, undefined, postData);
+          })
+          .finally(() => setIsUploading(false));
+      } else {
+        submitReply(lexicalContent, connections, undefined, postData);
+      }
     },
-    [post?.id, connectionId, commitCreateReply, capture],
+    [post?.id, connectionId, submitReply],
   );
 
   const handleLike = useCallback(
@@ -575,7 +606,7 @@ function PostContent({
         placeholder="Write a reply..."
         isAuthenticated={isAuthenticated}
         onAuthRequired={handleAuthRequired}
-        isSubmitting={isCreatingReply}
+        isSubmitting={isUploading || isCreatingReply}
       />
 
       {/* Sign-in Sheet */}

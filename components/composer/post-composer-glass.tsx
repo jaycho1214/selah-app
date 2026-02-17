@@ -292,8 +292,8 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
             )}
           </View>
 
-          {/* Images — below editor when expanded */}
-          {isExpanded && images.length > 0 && (
+          {/* Images — below editor */}
+          {images.length > 0 && (
             <View style={styles.imagesContainer}>
               <ImagePickerGrid
                 images={images}
