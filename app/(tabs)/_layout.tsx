@@ -4,15 +4,19 @@ import {
   NativeTabs,
   Icon,
   Label,
+  Badge,
   VectorIcon,
 } from "expo-router/unstable-native-tabs";
 import { useColorScheme } from "react-native";
+
+import { useBehindDaysStore } from "@/lib/stores/behind-days-store";
 
 const hasGlass = isLiquidGlassAvailable();
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+  const behindDays = useBehindDaysStore((s) => s.behindDaysCount);
 
   return (
     <NativeTabs
@@ -39,6 +43,7 @@ export default function TabLayout() {
           sf={{ default: "book", selected: "book.fill" }}
           androidSrc={<VectorIcon family={MaterialIcons} name="menu-book" />}
         />
+        <Badge hidden={behindDays === 0}>{String(behindDays)}</Badge>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Label hidden />

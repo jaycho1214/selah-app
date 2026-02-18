@@ -96,8 +96,8 @@ function MyPlansContent({ colors }: { colors: ReturnType<typeof useColors> }) {
           {item.myParticipation && (
             <View style={styles.progressWrapper}>
               <ReadingPlanProgressBar
-                completed={item.myParticipation.completedDaysCount}
-                total={item.dayCount}
+                completed={item.myParticipation.completedDaysCount ?? 0}
+                total={item.dayCount ?? 0}
               />
             </View>
           )}

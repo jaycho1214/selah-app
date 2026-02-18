@@ -7,19 +7,34 @@ import { useColors } from "@/hooks/use-colors";
 interface ReadingPlanProgressBarProps {
   completed: number;
   total: number;
+  /** Optional reading-level counts for finer-grained percentage */
+  readingCompleted?: number;
+  readingTotal?: number;
 }
 
 export const ReadingPlanProgressBar = memo(function ReadingPlanProgressBar({
   completed,
   total,
+  readingCompleted,
+  readingTotal,
 }: ReadingPlanProgressBarProps) {
   const colors = useColors();
-  const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  // Use reading-level progress for the bar and percentage when available
+  const percentage = useMemo(() => {
+    if (readingTotal != null && readingTotal > 0) {
+      return Math.round(((readingCompleted ?? 0) / readingTotal) * 100);
+    }
+    return total > 0 ? Math.round((completed / total) * 100) : 0;
+  }, [completed, total, readingCompleted, readingTotal]);
 
   const dynamicStyles = useMemo(
     () => ({
       track: { backgroundColor: colors.surfaceElevated },
-      fill: { backgroundColor: colors.accent, width: `${percentage}%` as const },
+      fill: {
+        backgroundColor: colors.accent,
+        width: `${percentage}%` as const,
+      },
     }),
     [colors, percentage],
   );
@@ -30,7 +45,7 @@ export const ReadingPlanProgressBar = memo(function ReadingPlanProgressBar({
         <View style={[styles.fill, dynamicStyles.fill]} />
       </View>
       <Text style={[styles.label, { color: colors.textMuted }]}>
-        {completed}/{total} ({percentage}%)
+        {completed}/{total} days ({percentage}%)
       </Text>
     </View>
   );

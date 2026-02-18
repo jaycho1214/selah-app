@@ -1,5 +1,9 @@
 import { useCallback, useState, useEffect, useMemo, useRef } from "react";
-import { View } from "react-native";
+import {
+  View,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+} from "react-native";
 import { FlashList, type FlashListRef } from "@shopify/flash-list";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -8,6 +12,7 @@ import { VerseItem } from "./verse-item";
 import { ChapterHeader } from "./chapter-header";
 import { ChapterSkeleton } from "./chapter-skeleton";
 import { useBibleStore } from "@/lib/stores/bible-store";
+import { useReadingPlanStore } from "@/lib/stores/reading-plan-store";
 import { useVerseSelectionStore } from "@/lib/stores/verse-selection-store";
 import { useVerseHighlightStore } from "@/lib/stores/verse-highlight-store";
 import { isTranslationDownloaded, getOfflineVerses } from "@/lib/bible/offline";
@@ -228,10 +233,29 @@ function ChapterViewContent({
 }) {
   const insets = useSafeAreaInsets();
   const setScrollToVerse = useBibleStore((s) => s.setScrollToVerse);
+  const planActive = useReadingPlanStore((s) => s.activePlanId) != null;
+  const setScrollProgress = useReadingPlanStore((s) => s.setScrollProgress);
   const selectedIds = useVerseSelectionStore((s) => s.selectedIds);
   const isSelecting = useVerseSelectionStore((s) => s.isSelecting);
   const highlightEnabled = useVerseHighlightStore((s) => s.enabled);
   const highlightColor = useVerseHighlightStore((s) => s.color);
+
+  // Throttled scroll progress tracking for reading plan circle indicator
+  const lastScrollUpdate = useRef(0);
+  const handleScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (!planActive) return;
+      const now = Date.now();
+      if (now - lastScrollUpdate.current < 80) return;
+      lastScrollUpdate.current = now;
+      const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
+      const maxScroll = contentSize.height - layoutMeasurement.height;
+      if (maxScroll > 0) {
+        setScrollProgress(Math.min(1, contentOffset.y / maxScroll));
+      }
+    },
+    [planActive, setScrollProgress],
+  );
 
   // Scroll to verse after data loads
   const listRef = useRef<FlashListRef<Verse>>(null);
@@ -307,7 +331,13 @@ function ChapterViewContent({
       highlightColor,
       planVerseRange,
     }),
-    [selectedIds, isSelecting, highlightEnabled, highlightColor, planVerseRange],
+    [
+      selectedIds,
+      isSelecting,
+      highlightEnabled,
+      highlightColor,
+      planVerseRange,
+    ],
   );
 
   if (verses.length === 0) {
@@ -323,6 +353,8 @@ function ChapterViewContent({
         keyExtractor={keyExtractor}
         extraData={extraData}
         ListHeaderComponent={ListHeader}
+        onScroll={handleScroll}
+        scrollEventThrottle={64}
         contentContainerStyle={{
           paddingTop: topInset + 16,
           paddingBottom: insets.bottom + 120,

@@ -1,8 +1,5 @@
 import * as React from "react";
-import {
-  Text as RNText,
-  TextProps as RNTextProps,
-} from "react-native";
+import { Text as RNText, TextProps as RNTextProps } from "react-native";
 import { useColors } from "@/hooks/use-colors";
 
 const Text = React.memo(

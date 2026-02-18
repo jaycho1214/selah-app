@@ -40,7 +40,10 @@ export const PollCreator = memo(function PollCreator({
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const minDeadline = useMemo(() => new Date(Date.now() + 10 * 60 * 1000), []); // 10 minutes
-  const maxDeadline = useMemo(() => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), []); // 30 days
+  const maxDeadline = useMemo(
+    () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    [],
+  ); // 30 days
 
   const addOption = useCallback(() => {
     if (options.length < MAX_OPTIONS) {

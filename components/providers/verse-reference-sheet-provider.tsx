@@ -20,12 +20,9 @@ export function VerseReferenceSheetProvider({
   const sheetRef = useRef<VerseReferenceSheetRef>(null);
   const environment = useRelayEnvironment();
 
-  const openVerseReference = useCallback(
-    (verseId: string, label: string) => {
-      sheetRef.current?.present({ verseId, label });
-    },
-    [],
-  );
+  const openVerseReference = useCallback((verseId: string, label: string) => {
+    sheetRef.current?.present({ verseId, label });
+  }, []);
 
   return (
     <VerseReferenceSheetContext.Provider value={{ openVerseReference }}>

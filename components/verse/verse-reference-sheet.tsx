@@ -109,11 +109,7 @@ function SheetContent({
         <Text style={[styles.goButtonText, { color: colors.text }]}>
           Go to verse
         </Text>
-        <ChevronRight
-          size={16}
-          color={colors.textMuted}
-          strokeWidth={1.5}
-        />
+        <ChevronRight size={16} color={colors.textMuted} strokeWidth={1.5} />
       </Pressable>
     </>
   );

@@ -11,7 +11,7 @@
 
 // @relayRequestID ba207af9c36c37c2c77048210f324bcd
 
-import { ConcreteRequest } from 'relay-runtime';
+import { ConcreteRequest } from "relay-runtime";
 export type UserUpdateInput = {
   bio?: string | null | undefined;
   imageId?: string | null | undefined;
@@ -27,10 +27,13 @@ export type userEditMutation$data = {
     readonly user: {
       readonly bio: string | null | undefined;
       readonly id: string;
-      readonly image: {
-        readonly id: string;
-        readonly url: string | null | undefined;
-      } | null | undefined;
+      readonly image:
+        | {
+            readonly id: string;
+            readonly url: string | null | undefined;
+          }
+        | null
+        | undefined;
       readonly name: string | null | undefined;
       readonly username: string | null | undefined;
       readonly website: string | null | undefined;
@@ -42,124 +45,124 @@ export type userEditMutation = {
   variables: userEditMutation$variables;
 };
 
-const node: ConcreteRequest = (function(){
-var v0 = [
-  {
-    "defaultValue": null,
-    "kind": "LocalArgument",
-    "name": "input"
-  }
-],
-v1 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "id",
-  "storageKey": null
-},
-v2 = [
-  {
-    "alias": null,
-    "args": [
+const node: ConcreteRequest = (function () {
+  var v0 = [
       {
-        "kind": "Variable",
-        "name": "input",
-        "variableName": "input"
-      }
+        defaultValue: null,
+        kind: "LocalArgument",
+        name: "input",
+      },
     ],
-    "concreteType": "UserUpdatePayload",
-    "kind": "LinkedField",
-    "name": "userUpdate",
-    "plural": false,
-    "selections": [
+    v1 = {
+      alias: null,
+      args: null,
+      kind: "ScalarField",
+      name: "id",
+      storageKey: null,
+    },
+    v2 = [
       {
-        "alias": null,
-        "args": null,
-        "concreteType": "User",
-        "kind": "LinkedField",
-        "name": "user",
-        "plural": false,
-        "selections": [
-          (v1/*: any*/),
+        alias: null,
+        args: [
           {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "name",
-            "storageKey": null
+            kind: "Variable",
+            name: "input",
+            variableName: "input",
           },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "username",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "bio",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "website",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "concreteType": "Asset",
-            "kind": "LinkedField",
-            "name": "image",
-            "plural": false,
-            "selections": [
-              (v1/*: any*/),
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "url",
-                "storageKey": null
-              }
-            ],
-            "storageKey": null
-          }
         ],
-        "storageKey": null
-      }
-    ],
-    "storageKey": null
-  }
-];
-return {
-  "fragment": {
-    "argumentDefinitions": (v0/*: any*/),
-    "kind": "Fragment",
-    "metadata": null,
-    "name": "userEditMutation",
-    "selections": (v2/*: any*/),
-    "type": "Mutation",
-    "abstractKey": null
-  },
-  "kind": "Request",
-  "operation": {
-    "argumentDefinitions": (v0/*: any*/),
-    "kind": "Operation",
-    "name": "userEditMutation",
-    "selections": (v2/*: any*/)
-  },
-  "params": {
-    "id": "ba207af9c36c37c2c77048210f324bcd",
-    "metadata": {},
-    "name": "userEditMutation",
-    "operationKind": "mutation",
-    "text": null
-  }
-};
+        concreteType: "UserUpdatePayload",
+        kind: "LinkedField",
+        name: "userUpdate",
+        plural: false,
+        selections: [
+          {
+            alias: null,
+            args: null,
+            concreteType: "User",
+            kind: "LinkedField",
+            name: "user",
+            plural: false,
+            selections: [
+              v1 /*: any*/,
+              {
+                alias: null,
+                args: null,
+                kind: "ScalarField",
+                name: "name",
+                storageKey: null,
+              },
+              {
+                alias: null,
+                args: null,
+                kind: "ScalarField",
+                name: "username",
+                storageKey: null,
+              },
+              {
+                alias: null,
+                args: null,
+                kind: "ScalarField",
+                name: "bio",
+                storageKey: null,
+              },
+              {
+                alias: null,
+                args: null,
+                kind: "ScalarField",
+                name: "website",
+                storageKey: null,
+              },
+              {
+                alias: null,
+                args: null,
+                concreteType: "Asset",
+                kind: "LinkedField",
+                name: "image",
+                plural: false,
+                selections: [
+                  v1 /*: any*/,
+                  {
+                    alias: null,
+                    args: null,
+                    kind: "ScalarField",
+                    name: "url",
+                    storageKey: null,
+                  },
+                ],
+                storageKey: null,
+              },
+            ],
+            storageKey: null,
+          },
+        ],
+        storageKey: null,
+      },
+    ];
+  return {
+    fragment: {
+      argumentDefinitions: v0 /*: any*/,
+      kind: "Fragment",
+      metadata: null,
+      name: "userEditMutation",
+      selections: v2 /*: any*/,
+      type: "Mutation",
+      abstractKey: null,
+    },
+    kind: "Request",
+    operation: {
+      argumentDefinitions: v0 /*: any*/,
+      kind: "Operation",
+      name: "userEditMutation",
+      selections: v2 /*: any*/,
+    },
+    params: {
+      id: "ba207af9c36c37c2c77048210f324bcd",
+      metadata: {},
+      name: "userEditMutation",
+      operationKind: "mutation",
+      text: null,
+    },
+  };
 })();
 
 (node as any).hash = "12b6c8692172e73fe9f0409cd4dd46c5";

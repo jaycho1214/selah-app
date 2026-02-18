@@ -11,7 +11,7 @@
 
 // @relayRequestID 1133a645dc0bc8b259cf08830c192b5b
 
-import { ConcreteRequest } from 'relay-runtime';
+import { ConcreteRequest } from "relay-runtime";
 import { FragmentRefs } from "relay-runtime";
 export type notificationsScreenListPaginationQuery$variables = {
   count?: number | null | undefined;
@@ -25,295 +25,292 @@ export type notificationsScreenListPaginationQuery = {
   variables: notificationsScreenListPaginationQuery$variables;
 };
 
-const node: ConcreteRequest = (function(){
-var v0 = [
-  {
-    "defaultValue": 20,
-    "kind": "LocalArgument",
-    "name": "count"
-  },
-  {
-    "defaultValue": null,
-    "kind": "LocalArgument",
-    "name": "cursor"
-  }
-],
-v1 = [
-  {
-    "kind": "Variable",
-    "name": "after",
-    "variableName": "cursor"
-  },
-  {
-    "kind": "Variable",
-    "name": "first",
-    "variableName": "count"
-  }
-],
-v2 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "id",
-  "storageKey": null
-},
-v3 = {
-  "alias": null,
-  "args": null,
-  "concreteType": "BibleVerse",
-  "kind": "LinkedField",
-  "name": "verse",
-  "plural": false,
-  "selections": [
-    (v2/*: any*/),
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "book",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "chapter",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "verse",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "translation",
-      "storageKey": null
-    }
-  ],
-  "storageKey": null
-};
-return {
-  "fragment": {
-    "argumentDefinitions": (v0/*: any*/),
-    "kind": "Fragment",
-    "metadata": null,
-    "name": "notificationsScreenListPaginationQuery",
-    "selections": [
+const node: ConcreteRequest = (function () {
+  var v0 = [
       {
-        "args": [
-          {
-            "kind": "Variable",
-            "name": "count",
-            "variableName": "count"
-          },
-          {
-            "kind": "Variable",
-            "name": "cursor",
-            "variableName": "cursor"
-          }
-        ],
-        "kind": "FragmentSpread",
-        "name": "notificationsScreenListFragment"
-      }
-    ],
-    "type": "Query",
-    "abstractKey": null
-  },
-  "kind": "Request",
-  "operation": {
-    "argumentDefinitions": (v0/*: any*/),
-    "kind": "Operation",
-    "name": "notificationsScreenListPaginationQuery",
-    "selections": [
-      {
-        "alias": null,
-        "args": (v1/*: any*/),
-        "concreteType": "NotificationConnection",
-        "kind": "LinkedField",
-        "name": "notifications",
-        "plural": false,
-        "selections": [
-          {
-            "alias": null,
-            "args": null,
-            "concreteType": "NotificationEdge",
-            "kind": "LinkedField",
-            "name": "edges",
-            "plural": true,
-            "selections": [
-              {
-                "alias": null,
-                "args": null,
-                "concreteType": "Notification",
-                "kind": "LinkedField",
-                "name": "node",
-                "plural": false,
-                "selections": [
-                  (v2/*: any*/),
-                  {
-                    "alias": null,
-                    "args": null,
-                    "kind": "ScalarField",
-                    "name": "type",
-                    "storageKey": null
-                  },
-                  {
-                    "alias": null,
-                    "args": null,
-                    "kind": "ScalarField",
-                    "name": "createdAt",
-                    "storageKey": null
-                  },
-                  {
-                    "alias": null,
-                    "args": null,
-                    "concreteType": "User",
-                    "kind": "LinkedField",
-                    "name": "sender",
-                    "plural": false,
-                    "selections": [
-                      (v2/*: any*/),
-                      {
-                        "alias": null,
-                        "args": null,
-                        "kind": "ScalarField",
-                        "name": "name",
-                        "storageKey": null
-                      },
-                      {
-                        "alias": null,
-                        "args": null,
-                        "kind": "ScalarField",
-                        "name": "username",
-                        "storageKey": null
-                      },
-                      {
-                        "alias": null,
-                        "args": null,
-                        "concreteType": "Asset",
-                        "kind": "LinkedField",
-                        "name": "image",
-                        "plural": false,
-                        "selections": [
-                          {
-                            "alias": null,
-                            "args": null,
-                            "kind": "ScalarField",
-                            "name": "url",
-                            "storageKey": null
-                          },
-                          (v2/*: any*/)
-                        ],
-                        "storageKey": null
-                      }
-                    ],
-                    "storageKey": null
-                  },
-                  {
-                    "alias": null,
-                    "args": null,
-                    "concreteType": "BibleVersePost",
-                    "kind": "LinkedField",
-                    "name": "post",
-                    "plural": false,
-                    "selections": [
-                      (v2/*: any*/),
-                      {
-                        "alias": null,
-                        "args": null,
-                        "kind": "ScalarField",
-                        "name": "content",
-                        "storageKey": null
-                      },
-                      (v3/*: any*/),
-                      {
-                        "alias": null,
-                        "args": null,
-                        "concreteType": "BibleVersePost",
-                        "kind": "LinkedField",
-                        "name": "parentPost",
-                        "plural": false,
-                        "selections": [
-                          (v3/*: any*/),
-                          (v2/*: any*/)
-                        ],
-                        "storageKey": null
-                      }
-                    ],
-                    "storageKey": null
-                  },
-                  {
-                    "alias": null,
-                    "args": null,
-                    "kind": "ScalarField",
-                    "name": "__typename",
-                    "storageKey": null
-                  }
-                ],
-                "storageKey": null
-              },
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "cursor",
-                "storageKey": null
-              }
-            ],
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "concreteType": "PageInfo",
-            "kind": "LinkedField",
-            "name": "pageInfo",
-            "plural": false,
-            "selections": [
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "endCursor",
-                "storageKey": null
-              },
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "hasNextPage",
-                "storageKey": null
-              }
-            ],
-            "storageKey": null
-          }
-        ],
-        "storageKey": null
+        defaultValue: 20,
+        kind: "LocalArgument",
+        name: "count",
       },
       {
-        "alias": null,
-        "args": (v1/*: any*/),
-        "filters": null,
-        "handle": "connection",
-        "key": "notificationsScreenList_notifications",
-        "kind": "LinkedHandle",
-        "name": "notifications"
-      }
-    ]
-  },
-  "params": {
-    "id": "1133a645dc0bc8b259cf08830c192b5b",
-    "metadata": {},
-    "name": "notificationsScreenListPaginationQuery",
-    "operationKind": "query",
-    "text": null
-  }
-};
+        defaultValue: null,
+        kind: "LocalArgument",
+        name: "cursor",
+      },
+    ],
+    v1 = [
+      {
+        kind: "Variable",
+        name: "after",
+        variableName: "cursor",
+      },
+      {
+        kind: "Variable",
+        name: "first",
+        variableName: "count",
+      },
+    ],
+    v2 = {
+      alias: null,
+      args: null,
+      kind: "ScalarField",
+      name: "id",
+      storageKey: null,
+    },
+    v3 = {
+      alias: null,
+      args: null,
+      concreteType: "BibleVerse",
+      kind: "LinkedField",
+      name: "verse",
+      plural: false,
+      selections: [
+        v2 /*: any*/,
+        {
+          alias: null,
+          args: null,
+          kind: "ScalarField",
+          name: "book",
+          storageKey: null,
+        },
+        {
+          alias: null,
+          args: null,
+          kind: "ScalarField",
+          name: "chapter",
+          storageKey: null,
+        },
+        {
+          alias: null,
+          args: null,
+          kind: "ScalarField",
+          name: "verse",
+          storageKey: null,
+        },
+        {
+          alias: null,
+          args: null,
+          kind: "ScalarField",
+          name: "translation",
+          storageKey: null,
+        },
+      ],
+      storageKey: null,
+    };
+  return {
+    fragment: {
+      argumentDefinitions: v0 /*: any*/,
+      kind: "Fragment",
+      metadata: null,
+      name: "notificationsScreenListPaginationQuery",
+      selections: [
+        {
+          args: [
+            {
+              kind: "Variable",
+              name: "count",
+              variableName: "count",
+            },
+            {
+              kind: "Variable",
+              name: "cursor",
+              variableName: "cursor",
+            },
+          ],
+          kind: "FragmentSpread",
+          name: "notificationsScreenListFragment",
+        },
+      ],
+      type: "Query",
+      abstractKey: null,
+    },
+    kind: "Request",
+    operation: {
+      argumentDefinitions: v0 /*: any*/,
+      kind: "Operation",
+      name: "notificationsScreenListPaginationQuery",
+      selections: [
+        {
+          alias: null,
+          args: v1 /*: any*/,
+          concreteType: "NotificationConnection",
+          kind: "LinkedField",
+          name: "notifications",
+          plural: false,
+          selections: [
+            {
+              alias: null,
+              args: null,
+              concreteType: "NotificationEdge",
+              kind: "LinkedField",
+              name: "edges",
+              plural: true,
+              selections: [
+                {
+                  alias: null,
+                  args: null,
+                  concreteType: "Notification",
+                  kind: "LinkedField",
+                  name: "node",
+                  plural: false,
+                  selections: [
+                    v2 /*: any*/,
+                    {
+                      alias: null,
+                      args: null,
+                      kind: "ScalarField",
+                      name: "type",
+                      storageKey: null,
+                    },
+                    {
+                      alias: null,
+                      args: null,
+                      kind: "ScalarField",
+                      name: "createdAt",
+                      storageKey: null,
+                    },
+                    {
+                      alias: null,
+                      args: null,
+                      concreteType: "User",
+                      kind: "LinkedField",
+                      name: "sender",
+                      plural: false,
+                      selections: [
+                        v2 /*: any*/,
+                        {
+                          alias: null,
+                          args: null,
+                          kind: "ScalarField",
+                          name: "name",
+                          storageKey: null,
+                        },
+                        {
+                          alias: null,
+                          args: null,
+                          kind: "ScalarField",
+                          name: "username",
+                          storageKey: null,
+                        },
+                        {
+                          alias: null,
+                          args: null,
+                          concreteType: "Asset",
+                          kind: "LinkedField",
+                          name: "image",
+                          plural: false,
+                          selections: [
+                            {
+                              alias: null,
+                              args: null,
+                              kind: "ScalarField",
+                              name: "url",
+                              storageKey: null,
+                            },
+                            v2 /*: any*/,
+                          ],
+                          storageKey: null,
+                        },
+                      ],
+                      storageKey: null,
+                    },
+                    {
+                      alias: null,
+                      args: null,
+                      concreteType: "BibleVersePost",
+                      kind: "LinkedField",
+                      name: "post",
+                      plural: false,
+                      selections: [
+                        v2 /*: any*/,
+                        {
+                          alias: null,
+                          args: null,
+                          kind: "ScalarField",
+                          name: "content",
+                          storageKey: null,
+                        },
+                        v3 /*: any*/,
+                        {
+                          alias: null,
+                          args: null,
+                          concreteType: "BibleVersePost",
+                          kind: "LinkedField",
+                          name: "parentPost",
+                          plural: false,
+                          selections: [v3 /*: any*/, v2 /*: any*/],
+                          storageKey: null,
+                        },
+                      ],
+                      storageKey: null,
+                    },
+                    {
+                      alias: null,
+                      args: null,
+                      kind: "ScalarField",
+                      name: "__typename",
+                      storageKey: null,
+                    },
+                  ],
+                  storageKey: null,
+                },
+                {
+                  alias: null,
+                  args: null,
+                  kind: "ScalarField",
+                  name: "cursor",
+                  storageKey: null,
+                },
+              ],
+              storageKey: null,
+            },
+            {
+              alias: null,
+              args: null,
+              concreteType: "PageInfo",
+              kind: "LinkedField",
+              name: "pageInfo",
+              plural: false,
+              selections: [
+                {
+                  alias: null,
+                  args: null,
+                  kind: "ScalarField",
+                  name: "endCursor",
+                  storageKey: null,
+                },
+                {
+                  alias: null,
+                  args: null,
+                  kind: "ScalarField",
+                  name: "hasNextPage",
+                  storageKey: null,
+                },
+              ],
+              storageKey: null,
+            },
+          ],
+          storageKey: null,
+        },
+        {
+          alias: null,
+          args: v1 /*: any*/,
+          filters: null,
+          handle: "connection",
+          key: "notificationsScreenList_notifications",
+          kind: "LinkedHandle",
+          name: "notifications",
+        },
+      ],
+    },
+    params: {
+      id: "1133a645dc0bc8b259cf08830c192b5b",
+      metadata: {},
+      name: "notificationsScreenListPaginationQuery",
+      operationKind: "query",
+      text: null,
+    },
+  };
 })();
 
 (node as any).hash = "3d26ad6cba5beda3bab4f0e349285525";

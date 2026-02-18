@@ -1,4 +1,12 @@
-import { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  memo,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { View, StyleSheet, Dimensions, useColorScheme } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -48,6 +56,8 @@ interface BibleReaderProps {
     chapter: number,
     verseNumber: number,
   ) => void;
+  onReadingComplete?: (readingId: string) => void;
+  onAllReadingsComplete?: () => void;
 }
 
 export const BibleReader = memo(function BibleReader({
@@ -57,6 +67,8 @@ export const BibleReader = memo(function BibleReader({
   onPositionChange,
   onVersePress,
   onVerseLongPress,
+  onReadingComplete,
+  onAllReadingsComplete,
 }: BibleReaderProps) {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
@@ -69,9 +81,9 @@ export const BibleReader = memo(function BibleReader({
   const planCurrentIndex = useReadingPlanStore((s) => s.currentReadingIndex);
   const planActive = useReadingPlanStore((s) => s.activePlanId) != null;
   const setPlanIndex = useReadingPlanStore((s) => s.setCurrentReadingIndex);
-  const markReadingComplete = useReadingPlanStore(
-    (s) => s.markReadingComplete,
-  );
+  const markReadingComplete = useReadingPlanStore((s) => s.markReadingComplete);
+  const completedReadingIds = useReadingPlanStore((s) => s.completedReadingIds);
+  const setScrollProgress = useReadingPlanStore((s) => s.setScrollProgress);
 
   // Timer ref for transition cleanup
   const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -167,12 +179,7 @@ export const BibleReader = memo(function BibleReader({
       return { start: 1, end: reading.endVerse ?? Infinity };
     }
     return { start: 1, end: Infinity };
-  }, [
-    planActive,
-    planReadings,
-    planCurrentIndex,
-    currentChapter,
-  ]);
+  }, [planActive, planReadings, planCurrentIndex, currentChapter]);
 
   const triggerHaptic = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -185,6 +192,7 @@ export const BibleReader = memo(function BibleReader({
       setCurrentChapter(prev.chapter);
       setPosition(prev.book, prev.chapter);
       onPositionChange?.(prev.book, prev.chapter);
+      setScrollProgress(0);
 
       // Update plan reading index and scroll to verse
       if (planActive && planCurrentIndex > 0) {
@@ -200,7 +208,17 @@ export const BibleReader = memo(function BibleReader({
         100,
       );
     }
-  }, [prev, setPosition, onPositionChange, planActive, planCurrentIndex, planReadings, setPlanIndex, setScrollToVerse]);
+  }, [
+    prev,
+    setPosition,
+    onPositionChange,
+    setScrollProgress,
+    planActive,
+    planCurrentIndex,
+    planReadings,
+    setPlanIndex,
+    setScrollToVerse,
+  ]);
 
   const goToNext = useCallback(() => {
     if (next) {
@@ -209,11 +227,13 @@ export const BibleReader = memo(function BibleReader({
       setCurrentChapter(next.chapter);
       setPosition(next.book, next.chapter);
       onPositionChange?.(next.book, next.chapter);
+      setScrollProgress(0);
 
       // Plan-aware: mark current reading complete and advance index
       if (planActive && planCurrentIndex < planReadings.length - 1) {
         const currentReading = planReadings[planCurrentIndex];
         markReadingComplete(currentReading.id);
+        onReadingComplete?.(currentReading.id);
         const nextReading = planReadings[planCurrentIndex + 1];
         if (nextReading?.startVerse) {
           setScrollToVerse(nextReading.startVerse);
@@ -226,7 +246,45 @@ export const BibleReader = memo(function BibleReader({
         100,
       );
     }
-  }, [next, setPosition, onPositionChange, planActive, planCurrentIndex, planReadings, markReadingComplete, setPlanIndex, setScrollToVerse]);
+  }, [
+    next,
+    setPosition,
+    onPositionChange,
+    setScrollProgress,
+    planActive,
+    planCurrentIndex,
+    planReadings,
+    markReadingComplete,
+    onReadingComplete,
+    setPlanIndex,
+    setScrollToVerse,
+  ]);
+
+  // Complete the last reading and trigger day completion
+  const completeLastReading = useCallback(() => {
+    if (!planActive || planReadings.length === 0) return;
+    const lastReading = planReadings[planCurrentIndex];
+    if (!lastReading) return;
+
+    // Mark last reading complete
+    markReadingComplete(lastReading.id);
+
+    // Check if ALL readings are now complete
+    const allComplete = planReadings.every(
+      (r) => r.id === lastReading.id || completedReadingIds.has(r.id),
+    );
+
+    if (allComplete) {
+      onAllReadingsComplete?.();
+    }
+  }, [
+    planActive,
+    planReadings,
+    planCurrentIndex,
+    completedReadingIds,
+    markReadingComplete,
+    onAllReadingsComplete,
+  ]);
 
   // Pan gesture with sticky resistance
   const panGesture = Gesture.Pan()
@@ -240,8 +298,9 @@ export const BibleReader = memo(function BibleReader({
       // Apply resistance - movement is slower than finger (sticky feel)
       let newX = e.translationX * RESISTANCE;
 
-      // Extra resistance at boundaries
-      if ((newX > 0 && !prev) || (newX < 0 && !next)) {
+      // Extra resistance at boundaries (skip when at plan's last reading so user can swipe to complete)
+      const atPlanEnd = planActive && newX < 0 && !next;
+      if (!atPlanEnd && ((newX > 0 && !prev) || (newX < 0 && !next))) {
         newX = newX * 0.3; // Even more resistance at edges
       }
 
@@ -252,6 +311,9 @@ export const BibleReader = memo(function BibleReader({
 
       const shouldGoNext = translateX.value < -SWIPE_THRESHOLD && next;
       const shouldGoPrev = translateX.value > SWIPE_THRESHOLD && prev;
+      // At last reading boundary — swipe left past threshold to complete
+      const shouldCompleteLast =
+        translateX.value < -SWIPE_THRESHOLD && !next && planActive;
 
       if (shouldGoNext) {
         // Change page immediately, animate reset
@@ -261,6 +323,10 @@ export const BibleReader = memo(function BibleReader({
       } else if (shouldGoPrev) {
         runOnJS(triggerHaptic)();
         runOnJS(goToPrev)();
+        translateX.value = withSpring(0, STICKY_SPRING);
+      } else if (shouldCompleteLast) {
+        runOnJS(triggerHaptic)();
+        runOnJS(completeLastReading)();
         translateX.value = withSpring(0, STICKY_SPRING);
       } else {
         // Snap back with jelly wobble

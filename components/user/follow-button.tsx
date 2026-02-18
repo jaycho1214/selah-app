@@ -87,9 +87,7 @@ export const FollowButton = memo(function FollowButton({
           const followingCount =
             (currentUser.getValue("followingCount") as number) ?? 0;
           currentUser.setValue(
-            isFollowing
-              ? Math.max(0, followingCount - 1)
-              : followingCount + 1,
+            isFollowing ? Math.max(0, followingCount - 1) : followingCount + 1,
             "followingCount",
           );
         }

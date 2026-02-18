@@ -61,10 +61,7 @@ export const ComposerVerseReferenceDropdown = memo(
           ]}
         >
           <View
-            style={[
-              styles.iconContainer,
-              { backgroundColor: "#0d948820" },
-            ]}
+            style={[styles.iconContainer, { backgroundColor: "#0d948820" }]}
           >
             <BookOpen size={16} color="#0d9488" />
           </View>

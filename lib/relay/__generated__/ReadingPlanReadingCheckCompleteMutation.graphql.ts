@@ -11,7 +11,7 @@
 
 // @relayRequestID c71f21a1138f3c1a48d0667b51a2b5b5
 
-import { ConcreteRequest } from 'relay-runtime';
+import { ConcreteRequest } from "relay-runtime";
 export type ReadingPlanReadingCheckCompleteMutation$variables = {
   dayId: string;
   planId: string;
@@ -25,80 +25,72 @@ export type ReadingPlanReadingCheckCompleteMutation = {
   variables: ReadingPlanReadingCheckCompleteMutation$variables;
 };
 
-const node: ConcreteRequest = (function(){
-var v0 = {
-  "defaultValue": null,
-  "kind": "LocalArgument",
-  "name": "dayId"
-},
-v1 = {
-  "defaultValue": null,
-  "kind": "LocalArgument",
-  "name": "planId"
-},
-v2 = {
-  "defaultValue": null,
-  "kind": "LocalArgument",
-  "name": "readingId"
-},
-v3 = [
-  {
-    "alias": null,
-    "args": [
+const node: ConcreteRequest = (function () {
+  var v0 = {
+      defaultValue: null,
+      kind: "LocalArgument",
+      name: "dayId",
+    },
+    v1 = {
+      defaultValue: null,
+      kind: "LocalArgument",
+      name: "planId",
+    },
+    v2 = {
+      defaultValue: null,
+      kind: "LocalArgument",
+      name: "readingId",
+    },
+    v3 = [
       {
-        "kind": "Variable",
-        "name": "dayId",
-        "variableName": "dayId"
+        alias: null,
+        args: [
+          {
+            kind: "Variable",
+            name: "dayId",
+            variableName: "dayId",
+          },
+          {
+            kind: "Variable",
+            name: "planId",
+            variableName: "planId",
+          },
+          {
+            kind: "Variable",
+            name: "readingId",
+            variableName: "readingId",
+          },
+        ],
+        kind: "ScalarField",
+        name: "readingPlanReadingComplete",
+        storageKey: null,
       },
-      {
-        "kind": "Variable",
-        "name": "planId",
-        "variableName": "planId"
-      },
-      {
-        "kind": "Variable",
-        "name": "readingId",
-        "variableName": "readingId"
-      }
-    ],
-    "kind": "ScalarField",
-    "name": "readingPlanReadingComplete",
-    "storageKey": null
-  }
-];
-return {
-  "fragment": {
-    "argumentDefinitions": [
-      (v0/*: any*/),
-      (v1/*: any*/),
-      (v2/*: any*/)
-    ],
-    "kind": "Fragment",
-    "metadata": null,
-    "name": "ReadingPlanReadingCheckCompleteMutation",
-    "selections": (v3/*: any*/),
-    "type": "Mutation",
-    "abstractKey": null
-  },
-  "kind": "Request",
-  "operation": {
-    "argumentDefinitions": [
-      (v1/*: any*/),
-      (v2/*: any*/),
-      (v0/*: any*/)
-    ],
-    "kind": "Operation",
-    "name": "ReadingPlanReadingCheckCompleteMutation",
-    "selections": (v3/*: any*/)
-  },
-  "params": {
-    "id": "c71f21a1138f3c1a48d0667b51a2b5b5",
-    "metadata": {},
-    "name": "ReadingPlanReadingCheckCompleteMutation",
-    "operationKind": "mutation",
-    "text": null
-  }
-};
+    ];
+  return {
+    fragment: {
+      argumentDefinitions: [v0 /*: any*/, v1 /*: any*/, v2 /*: any*/],
+      kind: "Fragment",
+      metadata: null,
+      name: "ReadingPlanReadingCheckCompleteMutation",
+      selections: v3 /*: any*/,
+      type: "Mutation",
+      abstractKey: null,
+    },
+    kind: "Request",
+    operation: {
+      argumentDefinitions: [v1 /*: any*/, v2 /*: any*/, v0 /*: any*/],
+      kind: "Operation",
+      name: "ReadingPlanReadingCheckCompleteMutation",
+      selections: v3 /*: any*/,
+    },
+    params: {
+      id: "c71f21a1138f3c1a48d0667b51a2b5b5",
+      metadata: {},
+      name: "ReadingPlanReadingCheckCompleteMutation",
+      operationKind: "mutation",
+      text: null,
+    },
+  };
 })();
 
 (node as any).hash = "7a44909487841772fda12c2b7c24e10a";

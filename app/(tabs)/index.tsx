@@ -1,3 +1,17 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Pressable,
+  StatusBar,
+  StyleSheet,
+  useColorScheme,
+  View,
+} from "react-native";
+import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
+import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
+import { graphql, useMutation } from "react-relay";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { BibleNavigator } from "@/components/bible/bible-navigator";
 import { BibleReader } from "@/components/bible/bible-reader";
 import { TranslationSelector } from "@/components/bible/translation-selector";
@@ -6,6 +20,10 @@ import {
   ReadingPlanPill,
   ReadingPlanSheet,
 } from "@/components/reading-plans/ReadingPlanBanner";
+import {
+  DayCompletionSheet,
+  type DayCompletionSheetRef,
+} from "@/components/reading-plans/DayCompletionSheet";
 import { Text } from "@/components/ui/text";
 import { useColors } from "@/hooks/use-colors";
 import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
@@ -13,20 +31,23 @@ import type { BibleBook } from "@/lib/bible/types";
 import { useBibleStore } from "@/lib/stores/bible-store";
 import { useReadingPlanStore } from "@/lib/stores/reading-plan-store";
 import { useVerseSelectionStore } from "@/lib/stores/verse-selection-store";
-import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
-import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Pressable,
-  StatusBar,
-  StyleSheet,
-  useColorScheme,
-  View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import type { TabsReadingCompleteSwipeMutation } from "@/lib/relay/__generated__/TabsReadingCompleteSwipeMutation.graphql";
 
 const hasGlass = isLiquidGlassAvailable();
+
+const readingCompleteSwipeMutation = graphql`
+  mutation TabsReadingCompleteSwipeMutation(
+    $planId: ID!
+    $readingId: ID!
+    $dayId: ID!
+  ) {
+    readingPlanReadingComplete(
+      planId: $planId
+      readingId: $readingId
+      dayId: $dayId
+    )
+  }
+`;
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -41,6 +62,9 @@ export default function HomeScreen() {
   const setPosition = useBibleStore((s) => s.setPosition);
   const scrollToVerse = useBibleStore((s) => s.scrollToVerse);
   const activePlanId = useReadingPlanStore((s) => s.activePlanId);
+  const dayJustCompleted = useReadingPlanStore((s) => s.dayJustCompleted);
+  const activeDayNumber = useReadingPlanStore((s) => s.activeDayNumber);
+  const planTitle = useReadingPlanStore((s) => s.planTitle);
   const isSelecting = useVerseSelectionStore((s) => s.isSelecting);
   const toggleVerse = useVerseSelectionStore((s) => s.toggleVerse);
   const clearSelection = useVerseSelectionStore((s) => s.clearSelection);
@@ -49,6 +73,11 @@ export default function HomeScreen() {
   const [translationSelectorVisible, setTranslationSelectorVisible] =
     useState(false);
   const [planSheetVisible, setPlanSheetVisible] = useState(false);
+  const dayCompletionRef = useRef<DayCompletionSheetRef>(null);
+
+  const [commitReadingComplete] = useMutation<TabsReadingCompleteSwipeMutation>(
+    readingCompleteSwipeMutation,
+  );
 
   // Key to force BibleReader remount on position change
   const [readerKey, setReaderKey] = useState(0);
@@ -59,6 +88,16 @@ export default function HomeScreen() {
       setReaderKey((k) => k + 1);
     }
   }, [scrollToVerse]);
+
+  // Watch for day completion trigger (from swipe or manual toggle)
+  useEffect(() => {
+    if (dayJustCompleted) {
+      setPlanSheetVisible(false);
+      setTimeout(() => {
+        dayCompletionRef.current?.present();
+      }, 300);
+    }
+  }, [dayJustCompleted]);
 
   const handlePositionChange = useCallback(
     (book: BibleBook, chapter: number) => {
@@ -104,6 +143,51 @@ export default function HomeScreen() {
     [toggleVerse],
   );
 
+  // When a single reading is completed via swipe
+  const handleReadingComplete = useCallback(
+    (readingId: string) => {
+      const state = useReadingPlanStore.getState();
+      if (!state.activePlanId || !state.activeDayId) return;
+
+      commitReadingComplete({
+        variables: {
+          planId: state.activePlanId,
+          readingId,
+          dayId: state.activeDayId,
+        },
+      });
+    },
+    [commitReadingComplete],
+  );
+
+  // When all readings are completed via swipe
+  const handleAllReadingsComplete = useCallback(() => {
+    const state = useReadingPlanStore.getState();
+    if (!state.activePlanId || !state.activeDayId) return;
+
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+    // Fire reading complete mutations for all readings
+    for (const reading of state.readings) {
+      commitReadingComplete({
+        variables: {
+          planId: state.activePlanId,
+          readingId: reading.id,
+          dayId: state.activeDayId,
+        },
+      });
+    }
+
+    // Trigger celebration
+    state.setDayJustCompleted(true);
+  }, [commitReadingComplete]);
+
+  const handleDayCompletionDismiss = useCallback(() => {
+    const store = useReadingPlanStore.getState();
+    store.setDayJustCompleted(false);
+    store.clearPlanSession();
+  }, []);
+
   const bookDetails = BIBLE_BOOK_DETAILS[currentBook as BibleBook];
   const bookName = bookDetails?.name ?? currentBook;
   const hasPlan = activePlanId != null;
@@ -134,6 +218,8 @@ export default function HomeScreen() {
           onPositionChange={handlePositionChange}
           onVersePress={handleVersePress}
           onVerseLongPress={handleVerseLongPress}
+          onReadingComplete={handleReadingComplete}
+          onAllReadingsComplete={handleAllReadingsComplete}
         />
       </View>
 
@@ -156,9 +242,7 @@ export default function HomeScreen() {
               {/* Plan badge on the left when active */}
               {hasPlan && (
                 <>
-                  <ReadingPlanPill
-                    onPress={() => setPlanSheetVisible(true)}
-                  />
+                  <ReadingPlanPill onPress={() => setPlanSheetVisible(true)} />
                   <View
                     style={[
                       styles.separator,
@@ -233,6 +317,14 @@ export default function HomeScreen() {
       <ReadingPlanSheet
         visible={planSheetVisible}
         onClose={() => setPlanSheetVisible(false)}
+      />
+
+      {/* Day completion celebration sheet */}
+      <DayCompletionSheet
+        ref={dayCompletionRef}
+        dayNumber={activeDayNumber}
+        planTitle={planTitle}
+        onDismiss={handleDayCompletionDismiss}
       />
     </View>
   );

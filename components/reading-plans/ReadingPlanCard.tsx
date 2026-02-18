@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
-import { Calendar, Users } from "lucide-react-native";
+import { BookMarked, BookOpen, Calendar, Users } from "lucide-react-native";
 import { graphql, useFragment } from "react-relay";
 
 import { Text } from "@/components/ui/text";
@@ -21,6 +21,9 @@ const fragment = graphql`
     isFeatured
     isOfficial
     status
+    coversFullBible
+    coversOldTestament
+    coversNewTestament
     coverImage {
       url
     }
@@ -66,6 +69,9 @@ export const ReadingPlanCard = memo(function ReadingPlanCard({
     }),
     [colors],
   );
+
+  const hasCoverage =
+    data.coversFullBible || data.coversOldTestament || data.coversNewTestament;
 
   return (
     <Pressable
@@ -114,6 +120,57 @@ export const ReadingPlanCard = memo(function ReadingPlanCard({
             </Text>
           )}
         </View>
+
+        {/* Coverage badges */}
+        {hasCoverage && (
+          <View style={styles.coverageRow}>
+            {data.coversFullBible ? (
+              <View
+                style={[styles.coverageBadge, { borderColor: colors.border }]}
+              >
+                <BookMarked size={10} color={colors.textMuted} />
+                <Text
+                  style={[styles.coverageBadgeText, { color: colors.text }]}
+                >
+                  Full Bible
+                </Text>
+              </View>
+            ) : (
+              <>
+                {data.coversOldTestament && (
+                  <View
+                    style={[
+                      styles.coverageBadge,
+                      { borderColor: colors.border },
+                    ]}
+                  >
+                    <BookOpen size={10} color={colors.textMuted} />
+                    <Text
+                      style={[styles.coverageBadgeText, { color: colors.text }]}
+                    >
+                      OT
+                    </Text>
+                  </View>
+                )}
+                {data.coversNewTestament && (
+                  <View
+                    style={[
+                      styles.coverageBadge,
+                      { borderColor: colors.border },
+                    ]}
+                  >
+                    <BookOpen size={10} color={colors.textMuted} />
+                    <Text
+                      style={[styles.coverageBadgeText, { color: colors.text }]}
+                    >
+                      NT
+                    </Text>
+                  </View>
+                )}
+              </>
+            )}
+          </View>
+        )}
 
         <View style={styles.footer}>
           <View style={styles.authorRow}>
@@ -209,6 +266,24 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 13,
     lineHeight: 18,
+  },
+  coverageRow: {
+    flexDirection: "row",
+    gap: 6,
+    flexWrap: "wrap",
+  },
+  coverageBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 4,
+    borderWidth: 1,
+  },
+  coverageBadgeText: {
+    fontSize: 10,
+    fontWeight: "600",
   },
   footer: {
     flexDirection: "row",

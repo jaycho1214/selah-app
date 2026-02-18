@@ -20,6 +20,12 @@ interface ReadingPlanStore {
   currentReadingIndex: number;
   completedReadingIds: Set<string>;
 
+  // Scroll progress for circular indicator (0-1)
+  scrollProgress: number;
+
+  // Day completion celebration trigger
+  dayJustCompleted: boolean;
+
   // Actions
   startPlanSession: (data: {
     planId: string;
@@ -34,6 +40,8 @@ interface ReadingPlanStore {
   setCurrentReadingIndex: (index: number) => void;
   markReadingComplete: (readingId: string) => void;
   markReadingUncomplete: (readingId: string) => void;
+  setScrollProgress: (progress: number) => void;
+  setDayJustCompleted: (completed: boolean) => void;
 }
 
 export const useReadingPlanStore = create<ReadingPlanStore>()((set) => ({
@@ -45,6 +53,8 @@ export const useReadingPlanStore = create<ReadingPlanStore>()((set) => ({
   readings: [],
   currentReadingIndex: 0,
   completedReadingIds: new Set(),
+  scrollProgress: 0,
+  dayJustCompleted: false,
 
   startPlanSession: (data) =>
     set({
@@ -56,6 +66,8 @@ export const useReadingPlanStore = create<ReadingPlanStore>()((set) => ({
       readings: data.readings,
       currentReadingIndex: 0,
       completedReadingIds: data.completedReadingIds,
+      scrollProgress: 0,
+      dayJustCompleted: false,
     }),
 
   clearPlanSession: () =>
@@ -68,6 +80,8 @@ export const useReadingPlanStore = create<ReadingPlanStore>()((set) => ({
       readings: [],
       currentReadingIndex: 0,
       completedReadingIds: new Set(),
+      scrollProgress: 0,
+      dayJustCompleted: false,
     }),
 
   setCurrentReadingIndex: (index) => set({ currentReadingIndex: index }),
@@ -83,4 +97,8 @@ export const useReadingPlanStore = create<ReadingPlanStore>()((set) => ({
       next.delete(readingId);
       return { completedReadingIds: next };
     }),
+
+  setScrollProgress: (progress) => set({ scrollProgress: progress }),
+
+  setDayJustCompleted: (completed) => set({ dayJustCompleted: completed }),
 }));

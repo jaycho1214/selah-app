@@ -127,7 +127,10 @@ function extractPlainText(content: string | null | undefined): string {
       if (node.type === "mention" && (node as { username?: string }).username) {
         texts.push(`@${(node as { username?: string }).username}`);
       }
-      if (node.type === "verse-reference" && (node as { label?: string }).label) {
+      if (
+        node.type === "verse-reference" &&
+        (node as { label?: string }).label
+      ) {
         texts.push((node as { label?: string }).label!);
       }
       if (node.children && Array.isArray(node.children)) {

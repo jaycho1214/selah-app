@@ -62,7 +62,16 @@ export const ReadingPlanDayCard = memo(function ReadingPlanDayCard({
   const colors = useColors();
 
   const readingsText = useMemo(
-    () => data.readings.map(formatReading).join(", "),
+    () =>
+      (data.readings ?? [])
+        .map((r) =>
+          formatReading({
+            ...r,
+            book: r.book ?? "",
+            startChapter: r.startChapter ?? 1,
+          }),
+        )
+        .join(", "),
     [data.readings],
   );
 

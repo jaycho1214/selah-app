@@ -55,6 +55,7 @@ import { useNotificationSetup } from "@/hooks/use-notifications";
 import { AnimatedSplashScreen } from "@/components/animated-splash-screen";
 import { useColors } from "@/hooks/use-colors";
 import { PostHogProvider } from "@/components/providers/posthog-provider";
+import { PostHogIdentifier } from "@/components/providers/posthog-identifier";
 import { VerseReferenceSheetProvider } from "@/components/providers/verse-reference-sheet-provider";
 import { CommonStyles } from "@/constants/styles";
 
@@ -152,6 +153,7 @@ export default function RootLayout() {
                 <RelayProvider>
                   <SessionProvider>
                     <PostHogProvider>
+                      <PostHogIdentifier />
                       <ThemeProvider>
                         <VerseReferenceSheetProvider>
                           <RootLayoutNav />

@@ -185,6 +185,7 @@ type Mutation {
   notificationMarkAsRead: Boolean!
   pollUnvote(pollId: ID!): PollUnvotePayload!
   pollVote(optionId: ID!, pollId: ID!): PollVotePayload!
+  readingPlanCatchUp(planId: ID!): ReadingPlanParticipant
   readingPlanCreate(input: ReadingPlanCreateInput!): ReadingPlan!
   readingPlanDayComplete(dayId: ID!, planId: ID!): Boolean
   readingPlanDayDelete(dayId: ID!, planId: ID!): Boolean
@@ -194,6 +195,7 @@ type Mutation {
   readingPlanDelete(id: ID!): Boolean
   readingPlanJoin(planId: ID!): ReadingPlanParticipant!
   readingPlanLeave(planId: ID!): Boolean
+  readingPlanMilestoneShare(content: JSON!, milestoneId: ID!, parentId: String!): ReadingPlanMilestone
   readingPlanNewVersion(changelog: String, planId: ID!): ReadingPlanVersion!
   readingPlanPublish(id: ID!): ReadingPlan
   readingPlanReadingComplete(dayId: ID!, planId: ID!, readingId: ID!): Boolean
@@ -314,6 +316,9 @@ type Query {
   bibleVersesByReferenceSearch(limit: Int, query: String!, translation: BibleTranslation!): [BibleVerse!]!
   followingBibleVersePosts(after: String, before: String, first: Int, last: Int): BibleVersePostConnection!
   myJoinedReadingPlans(after: ID, first: Int = 20): [ReadingPlan!]
+  myReadingPlanMilestones(after: ID, first: Int = 20): [ReadingPlanMilestone!]
+  myReadingPlanStats: UserReadingPlanStats!
+  myReadingPlanStreak: ReadingPlanStreak
   myReadingPlans(after: ID, first: Int = 20, status: ReadingPlanStatus): [ReadingPlan!]
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
@@ -341,6 +346,9 @@ type QueryUsersConnectionEdge {
 type ReadingPlan implements Node {
   author: User!
   coverImage: Asset
+  coversFullBible: Boolean
+  coversNewTestament: Boolean
+  coversOldTestament: Boolean
   createdAt: DateTime
   currentVersion: ReadingPlanVersion
   dayCount: Int
@@ -401,7 +409,23 @@ input ReadingPlanDayReorderInput {
   newDayNumber: Int!
 }
 
+type ReadingPlanMilestone implements Node {
+  createdAt: DateTime
+  id: ID!
+  metadata: JSON
+  milestoneType: ReadingPlanMilestoneType
+  plan: ReadingPlan
+}
+
+enum ReadingPlanMilestoneType {
+  BIBLE_COVERAGE_COMPLETION
+  DAY_COMPLETION
+  PLAN_COMPLETION
+  STREAK_ACHIEVEMENT
+}
+
 type ReadingPlanParticipant implements Node {
+  behindDaysCount: Int
   completedAt: DateTime
   completedDaysCount: Int
   hideProgress: Boolean
@@ -429,6 +453,12 @@ enum ReadingPlanStatus {
   ARCHIVED
   DRAFT
   PUBLISHED
+}
+
+type ReadingPlanStreak {
+  currentStreak: Int
+  lastActivityDate: String
+  longestStreak: Int
 }
 
 input ReadingPlanUpdateInput {
@@ -495,6 +525,7 @@ type UpdateUserSettingsPayload {
 }
 
 type User implements Node {
+  behindReadingPlanDaysCount: Int
   bibleReadStates: [UserBibleReadState!]!
   bibleVerseChildPosts(after: String, before: String, first: Int, last: Int): BibleVersePostConnection!
   bibleVersePosts(after: String, before: String, first: Int, last: Int): BibleVersePostConnection!
@@ -535,6 +566,13 @@ input UserFilterInput {
 
 type UserFollowPayload {
   user: User!
+}
+
+type UserReadingPlanStats {
+  completedPlansCount: Int
+  fullBibleCount: Int
+  newTestamentCount: Int
+  oldTestamentCount: Int
 }
 
 type UserSettings {

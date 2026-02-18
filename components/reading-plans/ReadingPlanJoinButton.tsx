@@ -1,11 +1,10 @@
-import { memo, useCallback, useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { memo, useCallback } from "react";
+import { ActivityIndicator, Alert, StyleSheet, View } from "react-native";
 import * as Haptics from "expo-haptics";
 import { graphql, useMutation } from "react-relay";
 
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { Confetti } from "@/components/ui/confetti";
 import { useColors } from "@/hooks/use-colors";
 import type { ReadingPlanJoinButtonJoinMutation } from "@/lib/relay/__generated__/ReadingPlanJoinButtonJoinMutation.graphql";
 import type { ReadingPlanJoinButtonLeaveMutation } from "@/lib/relay/__generated__/ReadingPlanJoinButtonLeaveMutation.graphql";
@@ -42,14 +41,15 @@ const leaveMutation = graphql`
 interface ReadingPlanJoinButtonProps {
   planId: string;
   isJoined: boolean;
+  onJoined?: () => void;
 }
 
 export const ReadingPlanJoinButton = memo(function ReadingPlanJoinButton({
   planId,
   isJoined,
+  onJoined,
 }: ReadingPlanJoinButtonProps) {
   const colors = useColors();
-  const [showConfetti, setShowConfetti] = useState(false);
   const [commitJoin, isJoining] =
     useMutation<ReadingPlanJoinButtonJoinMutation>(joinMutation);
   const [commitLeave, isLeaving] =
@@ -95,11 +95,11 @@ export const ReadingPlanJoinButton = memo(function ReadingPlanJoinButton({
         },
         onCompleted: () => {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          setShowConfetti(true);
+          onJoined?.();
         },
       });
     }
-  }, [isJoined, planId, handleLeave, commitJoin]);
+  }, [isJoined, planId, handleLeave, commitJoin, onJoined]);
 
   const isLoading = isJoining || isLeaving;
 
@@ -112,16 +112,22 @@ export const ReadingPlanJoinButton = memo(function ReadingPlanJoinButton({
         disabled={isLoading}
         style={styles.button}
       >
-        <Text
-          style={[
-            styles.text,
-            { color: isJoined ? colors.text : colors.primaryForeground },
-          ]}
-        >
-          {isLoading ? "..." : isJoined ? "Leave" : "Join"}
-        </Text>
+        {isLoading ? (
+          <ActivityIndicator
+            size="small"
+            color={isJoined ? colors.text : colors.primaryForeground}
+          />
+        ) : (
+          <Text
+            style={[
+              styles.text,
+              { color: isJoined ? colors.text : colors.primaryForeground },
+            ]}
+          >
+            {isJoined ? "Leave" : "Join"}
+          </Text>
+        )}
       </Button>
-      {showConfetti && <Confetti onComplete={() => setShowConfetti(false)} />}
     </View>
   );
 });

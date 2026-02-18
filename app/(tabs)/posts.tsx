@@ -461,7 +461,7 @@ function FollowingFeedContent({
   const handleLike = useCallback(
     (postId: string) => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      capture("post_liked", { post_id: postId, feed: "following" });
+      capture("post_liked", { post_id: postId });
       commitLike({
         variables: { id: postId },
         optimisticUpdater: (store) => {
@@ -480,7 +480,7 @@ function FollowingFeedContent({
   const handleUnlike = useCallback(
     (postId: string) => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      capture("post_unliked", { post_id: postId, feed: "following" });
+      capture("post_unliked", { post_id: postId });
       commitUnlike({
         variables: { id: postId },
         optimisticUpdater: (store) => {
@@ -499,7 +499,7 @@ function FollowingFeedContent({
   const handleDelete = useCallback(
     (postId: string) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      capture("post_deleted", { post_id: postId, feed: "following" });
+      capture("post_deleted", { post_id: postId });
       const connections = connectionIdRef.current
         ? [connectionIdRef.current]
         : [];

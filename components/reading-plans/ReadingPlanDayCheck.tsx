@@ -3,7 +3,13 @@ import { Pressable, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
 import { Check } from "lucide-react-native";
 import { graphql, useMutation } from "react-relay";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from "react-native-reanimated";
 
+import { MiniConfetti } from "@/components/ui/mini-confetti";
 import { useColors } from "@/hooks/use-colors";
 import type { ReadingPlanDayCheckCompleteMutation } from "@/lib/relay/__generated__/ReadingPlanDayCheckCompleteMutation.graphql";
 import type { ReadingPlanDayCheckUncompleteMutation } from "@/lib/relay/__generated__/ReadingPlanDayCheckUncompleteMutation.graphql";
@@ -33,6 +39,8 @@ export const ReadingPlanDayCheck = memo(function ReadingPlanDayCheck({
 }: ReadingPlanDayCheckProps) {
   const colors = useColors();
   const [completed, setCompleted] = useState(isCompleted);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const scale = useSharedValue(1);
 
   // Sync local state when prop changes (e.g. after pull-to-refresh)
   useEffect(() => {
@@ -44,12 +52,22 @@ export const ReadingPlanDayCheck = memo(function ReadingPlanDayCheck({
   const [commitUncomplete] =
     useMutation<ReadingPlanDayCheckUncompleteMutation>(uncompleteMutation);
 
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
   const handlePress = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const newState = !completed;
     setCompleted(newState);
 
     if (newState) {
+      // Scale animation: 1 → 1.2 → 1
+      scale.value = withSpring(1.2, { damping: 8, stiffness: 400 }, () => {
+        scale.value = withSpring(1, { damping: 12, stiffness: 200 });
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setShowConfetti(true);
+
       commitComplete({
         variables: { planId, dayId },
         updater: (store) => {
@@ -64,6 +82,7 @@ export const ReadingPlanDayCheck = memo(function ReadingPlanDayCheck({
         onError: () => setCompleted(false),
       });
     } else {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       commitUncomplete({
         variables: { planId, dayId },
         updater: (store) => {
@@ -78,22 +97,29 @@ export const ReadingPlanDayCheck = memo(function ReadingPlanDayCheck({
         onError: () => setCompleted(true),
       });
     }
-  }, [completed, planId, dayId, commitComplete, commitUncomplete]);
+  }, [completed, planId, dayId, commitComplete, commitUncomplete, scale]);
 
   return (
-    <Pressable
-      onPress={handlePress}
-      style={[
-        styles.checkbox,
-        {
-          borderColor: completed ? colors.accent : colors.border,
-          backgroundColor: completed ? colors.accent : "transparent",
-        },
-      ]}
-      hitSlop={8}
-    >
-      {completed && <Check size={14} color="#fff" strokeWidth={3} />}
-    </Pressable>
+    <>
+      <Animated.View style={animatedStyle}>
+        <Pressable
+          onPress={handlePress}
+          style={[
+            styles.checkbox,
+            {
+              borderColor: completed ? colors.accent : colors.border,
+              backgroundColor: completed ? colors.accent : "transparent",
+            },
+          ]}
+          hitSlop={8}
+        >
+          {completed && <Check size={14} color="#fff" strokeWidth={3} />}
+        </Pressable>
+      </Animated.View>
+      {showConfetti && (
+        <MiniConfetti onComplete={() => setShowConfetti(false)} />
+      )}
+    </>
   );
 });
 

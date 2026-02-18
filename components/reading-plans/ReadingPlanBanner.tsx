@@ -1,10 +1,5 @@
 import { memo, useCallback, useEffect, useRef } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  useColorScheme,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, useColorScheme, View } from "react-native";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -15,6 +10,7 @@ import * as Haptics from "expo-haptics";
 import { CheckCircle2, Circle, X } from "lucide-react-native";
 import { graphql, useMutation } from "react-relay";
 
+import { ReadingPlanCircleProgress } from "@/components/reading-plans/ReadingPlanCircleProgress";
 import { Text } from "@/components/ui/text";
 import { useColors } from "@/hooks/use-colors";
 import { useReadingPlanStore } from "@/lib/stores/reading-plan-store";
@@ -63,22 +59,35 @@ export const ReadingPlanPill = memo(function ReadingPlanPill({
   const colors = useColors();
   const activeDayNumber = useReadingPlanStore((s) => s.activeDayNumber);
   const readings = useReadingPlanStore((s) => s.readings);
-  const completedReadingIds = useReadingPlanStore(
-    (s) => s.completedReadingIds,
-  );
+  const completedReadingIds = useReadingPlanStore((s) => s.completedReadingIds);
+  const currentReadingIndex = useReadingPlanStore((s) => s.currentReadingIndex);
+  const scrollProgress = useReadingPlanStore((s) => s.scrollProgress);
 
   const completedCount = readings.filter((r) =>
     completedReadingIds.has(r.id),
   ).length;
   const allDone = completedCount === readings.length && readings.length > 0;
 
+  // Overall progress: completed readings + fractional scroll of current reading
+  const currentReading = readings[currentReadingIndex];
+  const isCurrentDone = currentReading
+    ? completedReadingIds.has(currentReading.id)
+    : false;
+  const overallProgress =
+    readings.length > 0
+      ? (completedCount + (isCurrentDone ? 0 : scrollProgress)) /
+        readings.length
+      : 0;
+
   return (
     <Pressable onPress={onPress} style={styles.pillBadge}>
-      {allDone ? (
-        <CheckCircle2 size={13} color={colors.text} />
-      ) : (
-        <Circle size={13} color={colors.textMuted} />
-      )}
+      <ReadingPlanCircleProgress
+        progress={allDone ? 1 : overallProgress}
+        size={20}
+        strokeWidth={2}
+      >
+        {allDone ? <CheckCircle2 size={10} color={colors.text} /> : null}
+      </ReadingPlanCircleProgress>
       <Text style={[styles.pillBadgeText, { color: colors.text }]}>
         {completedCount}/{readings.length}
       </Text>
@@ -112,16 +121,10 @@ export const ReadingPlanSheet = memo(function ReadingPlanSheet({
   const planTitle = useReadingPlanStore((s) => s.planTitle);
   const planDayCount = useReadingPlanStore((s) => s.planDayCount);
   const readings = useReadingPlanStore((s) => s.readings);
-  const currentReadingIndex = useReadingPlanStore(
-    (s) => s.currentReadingIndex,
-  );
-  const completedReadingIds = useReadingPlanStore(
-    (s) => s.completedReadingIds,
-  );
+  const currentReadingIndex = useReadingPlanStore((s) => s.currentReadingIndex);
+  const completedReadingIds = useReadingPlanStore((s) => s.completedReadingIds);
   const clearPlanSession = useReadingPlanStore((s) => s.clearPlanSession);
-  const markReadingComplete = useReadingPlanStore(
-    (s) => s.markReadingComplete,
-  );
+  const markReadingComplete = useReadingPlanStore((s) => s.markReadingComplete);
   const markReadingUncomplete = useReadingPlanStore(
     (s) => s.markReadingUncomplete,
   );
@@ -144,6 +147,8 @@ export const ReadingPlanSheet = memo(function ReadingPlanSheet({
   const handleDismiss = useCallback(() => {
     onClose();
   }, [onClose]);
+
+  const setDayJustCompleted = useReadingPlanStore((s) => s.setDayJustCompleted);
 
   const handleToggleReading = useCallback(
     (readingId: string) => {
@@ -170,6 +175,22 @@ export const ReadingPlanSheet = memo(function ReadingPlanSheet({
             readingId,
             dayId: activeDayId,
           },
+          onCompleted: () => {
+            // Check if ALL readings are now complete after this toggle
+            const allComplete = readings.every(
+              (r) => r.id === readingId || completedReadingIds.has(r.id),
+            );
+            if (allComplete) {
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success,
+              );
+              // Close sheet and trigger day completion celebration
+              setTimeout(() => {
+                onClose();
+                setDayJustCompleted(true);
+              }, 400);
+            }
+          },
           onError: () => markReadingUncomplete(readingId),
         });
       }
@@ -179,10 +200,13 @@ export const ReadingPlanSheet = memo(function ReadingPlanSheet({
       activeDayId,
       isLoading,
       completedReadingIds,
+      readings,
       markReadingComplete,
       markReadingUncomplete,
       commitComplete,
       commitUncomplete,
+      onClose,
+      setDayJustCompleted,
     ],
   );
 
@@ -282,12 +306,18 @@ export const ReadingPlanSheet = memo(function ReadingPlanSheet({
             if (reading.startVerse) {
               label += `:${reading.startVerse}`;
             }
-            if (reading.endChapter && reading.endChapter !== reading.startChapter) {
+            if (
+              reading.endChapter &&
+              reading.endChapter !== reading.startChapter
+            ) {
               label += `–${reading.endChapter}`;
               if (reading.endVerse) {
                 label += `:${reading.endVerse}`;
               }
-            } else if (reading.endVerse && reading.endVerse !== reading.startVerse) {
+            } else if (
+              reading.endVerse &&
+              reading.endVerse !== reading.startVerse
+            ) {
               label += `–${reading.endVerse}`;
             }
 
