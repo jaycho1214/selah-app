@@ -402,6 +402,16 @@ export default function PostsScreen() {
   const activeTab = useFeedStore((s) => s.activeTab);
   const setActiveTab = useFeedStore((s) => s.setActiveTab);
   const [currentTab, setCurrentTab] = useState(activeTab);
+  // Track whether the pager is mid-animation to avoid UIPageViewController
+  // assertion crash when setPage is called during an in-progress transition.
+  const isAnimatingRef = useRef(false);
+
+  const handlePageScrollStateChanged = useCallback(
+    (e: { nativeEvent: { pageScrollState: string } }) => {
+      isAnimatingRef.current = e.nativeEvent.pageScrollState !== "idle";
+    },
+    [],
+  );
 
   const handlePageSelected = useCallback(
     (e: { nativeEvent: { position: number } }) => {
@@ -414,18 +424,26 @@ export default function PostsScreen() {
     [currentTab, setActiveTab],
   );
 
+  const navigateToPage = useCallback((index: number) => {
+    if (isAnimatingRef.current) {
+      pagerRef.current?.setPageWithoutAnimation(index);
+    } else {
+      pagerRef.current?.setPage(index);
+    }
+  }, []);
+
   const handleTabPress = useCallback(
     (index: number) => {
       if (index !== currentTab) {
-        pagerRef.current?.setPage(index);
+        navigateToPage(index);
       }
     },
-    [currentTab],
+    [currentTab, navigateToPage],
   );
 
   const handleSwitchToForYou = useCallback(() => {
-    pagerRef.current?.setPage(0);
-  }, []);
+    navigateToPage(0);
+  }, [navigateToPage]);
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.bg }]}>
@@ -435,6 +453,7 @@ export default function PostsScreen() {
         style={styles.pager}
         initialPage={activeTab}
         onPageSelected={handlePageSelected}
+        onPageScrollStateChanged={handlePageScrollStateChanged}
       >
         <View key="for-you" style={styles.page} collapsable={false}>
           <ErrorBoundary propagateServerErrors>
