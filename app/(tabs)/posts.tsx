@@ -35,6 +35,7 @@ import type { postsScreenForYouFragment$key } from "@/lib/relay/__generated__/po
 import type { postsScreenLikeMutation } from "@/lib/relay/__generated__/postsScreenLikeMutation.graphql";
 import type { postsScreenUnlikeMutation } from "@/lib/relay/__generated__/postsScreenUnlikeMutation.graphql";
 import type { postsScreenDeleteMutation } from "@/lib/relay/__generated__/postsScreenDeleteMutation.graphql";
+import type { postsScreenFollowingQuery } from "@/lib/relay/__generated__/postsScreenFollowingQuery.graphql";
 
 // ---------- Constants ----------
 
@@ -352,6 +353,62 @@ function ForYouFeed() {
 
 // ---------- Following Feed ----------
 
+// Query to check if user is following anyone
+const FollowingQuery = graphql`
+  query postsScreenFollowingQuery {
+    user {
+      id
+      followingCount
+    }
+  }
+`;
+
+function FollowingFeedContent({
+  onSwitchToForYou,
+}: {
+  onSwitchToForYou: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+  const data = useLazyLoadQuery<postsScreenFollowingQuery>(FollowingQuery, {}, { fetchPolicy: "store-and-network" });
+  const followingCount = data.user?.followingCount ?? 0;
+
+  if (followingCount === 0) {
+    return (
+      <View
+        style={[
+          styles.followingContainer,
+          {
+            paddingBottom: insets.bottom + 100,
+          },
+        ]}
+      >
+        <EmptyState
+          title="Follow people to see their posts here"
+          message="Posts from people you follow will show up in this feed"
+          action={{ label: "Discover Posts", onPress: onSwitchToForYou }}
+        />
+      </View>
+    );
+  }
+
+  return (
+    <View
+      style={[
+        styles.followingContainer,
+        {
+          paddingBottom: insets.bottom + 100,
+        },
+      ]}
+    >
+      <EmptyState
+        title="No posts yet"
+        message="When people you follow share reflections, they will appear here"
+        action={{ label: "Discover Posts", onPress: onSwitchToForYou }}
+      />
+    </View>
+  );
+}
+
 function FollowingFeed({ onSwitchToForYou }: { onSwitchToForYou: () => void }) {
   const insets = useSafeAreaInsets();
   const { isAuthenticated, presentSignIn } = useSession();
@@ -375,22 +432,16 @@ function FollowingFeed({ onSwitchToForYou }: { onSwitchToForYou: () => void }) {
     );
   }
 
-  // Authenticated but no following feed from backend yet
   return (
-    <View
-      style={[
-        styles.followingContainer,
-        {
-          paddingBottom: insets.bottom + 100,
-        },
-      ]}
+    <Suspense
+      fallback={
+        <View style={[styles.followingContainer, { paddingBottom: insets.bottom + 100 }]}>
+          <FeedSkeleton />
+        </View>
+      }
     >
-      <EmptyState
-        title="Follow people to see their posts here"
-        message="Posts from people you follow will show up in this feed"
-        action={{ label: "Discover Posts", onPress: onSwitchToForYou }}
-      />
-    </View>
+      <FollowingFeedContent onSwitchToForYou={onSwitchToForYou} />
+    </Suspense>
   );
 }
 
