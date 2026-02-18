@@ -80,6 +80,19 @@ export const FollowButton = memo(function FollowButton({
             "followerCount",
           );
         }
+        // Update current user's followingCount
+        const root = store.getRoot();
+        const currentUser = root.getLinkedRecord("user");
+        if (currentUser) {
+          const followingCount =
+            (currentUser.getValue("followingCount") as number) ?? 0;
+          currentUser.setValue(
+            isFollowing
+              ? Math.max(0, followingCount - 1)
+              : followingCount + 1,
+            "followingCount",
+          );
+        }
       },
       onError: (error) => {
         // Optimistic update auto-rolls back
