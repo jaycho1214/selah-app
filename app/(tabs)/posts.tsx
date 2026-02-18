@@ -35,7 +35,8 @@ import type { postsScreenForYouFragment$key } from "@/lib/relay/__generated__/po
 import type { postsScreenLikeMutation } from "@/lib/relay/__generated__/postsScreenLikeMutation.graphql";
 import type { postsScreenUnlikeMutation } from "@/lib/relay/__generated__/postsScreenUnlikeMutation.graphql";
 import type { postsScreenDeleteMutation } from "@/lib/relay/__generated__/postsScreenDeleteMutation.graphql";
-import type { postsScreenFollowingQuery } from "@/lib/relay/__generated__/postsScreenFollowingQuery.graphql";
+import type { postsScreenFollowingFeedQuery } from "@/lib/relay/__generated__/postsScreenFollowingFeedQuery.graphql";
+import type { postsScreenFollowingFeedFragment$key } from "@/lib/relay/__generated__/postsScreenFollowingFeedFragment.graphql";
 
 // ---------- Constants ----------
 
@@ -353,12 +354,72 @@ function ForYouFeed() {
 
 // ---------- Following Feed ----------
 
-// Query to check if user is following anyone
-const FollowingQuery = graphql`
-  query postsScreenFollowingQuery {
+const FollowingFeedQuery = graphql`
+  query postsScreenFollowingFeedQuery {
     user {
       id
       followingCount
+    }
+    ...postsScreenFollowingFeedFragment
+  }
+`;
+
+const FollowingFeedFragment = graphql`
+  fragment postsScreenFollowingFeedFragment on Query
+  @argumentDefinitions(
+    count: { type: "Int", defaultValue: 20 }
+    cursor: { type: "String" }
+  )
+  @refetchable(queryName: "postsScreenFollowingFeedPaginationQuery") {
+    followingBibleVersePosts(first: $count, after: $cursor)
+      @connection(key: "followingFeed_followingBibleVersePosts") {
+      __id
+      edges {
+        node {
+          id
+          content
+          createdAt
+          likesCount
+          childPostsCount
+          likedAt
+          user {
+            id
+            name
+            username
+            image {
+              url
+            }
+          }
+          images {
+            url
+            width
+            height
+          }
+          poll {
+            id
+            totalVotes
+            isExpired
+            deadline
+            userVote {
+              id
+              text
+            }
+            options {
+              id
+              text
+              voteCount
+              votePercentage
+            }
+          }
+          verse {
+            id
+            book
+            chapter
+            verse
+            translation
+          }
+        }
+      }
     }
   }
 `;
@@ -369,17 +430,114 @@ function FollowingFeedContent({
   onSwitchToForYou: () => void;
 }) {
   const insets = useSafeAreaInsets();
-  const data = useLazyLoadQuery<postsScreenFollowingQuery>(FollowingQuery, {}, { fetchPolicy: "store-and-network" });
-  const followingCount = data.user?.followingCount ?? 0;
+  const { session } = useSession();
+  const { capture } = useAnalytics();
+  const currentUserId = session?.user?.id ?? null;
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const environment = useRelayEnvironment();
+  const connectionIdRef = useRef<string | null>(null);
+  const reportSheetRef = useRef<ReportSheetRef>(null);
+
+  const queryData = useLazyLoadQuery<postsScreenFollowingFeedQuery>(
+    FollowingFeedQuery,
+    {},
+    { fetchPolicy: "store-and-network" },
+  );
+
+  const followingCount = queryData.user?.followingCount ?? 0;
+
+  const { data, loadNext, hasNext, isLoadingNext } = usePaginationFragment<
+    postsScreenFollowingFeedQuery,
+    postsScreenFollowingFeedFragment$key
+  >(FollowingFeedFragment, queryData);
+
+  const posts = data.followingBibleVersePosts?.edges ?? [];
+  connectionIdRef.current = data.followingBibleVersePosts?.__id ?? null;
+
+  const [commitLike] = useMutation<postsScreenLikeMutation>(LikeMutation);
+  const [commitUnlike] = useMutation<postsScreenUnlikeMutation>(UnlikeMutation);
+  const [commitDelete] = useMutation<postsScreenDeleteMutation>(DeleteMutation);
+
+  const handleLike = useCallback(
+    (postId: string) => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      capture("post_liked", { post_id: postId, feed: "following" });
+      commitLike({
+        variables: { id: postId },
+        optimisticUpdater: (store) => {
+          const post = store.get(postId);
+          if (post) {
+            post.setValue(new Date().toISOString(), "likedAt");
+            const currentCount = (post.getValue("likesCount") as number) ?? 0;
+            post.setValue(currentCount + 1, "likesCount");
+          }
+        },
+      });
+    },
+    [commitLike, capture],
+  );
+
+  const handleUnlike = useCallback(
+    (postId: string) => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      capture("post_unliked", { post_id: postId, feed: "following" });
+      commitUnlike({
+        variables: { id: postId },
+        optimisticUpdater: (store) => {
+          const post = store.get(postId);
+          if (post) {
+            post.setValue(null, "likedAt");
+            const currentCount = (post.getValue("likesCount") as number) ?? 0;
+            post.setValue(Math.max(0, currentCount - 1), "likesCount");
+          }
+        },
+      });
+    },
+    [commitUnlike, capture],
+  );
+
+  const handleDelete = useCallback(
+    (postId: string) => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      capture("post_deleted", { post_id: postId, feed: "following" });
+      const connections = connectionIdRef.current
+        ? [connectionIdRef.current]
+        : [];
+      commitDelete({
+        variables: { id: postId, connections },
+        onError: (error) => {
+          console.error("Failed to delete post:", error);
+        },
+      });
+    },
+    [commitDelete, capture],
+  );
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await fetchQuery(environment, FollowingFeedQuery, {}).toPromise();
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [environment]);
+
+  const handleLoadMore = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(20);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const handleReport = useCallback((postId: string) => {
+    reportSheetRef.current?.present({ type: "post", targetId: postId });
+  }, []);
 
   if (followingCount === 0) {
     return (
       <View
         style={[
           styles.followingContainer,
-          {
-            paddingBottom: insets.bottom + 100,
-          },
+          { paddingBottom: insets.bottom + 100 },
         ]}
       >
         <EmptyState
@@ -391,21 +549,36 @@ function FollowingFeedContent({
     );
   }
 
+  const emptyState = (
+    <EmptyState
+      title="No posts yet"
+      message="When people you follow share reflections, they will appear here"
+      action={{ label: "Discover Posts", onPress: onSwitchToForYou }}
+      style={{ marginTop: 16 }}
+    />
+  );
+
   return (
-    <View
-      style={[
-        styles.followingContainer,
-        {
+    <>
+      <FeedList
+        posts={posts}
+        isRefreshing={isRefreshing}
+        isLoadingNext={isLoadingNext}
+        hasNext={hasNext}
+        onRefresh={handleRefresh}
+        onLoadMore={handleLoadMore}
+        onLike={handleLike}
+        onUnlike={handleUnlike}
+        onDelete={handleDelete}
+        onReport={handleReport}
+        currentUserId={currentUserId}
+        emptyState={emptyState}
+        contentContainerStyle={{
           paddingBottom: insets.bottom + 100,
-        },
-      ]}
-    >
-      <EmptyState
-        title="No posts yet"
-        message="When people you follow share reflections, they will appear here"
-        action={{ label: "Discover Posts", onPress: onSwitchToForYou }}
+        }}
       />
-    </View>
+      <ReportSheet ref={reportSheetRef} />
+    </>
   );
 }
 
@@ -435,7 +608,12 @@ function FollowingFeed({ onSwitchToForYou }: { onSwitchToForYou: () => void }) {
   return (
     <Suspense
       fallback={
-        <View style={[styles.followingContainer, { paddingBottom: insets.bottom + 100 }]}>
+        <View
+          style={[
+            styles.followingContainer,
+            { paddingBottom: insets.bottom + 100 },
+          ]}
+        >
           <FeedSkeleton />
         </View>
       }

@@ -312,6 +312,7 @@ type Query {
   bibleVersesByQuery(limit: Int, query: String!, translation: BibleTranslation!): [BibleVerse!]!
   bibleVersesByReference(book: BibleBook!, chapter: Int!, translation: BibleTranslation!): [BibleVerse!]!
   bibleVersesByReferenceSearch(limit: Int, query: String!, translation: BibleTranslation!): [BibleVerse!]!
+  followingBibleVersePosts(after: String, before: String, first: Int, last: Int): BibleVersePostConnection!
   myJoinedReadingPlans(after: ID, first: Int = 20): [ReadingPlan!]
   myReadingPlans(after: ID, first: Int = 20, status: ReadingPlanStatus): [ReadingPlan!]
   node(id: ID!): Node
