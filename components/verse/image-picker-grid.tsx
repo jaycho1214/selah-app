@@ -1,12 +1,20 @@
 import { memo, useCallback } from "react";
-import { View, Pressable, StyleSheet, Alert } from "react-native";
+import {
+  View,
+  Pressable,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import Animated, { FadeIn, FadeOut, Layout } from "react-native-reanimated";
-import { X, ImagePlus } from "lucide-react-native";
+import { X, ImagePlus, Check } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
+import { Text } from "@/components/ui/text";
+import { MAX_IMAGES_PER_POST } from "@/lib/constants";
 
-const MAX_IMAGES = 4;
+const MAX_IMAGES = MAX_IMAGES_PER_POST;
 
 export interface SelectedImage {
   uri: string;
@@ -15,9 +23,15 @@ export interface SelectedImage {
   mimeType?: string;
 }
 
+export interface UploadProgress {
+  completed: number;
+  total: number;
+}
+
 interface ImagePickerGridProps {
   images: SelectedImage[];
   onImagesChange: (images: SelectedImage[]) => void;
+  uploadProgress?: UploadProgress | null;
   colors: {
     bg: string;
     surface: string;
@@ -33,6 +47,7 @@ interface ImagePickerGridProps {
 export const ImagePickerGrid = memo(function ImagePickerGrid({
   images,
   onImagesChange,
+  uploadProgress,
   colors,
 }: ImagePickerGridProps) {
   const removeImage = useCallback(
@@ -47,50 +62,84 @@ export const ImagePickerGrid = memo(function ImagePickerGrid({
     return null;
   }
 
+  const isUploading = uploadProgress != null;
+
   return (
     <Animated.View
       entering={FadeIn.duration(200)}
       exiting={FadeOut.duration(150)}
       style={styles.container}
     >
+      {isUploading && (
+        <Animated.View
+          entering={FadeIn.duration(150)}
+          style={styles.uploadStatus}
+        >
+          <ActivityIndicator size="small" color={colors.textMuted} />
+          <Text style={[styles.uploadStatusText, { color: colors.textMuted }]}>
+            Uploading {uploadProgress.completed}/{uploadProgress.total}
+          </Text>
+        </Animated.View>
+      )}
       <View style={styles.grid}>
-        {images.map((image, index) => (
-          <Animated.View
-            key={image.uri}
-            layout={Layout.springify()}
-            entering={FadeIn.duration(200)}
-            exiting={FadeOut.duration(150)}
-            style={[
-              styles.imageContainer,
-              images.length === 1 && styles.singleImage,
-              images.length === 2 && styles.doubleImage,
-              images.length >= 3 && styles.gridImage,
-            ]}
-          >
-            <View style={styles.imageClip}>
-              <Image
-                source={{ uri: image.uri }}
-                style={styles.image}
-                contentFit="cover"
-                transition={200}
-              />
-            </View>
-            <Pressable
-              onPress={() => removeImage(index)}
+        {images.map((image, index) => {
+          const isCompleted = isUploading && index < uploadProgress.completed;
+          const isCurrentlyUploading =
+            isUploading && index === uploadProgress.completed;
+
+          return (
+            <Animated.View
+              key={image.uri}
+              layout={Layout.springify()}
+              entering={FadeIn.duration(200)}
+              exiting={FadeOut.duration(150)}
               style={[
-                styles.removeButton,
-                {
-                  backgroundColor: colors.bg,
-                  borderWidth: 1.5,
-                  borderColor: colors.border,
-                },
+                styles.imageContainer,
+                images.length === 1 && styles.singleImage,
+                images.length === 2 && styles.doubleImage,
+                images.length >= 3 && styles.gridImage,
               ]}
-              hitSlop={8}
             >
-              <X size={10} color={colors.text} strokeWidth={3} />
-            </Pressable>
-          </Animated.View>
-        ))}
+              <View style={styles.imageClip}>
+                <Image
+                  source={{ uri: image.uri }}
+                  style={[
+                    styles.image,
+                    isUploading && !isCompleted && { opacity: 0.5 },
+                  ]}
+                  contentFit="cover"
+                  transition={200}
+                />
+                {isCurrentlyUploading && (
+                  <View style={styles.uploadOverlay}>
+                    <ActivityIndicator size="small" color="#fff" />
+                  </View>
+                )}
+                {isCompleted && (
+                  <View style={styles.uploadOverlay}>
+                    <Check size={16} color="#fff" strokeWidth={3} />
+                  </View>
+                )}
+              </View>
+              {!isUploading && (
+                <Pressable
+                  onPress={() => removeImage(index)}
+                  style={[
+                    styles.removeButton,
+                    {
+                      backgroundColor: colors.bg,
+                      borderWidth: 1.5,
+                      borderColor: colors.border,
+                    },
+                  ]}
+                  hitSlop={8}
+                >
+                  <X size={10} color={colors.text} strokeWidth={3} />
+                </Pressable>
+              )}
+            </Animated.View>
+          );
+        })}
       </View>
     </Animated.View>
   );
@@ -178,6 +227,22 @@ export const ImagePickerButton = memo(function ImagePickerButton({
 const styles = StyleSheet.create({
   container: {
     marginBottom: 8,
+  },
+  uploadStatus: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingBottom: 6,
+  },
+  uploadStatusText: {
+    fontSize: 12,
+  },
+  uploadOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 10,
   },
   grid: {
     flexDirection: "row",

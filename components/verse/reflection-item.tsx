@@ -16,6 +16,7 @@ import {
   Pressable,
   Share,
   StyleSheet,
+  Text as RNText,
   View,
 } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
@@ -27,6 +28,7 @@ import { useAnalytics } from "@/lib/analytics";
 import { createVerseId } from "@/lib/bible/utils";
 import type { BibleBook } from "@/lib/bible/types";
 import { getPostShareUrl } from "@/lib/utils";
+import { MAX_IMAGES_PER_POST } from "@/lib/constants";
 import type { reflectionItemPollVoteMutation } from "@/lib/relay/__generated__/reflectionItemPollVoteMutation.graphql";
 import type { reflectionItemPollUnvoteMutation } from "@/lib/relay/__generated__/reflectionItemPollUnvoteMutation.graphql";
 
@@ -580,7 +582,7 @@ export const ReflectionItem = memo(function ReflectionItem({
                 { borderColor: colors.border },
               ]}
             >
-              {images.slice(0, 4).map(
+              {images.slice(0, MAX_IMAGES_PER_POST).map(
                 (image, imgIndex) =>
                   image.url && (
                     <View
@@ -593,7 +595,7 @@ export const ReflectionItem = memo(function ReflectionItem({
                           (imgIndex === 0
                             ? styles.threeImageFirst
                             : styles.threeImageRest),
-                        images.length === 4 && styles.fourImage,
+                        images.length >= 4 && styles.fourImage,
                       ]}
                     >
                       <Image
@@ -602,6 +604,14 @@ export const ReflectionItem = memo(function ReflectionItem({
                         contentFit="cover"
                         transition={150}
                       />
+                      {imgIndex === MAX_IMAGES_PER_POST - 1 &&
+                        images.length > MAX_IMAGES_PER_POST && (
+                          <View style={styles.moreImagesOverlay}>
+                            <RNText style={styles.moreImagesText}>
+                              +{images.length - MAX_IMAGES_PER_POST}
+                            </RNText>
+                          </View>
+                        )}
                     </View>
                   ),
               )}
@@ -1064,6 +1074,17 @@ const styles = StyleSheet.create({
   imageFill: {
     width: "100%",
     height: "100%",
+  },
+  moreImagesOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  moreImagesText: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "700",
   },
   // Text formatting styles
   boldText: {

@@ -223,6 +223,16 @@ function BehindDaysFetcher() {
   return null;
 }
 
+function BehindDaysErrorFallback() {
+  const setError = useBehindDaysStore((s) => s.setError);
+
+  useEffect(() => {
+    setError(true);
+  }, [setError]);
+
+  return null;
+}
+
 // ---------- Streak Display ----------
 
 function StreakDisplay() {
@@ -557,7 +567,7 @@ export default function PlansScreen() {
             {isAuthenticated && (
               <>
                 {/* Behind days fetcher (invisible) */}
-                <ErrorBoundary propagateServerErrors>
+                <ErrorBoundary fallback={<BehindDaysErrorFallback />}>
                   <Suspense fallback={null}>
                     <BehindDaysFetcher />
                   </Suspense>

@@ -318,6 +318,10 @@ function PostContent({
   const reportSheetRef = useRef<ReportSheetRef>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{
+    completed: number;
+    total: number;
+  } | null>(null);
   const [connectionId, setConnectionId] = useState<string | null>(null);
   const environment = useRelayEnvironment();
 
@@ -428,7 +432,10 @@ function PostContent({
       // Upload images first, then create the reply
       if (postData.images.length > 0) {
         setIsUploading(true);
-        uploadPostImages(postData.images)
+        setUploadProgress({ completed: 0, total: postData.images.length });
+        uploadPostImages(postData.images, (completed, total) => {
+          setUploadProgress({ completed, total });
+        })
           .then((imageIds) => {
             submitReply(lexicalContent, connections, imageIds, postData);
           })
@@ -437,7 +444,10 @@ function PostContent({
             // Still create the reply without images
             submitReply(lexicalContent, connections, undefined, postData);
           })
-          .finally(() => setIsUploading(false));
+          .finally(() => {
+            setIsUploading(false);
+            setUploadProgress(null);
+          });
       } else {
         submitReply(lexicalContent, connections, undefined, postData);
       }
@@ -604,6 +614,7 @@ function PostContent({
         isAuthenticated={isAuthenticated}
         onAuthRequired={handleAuthRequired}
         isSubmitting={isUploading || isCreatingReply}
+        uploadProgress={uploadProgress}
       />
 
       {/* Sign-in Sheet */}

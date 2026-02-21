@@ -7,6 +7,7 @@ import {
 } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 
+import { Text } from "@/components/ui/text";
 import { ReflectionItem } from "@/components/verse/reflection-item";
 import { EmptyState } from "@/components/ui/empty-state";
 import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
@@ -173,11 +174,20 @@ const FeedList = memo(function FeedList({
     );
   }
 
-  const ListFooter = isLoadingNext ? (
-    <View style={styles.loadingMore}>
-      <ActivityIndicator size="small" color={colors.textMuted} />
-    </View>
-  ) : null;
+  // Show spinner when loading OR when there are more posts to load
+  // (the latter covers the gap between scroll and loadNext starting)
+  const ListFooter =
+    isLoadingNext || hasNext ? (
+      <View style={styles.loadingMore}>
+        <ActivityIndicator size="small" color={colors.textMuted} />
+      </View>
+    ) : posts.length > 0 ? (
+      <View style={styles.endOfFeed}>
+        <Text style={[styles.endOfFeedText, { color: colors.textMuted }]}>
+          You&apos;re all caught up
+        </Text>
+      </View>
+    ) : null;
 
   return (
     <View style={styles.container}>
@@ -213,5 +223,12 @@ const styles = StyleSheet.create({
   loadingMore: {
     paddingVertical: 20,
     alignItems: "center",
+  },
+  endOfFeed: {
+    paddingVertical: 24,
+    alignItems: "center",
+  },
+  endOfFeedText: {
+    fontSize: 13,
   },
 });

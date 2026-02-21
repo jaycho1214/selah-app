@@ -15,41 +15,45 @@ interface UploadResult {
 /**
  * Uploads selected images to the server and returns their asset IDs.
  * Uses the same cookie-based auth as the Relay network layer.
+ *
+ * @param onProgress - Called after each image upload completes with (completed, total).
  */
 export async function uploadPostImages(
   images: SelectedImage[],
+  onProgress?: (completed: number, total: number) => void,
 ): Promise<string[]> {
   if (images.length === 0) return [];
 
   const cookie = Platform.OS === "web" ? "" : (authClient.getCookie() ?? "");
+  const ids: string[] = [];
 
-  const results = await Promise.all(
-    images.map(async (image) => {
-      const formData = new FormData();
-      formData.append("file", {
-        uri: image.uri,
-        type: image.mimeType ?? "image/jpeg",
-        name: `post-image.${getExtension(image.mimeType)}`,
-      } as unknown as Blob);
+  for (let i = 0; i < images.length; i++) {
+    const image = images[i];
+    const formData = new FormData();
+    formData.append("file", {
+      uri: image.uri,
+      type: image.mimeType ?? "image/jpeg",
+      name: `post-image.${getExtension(image.mimeType)}`,
+    } as unknown as Blob);
 
-      const response = await fetch(`${API_URL}/api/upload`, {
-        method: "POST",
-        body: formData,
-        headers: {
-          ...(cookie ? { cookie } : {}),
-        },
-        credentials: Platform.OS === "web" ? "include" : "omit",
-      });
+    const response = await fetch(`${API_URL}/api/upload`, {
+      method: "POST",
+      body: formData,
+      headers: {
+        ...(cookie ? { cookie } : {}),
+      },
+      credentials: Platform.OS === "web" ? "include" : "omit",
+    });
 
-      const data = await response.json();
-      if (!data.ok) {
-        throw new Error(data.code ?? "Upload failed");
-      }
-      return data.data as UploadResult;
-    }),
-  );
+    const data = await response.json();
+    if (!data.ok) {
+      throw new Error(data.code ?? "Upload failed");
+    }
+    ids.push((data.data as UploadResult).id);
+    onProgress?.(i + 1, images.length);
+  }
 
-  return results.map((r) => r.id);
+  return ids;
 }
 
 function getExtension(mimeType?: string): string {

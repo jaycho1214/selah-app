@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { getLexicalEditorHtml } from "../verse/lexical-editor-html";
 import type { SelectedImage } from "../verse/image-picker-grid";
+import { MAX_IMAGES_PER_POST } from "@/lib/constants";
 import type {
   useComposerStateMentionQuery,
   useComposerStateMentionQuery$data,
@@ -106,6 +107,7 @@ export interface PostComposerProps {
   isAuthenticated: boolean;
   onAuthRequired?: () => void;
   isSubmitting?: boolean;
+  uploadProgress?: { completed: number; total: number } | null;
 }
 
 // ─── Hook ───
@@ -120,6 +122,7 @@ export function useComposerState(
     isAuthenticated,
     onAuthRequired,
     isSubmitting = false,
+    uploadProgress = null,
   } = props;
 
   const insets = useSafeAreaInsets();
@@ -596,7 +599,7 @@ export function useComposerState(
   }, []);
 
   const addImages = useCallback((newImages: SelectedImage[]) => {
-    setImages((prev) => [...prev, ...newImages].slice(0, 4));
+    setImages((prev) => [...prev, ...newImages].slice(0, MAX_IMAGES_PER_POST));
     setIsExpanded(true);
   }, []);
 
@@ -845,6 +848,7 @@ export function useComposerState(
     colors,
     isAuthenticated,
     isSubmitting,
+    uploadProgress,
   };
 }
 

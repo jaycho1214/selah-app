@@ -274,6 +274,10 @@ function VerseContent({
   const reportSheetRef = useRef<ReportSheetRef>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{
+    completed: number;
+    total: number;
+  } | null>(null);
   const environment = useRelayEnvironment();
 
   const isAuthenticated = !!session?.user;
@@ -421,7 +425,10 @@ function VerseContent({
       // Upload images first, then create the post
       if (postData.images.length > 0) {
         setIsUploading(true);
-        uploadPostImages(postData.images)
+        setUploadProgress({ completed: 0, total: postData.images.length });
+        uploadPostImages(postData.images, (completed, total) => {
+          setUploadProgress({ completed, total });
+        })
           .then((imageIds) => {
             submitReflection(lexicalContent, connections, imageIds, postData);
           })
@@ -430,7 +437,10 @@ function VerseContent({
             // Still create the post without images
             submitReflection(lexicalContent, connections, undefined, postData);
           })
-          .finally(() => setIsUploading(false));
+          .finally(() => {
+            setIsUploading(false);
+            setUploadProgress(null);
+          });
       } else {
         submitReflection(lexicalContent, connections, undefined, postData);
       }
@@ -604,6 +614,7 @@ function VerseContent({
         isAuthenticated={isAuthenticated}
         onAuthRequired={handleAuthRequired}
         isSubmitting={isUploading || isCreatingReflection}
+        uploadProgress={uploadProgress}
       />
 
       {/* Sign-in Sheet */}

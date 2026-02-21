@@ -13,9 +13,12 @@ import {
 } from "@gorhom/bottom-sheet";
 import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
 import * as Haptics from "expo-haptics";
-import { CheckCircle2, Circle, X } from "lucide-react-native";
+import { CheckCircle2, Circle, PartyPopper, X } from "lucide-react-native";
+import Animated, { FadeIn, FadeInUp } from "react-native-reanimated";
 import { graphql, useMutation } from "react-relay";
 
+import { Button } from "@/components/ui/button";
+import { Confetti } from "@/components/ui/confetti";
 import { ReadingPlanCircleProgress } from "@/components/reading-plans/ReadingPlanCircleProgress";
 import { Text } from "@/components/ui/text";
 import { useColors } from "@/hooks/use-colors";
@@ -85,6 +88,15 @@ export const ReadingPlanPill = memo(function ReadingPlanPill({
         readings.length
       : 0;
 
+  // Display count includes the current reading (user has reached it)
+  const displayCount =
+    readings.length > 0
+      ? Math.min(
+          isCurrentDone ? completedCount : completedCount + 1,
+          readings.length,
+        )
+      : 0;
+
   return (
     <Pressable onPress={onPress} style={styles.pillBadge}>
       <ReadingPlanCircleProgress
@@ -95,7 +107,7 @@ export const ReadingPlanPill = memo(function ReadingPlanPill({
         {allDone ? <CheckCircle2 size={10} color={colors.text} /> : null}
       </ReadingPlanCircleProgress>
       <Text style={[styles.pillBadgeText, { color: colors.text }]}>
-        {completedCount}/{readings.length}
+        {displayCount}/{readings.length}
       </Text>
       <Text style={[styles.pillDayText, { color: colors.textMuted }]}>
         D{activeDayNumber}
@@ -104,7 +116,7 @@ export const ReadingPlanPill = memo(function ReadingPlanPill({
   );
 });
 
-// ─── Bottom sheet (full progress) ──────────────────────────────────
+// ─── Bottom sheet (full progress + celebration) ─────────────────────
 
 interface ReadingPlanSheetProps {
   visible: boolean;
@@ -142,6 +154,11 @@ export const ReadingPlanSheet = memo(function ReadingPlanSheet({
 
   const isLoading = isCompleting || isUncompleting;
 
+  const completedCount = readings.filter((r) =>
+    completedReadingIds.has(r.id),
+  ).length;
+  const allDone = completedCount === readings.length && readings.length > 0;
+
   useEffect(() => {
     if (visible) {
       bottomSheetRef.current?.present();
@@ -151,10 +168,11 @@ export const ReadingPlanSheet = memo(function ReadingPlanSheet({
   }, [visible]);
 
   const handleDismiss = useCallback(() => {
+    if (allDone) {
+      clearPlanSession();
+    }
     onClose();
-  }, [onClose]);
-
-  const setDayJustCompleted = useReadingPlanStore((s) => s.setDayJustCompleted);
+  }, [allDone, clearPlanSession, onClose]);
 
   const handleToggleReading = useCallback(
     (readingId: string) => {
@@ -175,27 +193,20 @@ export const ReadingPlanSheet = memo(function ReadingPlanSheet({
         });
       } else {
         markReadingComplete(readingId);
+
+        // Check if this completes all readings (optimistic)
+        const justCompletedAll = readings.every(
+          (r) => r.id === readingId || completedReadingIds.has(r.id),
+        );
+        if (justCompletedAll) {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
+
         commitComplete({
           variables: {
             planId: activePlanId,
             readingId,
             dayId: activeDayId,
-          },
-          onCompleted: () => {
-            // Check if ALL readings are now complete after this toggle
-            const allComplete = readings.every(
-              (r) => r.id === readingId || completedReadingIds.has(r.id),
-            );
-            if (allComplete) {
-              Haptics.notificationAsync(
-                Haptics.NotificationFeedbackType.Success,
-              );
-              // Close sheet and trigger day completion celebration
-              setTimeout(() => {
-                onClose();
-                setDayJustCompleted(true);
-              }, 400);
-            }
           },
           onError: () => markReadingUncomplete(readingId),
         });
@@ -211,8 +222,6 @@ export const ReadingPlanSheet = memo(function ReadingPlanSheet({
       markReadingUncomplete,
       commitComplete,
       commitUncomplete,
-      onClose,
-      setDayJustCompleted,
     ],
   );
 
@@ -268,9 +277,18 @@ export const ReadingPlanSheet = memo(function ReadingPlanSheet({
     [sheetColors.bg, hasGlass],
   );
 
-  const completedCount = readings.filter((r) =>
-    completedReadingIds.has(r.id),
-  ).length;
+  // Display count includes the current reading (user has reached it)
+  const currentReading = readings[currentReadingIndex];
+  const isCurrentDone = currentReading
+    ? completedReadingIds.has(currentReading.id)
+    : false;
+  const sheetDisplayCount =
+    readings.length > 0
+      ? Math.min(
+          isCurrentDone ? completedCount : completedCount + 1,
+          readings.length,
+        )
+      : 0;
 
   return (
     <BottomSheetModal
@@ -296,87 +314,147 @@ export const ReadingPlanSheet = memo(function ReadingPlanSheet({
         marginTop: 10,
       }}
     >
-      <BottomSheetView style={styles.sheetContainer}>
-        {/* Header */}
-        <View style={styles.sheetHeader}>
-          <View style={styles.sheetHeaderLeft}>
-            <Text style={[styles.sheetTitle, { color: colors.text }]}>
-              {planTitle}
-            </Text>
-            <Text style={[styles.sheetSubtitle, { color: colors.textMuted }]}>
-              Day {activeDayNumber} of {planDayCount} · {completedCount}/
-              {readings.length} readings
-            </Text>
-          </View>
-          <Pressable onPress={onClose} hitSlop={8}>
-            <X size={18} color={colors.textMuted} strokeWidth={2} />
-          </Pressable>
-        </View>
-
-        {/* Readings list */}
-        <View style={styles.sheetReadings}>
-          {readings.map((reading, index) => {
-            const isDone = completedReadingIds.has(reading.id);
-            const isCurrent = index === currentReadingIndex;
-            const bookName =
-              BIBLE_BOOK_DETAILS[reading.book as BibleBook]?.name ??
-              reading.book;
-            let label = `${bookName} ${reading.startChapter}`;
-            if (reading.startVerse) {
-              label += `:${reading.startVerse}`;
-              if (reading.endVerse && reading.endVerse !== reading.startVerse) {
-                label += `–${reading.endVerse}`;
-              }
-            }
-
-            return (
-              <Pressable
-                key={reading.id}
-                onPress={() => handleToggleReading(reading.id)}
-                disabled={isLoading}
+      <BottomSheetView
+        style={allDone ? styles.celebrationContainer : styles.sheetContainer}
+      >
+        {allDone ? (
+          <>
+            <Confetti />
+            <Animated.View
+              entering={FadeIn.duration(400)}
+              style={styles.celebrationIcon}
+            >
+              <PartyPopper size={36} color={colors.text} />
+            </Animated.View>
+            <Animated.Text
+              entering={FadeInUp.duration(400).delay(100)}
+              style={[styles.celebrationTitle, { color: colors.text }]}
+            >
+              {`Day ${activeDayNumber ?? ""} Complete!`}
+            </Animated.Text>
+            {planTitle && (
+              <Animated.Text
+                entering={FadeInUp.duration(400).delay(200)}
                 style={[
-                  styles.sheetReadingRow,
-                  { borderBottomColor: colors.border },
+                  styles.celebrationSubtitle,
+                  { color: colors.textSecondary },
                 ]}
               >
-                {isDone ? (
-                  <CheckCircle2 size={18} color={colors.text} />
-                ) : (
-                  <Circle
-                    size={18}
-                    color={isCurrent ? colors.text : colors.textMuted}
-                  />
-                )}
+                {planTitle}
+              </Animated.Text>
+            )}
+            <Animated.View
+              entering={FadeInUp.duration(400).delay(300)}
+              style={styles.celebrationButtonRow}
+            >
+              <Button
+                variant="default"
+                onPress={() => bottomSheetRef.current?.dismiss()}
+                style={styles.celebrationButton}
+              >
                 <Text
                   style={[
-                    styles.sheetReadingLabel,
-                    {
-                      color: isDone ? colors.textMuted : colors.text,
-                      fontWeight: isCurrent ? "600" : "400",
-                    },
-                    isDone && styles.strikethrough,
+                    styles.celebrationButtonText,
+                    { color: colors.primaryForeground },
                   ]}
                 >
-                  {label}
+                  Continue
                 </Text>
-                {isCurrent && !isDone && (
-                  <Text
-                    style={[styles.currentBadge, { color: colors.textMuted }]}
-                  >
-                    current
-                  </Text>
-                )}
+              </Button>
+            </Animated.View>
+          </>
+        ) : (
+          <>
+            {/* Header */}
+            <View style={styles.sheetHeader}>
+              <View style={styles.sheetHeaderLeft}>
+                <Text style={[styles.sheetTitle, { color: colors.text }]}>
+                  {planTitle}
+                </Text>
+                <Text
+                  style={[styles.sheetSubtitle, { color: colors.textMuted }]}
+                >
+                  Day {activeDayNumber} of {planDayCount} · {sheetDisplayCount}/
+                  {readings.length} readings
+                </Text>
+              </View>
+              <Pressable onPress={onClose} hitSlop={8}>
+                <X size={18} color={colors.textMuted} strokeWidth={2} />
               </Pressable>
-            );
-          })}
-        </View>
+            </View>
 
-        {/* Exit plan */}
-        <Pressable onPress={handleClose} style={styles.exitButton}>
-          <Text style={[styles.exitText, { color: colors.destructive }]}>
-            Exit reading plan
-          </Text>
-        </Pressable>
+            {/* Readings list */}
+            <View style={styles.sheetReadings}>
+              {readings.map((reading, index) => {
+                const isDone = completedReadingIds.has(reading.id);
+                const isCurrent = index === currentReadingIndex;
+                const bookName =
+                  BIBLE_BOOK_DETAILS[reading.book as BibleBook]?.name ??
+                  reading.book;
+                let label = `${bookName} ${reading.startChapter}`;
+                if (reading.startVerse) {
+                  label += `:${reading.startVerse}`;
+                  if (
+                    reading.endVerse &&
+                    reading.endVerse !== reading.startVerse
+                  ) {
+                    label += `–${reading.endVerse}`;
+                  }
+                }
+
+                return (
+                  <Pressable
+                    key={reading.id}
+                    onPress={() => handleToggleReading(reading.id)}
+                    disabled={isLoading}
+                    style={[
+                      styles.sheetReadingRow,
+                      { borderBottomColor: colors.border },
+                    ]}
+                  >
+                    {isDone ? (
+                      <CheckCircle2 size={18} color={colors.text} />
+                    ) : (
+                      <Circle
+                        size={18}
+                        color={isCurrent ? colors.text : colors.textMuted}
+                      />
+                    )}
+                    <Text
+                      style={[
+                        styles.sheetReadingLabel,
+                        {
+                          color: isDone ? colors.textMuted : colors.text,
+                          fontWeight: isCurrent ? "600" : "400",
+                        },
+                        isDone && styles.strikethrough,
+                      ]}
+                    >
+                      {label}
+                    </Text>
+                    {isCurrent && !isDone && (
+                      <Text
+                        style={[
+                          styles.currentBadge,
+                          { color: colors.textMuted },
+                        ]}
+                      >
+                        current
+                      </Text>
+                    )}
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {/* Exit plan */}
+            <Pressable onPress={handleClose} style={styles.exitButton}>
+              <Text style={[styles.exitText, { color: colors.destructive }]}>
+                Exit reading plan
+              </Text>
+            </Pressable>
+          </>
+        )}
       </BottomSheetView>
     </BottomSheetModal>
   );
@@ -400,7 +478,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  // Bottom sheet
+  // Bottom sheet — reading list
   sheetContainer: {
     paddingHorizontal: 20,
     paddingBottom: 40,
@@ -455,5 +533,36 @@ const styles = StyleSheet.create({
   exitText: {
     fontSize: 14,
     fontWeight: "500",
+  },
+
+  // Bottom sheet — celebration
+  celebrationContainer: {
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+    alignItems: "center",
+    gap: 12,
+  },
+  celebrationIcon: {
+    marginBottom: 4,
+  },
+  celebrationTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+  },
+  celebrationSubtitle: {
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: "center",
+  },
+  celebrationButtonRow: {
+    marginTop: 8,
+    width: "100%",
+  },
+  celebrationButton: {
+    width: "100%",
+  },
+  celebrationButtonText: {
+    fontSize: 15,
+    fontWeight: "600",
   },
 });

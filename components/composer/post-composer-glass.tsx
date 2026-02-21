@@ -35,6 +35,7 @@ import { ComposerFullscreenModal } from "./composer-fullscreen-modal";
 import { CircularProgress, AnimatedPressable } from "./composer-shared";
 import {
   useComposerState,
+  MAX_LENGTH,
   type PostComposerRef,
   type PostComposerProps,
 } from "./use-composer-state";
@@ -79,6 +80,7 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       handleDismissKeyboard,
       canSubmit,
+      contentLength,
       handleSubmit,
       showProgress,
       progress,
@@ -90,6 +92,7 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
       isVerseRefLoading,
       selectVerseReference,
       insertVerseReference,
+      uploadProgress,
     } = state;
 
     const dynamicStyles = useMemo(
@@ -298,6 +301,7 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
               <ImagePickerGrid
                 images={images}
                 onImagesChange={handleImagesChange}
+                uploadProgress={uploadProgress}
                 colors={colors}
               />
             </View>
@@ -361,39 +365,60 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
                 </Pressable>
               </View>
 
-              {/* Send button — far right, replaces Done */}
-              <View style={styles.submitWrapper}>
+              {/* Character count + Send button */}
+              <View style={styles.submitArea}>
                 {showProgress && (
-                  <View style={styles.progressRing}>
-                    <CircularProgress
-                      progress={progress}
-                      size={36}
-                      strokeWidth={2.5}
-                      color={colors.text}
-                      trackColor={colors.border}
-                    />
-                  </View>
+                  <Text
+                    style={[
+                      styles.charCount,
+                      {
+                        color:
+                          contentLength > MAX_LENGTH
+                            ? "#ef4444"
+                            : colors.textMuted,
+                      },
+                    ]}
+                  >
+                    {MAX_LENGTH - contentLength}
+                  </Text>
                 )}
-                <AnimatedPressable
-                  onPress={handleSubmit}
-                  disabled={!canSubmit}
-                  style={[
-                    styles.submitButton,
-                    {
-                      backgroundColor: canSubmit ? colors.text : colors.border,
-                    },
-                  ]}
-                >
-                  {isSubmitting ? (
-                    <ActivityIndicator size="small" color={colors.bg} />
-                  ) : (
-                    <ArrowUp
-                      size={20}
-                      color={canSubmit ? colors.bg : colors.textMuted}
-                      strokeWidth={2.5}
-                    />
+                <View style={styles.submitWrapper}>
+                  {showProgress && (
+                    <View style={styles.progressRing}>
+                      <CircularProgress
+                        progress={progress}
+                        size={36}
+                        strokeWidth={2.5}
+                        color={
+                          contentLength > MAX_LENGTH ? "#ef4444" : colors.text
+                        }
+                        trackColor={colors.border}
+                      />
+                    </View>
                   )}
-                </AnimatedPressable>
+                  <AnimatedPressable
+                    onPress={handleSubmit}
+                    disabled={!canSubmit}
+                    style={[
+                      styles.submitButton,
+                      {
+                        backgroundColor: canSubmit
+                          ? colors.text
+                          : colors.border,
+                      },
+                    ]}
+                  >
+                    {isSubmitting ? (
+                      <ActivityIndicator size="small" color={colors.bg} />
+                    ) : (
+                      <ArrowUp
+                        size={20}
+                        color={canSubmit ? colors.bg : colors.textMuted}
+                        strokeWidth={2.5}
+                      />
+                    )}
+                  </AnimatedPressable>
+                </View>
               </View>
             </View>
           )}
@@ -460,6 +485,15 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+  },
+  submitArea: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  charCount: {
+    fontSize: 12,
+    fontVariant: ["tabular-nums"],
   },
   submitWrapper: {
     width: 36,

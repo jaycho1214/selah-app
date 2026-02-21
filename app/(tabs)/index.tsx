@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Pressable,
   StatusBar,
@@ -20,10 +20,6 @@ import {
   ReadingPlanPill,
   ReadingPlanSheet,
 } from "@/components/reading-plans/ReadingPlanBanner";
-import {
-  DayCompletionSheet,
-  type DayCompletionSheetRef,
-} from "@/components/reading-plans/DayCompletionSheet";
 import { Text } from "@/components/ui/text";
 import { useColors } from "@/hooks/use-colors";
 import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
@@ -63,8 +59,6 @@ export default function HomeScreen() {
   const scrollToVerse = useBibleStore((s) => s.scrollToVerse);
   const activePlanId = useReadingPlanStore((s) => s.activePlanId);
   const dayJustCompleted = useReadingPlanStore((s) => s.dayJustCompleted);
-  const activeDayNumber = useReadingPlanStore((s) => s.activeDayNumber);
-  const planTitle = useReadingPlanStore((s) => s.planTitle);
   const isSelecting = useVerseSelectionStore((s) => s.isSelecting);
   const toggleVerse = useVerseSelectionStore((s) => s.toggleVerse);
   const clearSelection = useVerseSelectionStore((s) => s.clearSelection);
@@ -73,7 +67,6 @@ export default function HomeScreen() {
   const [translationSelectorVisible, setTranslationSelectorVisible] =
     useState(false);
   const [planSheetVisible, setPlanSheetVisible] = useState(false);
-  const dayCompletionRef = useRef<DayCompletionSheetRef>(null);
 
   const [commitReadingComplete] = useMutation<TabsReadingCompleteSwipeMutation>(
     readingCompleteSwipeMutation,
@@ -89,15 +82,15 @@ export default function HomeScreen() {
     }
   }, [scrollToVerse]);
 
-  // Watch for day completion trigger (from swipe or manual toggle)
+  // Watch for day completion trigger (from swipe past last reading)
+  // Opens the ReadingPlanSheet which shows celebration mode when allDone
+  const setDayJustCompleted = useReadingPlanStore((s) => s.setDayJustCompleted);
   useEffect(() => {
     if (dayJustCompleted) {
-      setPlanSheetVisible(false);
-      setTimeout(() => {
-        dayCompletionRef.current?.present();
-      }, 300);
+      setDayJustCompleted(false);
+      setPlanSheetVisible(true);
     }
-  }, [dayJustCompleted]);
+  }, [dayJustCompleted, setDayJustCompleted]);
 
   const handlePositionChange = useCallback(
     (book: BibleBook, chapter: number) => {
@@ -178,15 +171,9 @@ export default function HomeScreen() {
       });
     }
 
-    // Trigger celebration
+    // Trigger celebration — opens ReadingPlanSheet in celebration mode
     state.setDayJustCompleted(true);
   }, [commitReadingComplete]);
-
-  const handleDayCompletionDismiss = useCallback(() => {
-    const store = useReadingPlanStore.getState();
-    store.setDayJustCompleted(false);
-    store.clearPlanSession();
-  }, []);
 
   const bookDetails = BIBLE_BOOK_DETAILS[currentBook as BibleBook];
   const bookName = bookDetails?.name ?? currentBook;
@@ -313,18 +300,10 @@ export default function HomeScreen() {
         onClose={() => setTranslationSelectorVisible(false)}
       />
 
-      {/* Reading plan progress sheet */}
+      {/* Reading plan progress sheet (also shows celebration when all done) */}
       <ReadingPlanSheet
         visible={planSheetVisible}
         onClose={() => setPlanSheetVisible(false)}
-      />
-
-      {/* Day completion celebration sheet */}
-      <DayCompletionSheet
-        ref={dayCompletionRef}
-        dayNumber={activeDayNumber}
-        planTitle={planTitle}
-        onDismiss={handleDayCompletionDismiss}
       />
     </View>
   );
