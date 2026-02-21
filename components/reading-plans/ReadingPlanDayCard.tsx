@@ -18,7 +18,6 @@ const fragment = graphql`
       book
       startChapter
       startVerse
-      endChapter
       endVerse
     }
   }
@@ -32,7 +31,6 @@ function formatReading(reading: {
   readonly book: string;
   readonly startChapter: number;
   readonly startVerse?: number | null;
-  readonly endChapter?: number | null;
   readonly endVerse?: number | null;
 }): string {
   const bookName =
@@ -41,15 +39,9 @@ function formatReading(reading: {
 
   if (reading.startVerse) {
     ref += `:${reading.startVerse}`;
-  }
-
-  if (reading.endChapter && reading.endChapter !== reading.startChapter) {
-    ref += `–${reading.endChapter}`;
-    if (reading.endVerse) {
-      ref += `:${reading.endVerse}`;
+    if (reading.endVerse && reading.endVerse !== reading.startVerse) {
+      ref += `–${reading.endVerse}`;
     }
-  } else if (reading.endVerse && reading.endVerse !== reading.startVerse) {
-    ref += `–${reading.endVerse}`;
   }
 
   return ref;

@@ -1,11 +1,12 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { mmkvStorage } from "../storage";
 
 export interface PlanReading {
   id: string;
   book: string;
   startChapter: number;
   startVerse?: number | null;
-  endChapter?: number | null;
   endVerse?: number | null;
 }
 
@@ -44,34 +45,9 @@ interface ReadingPlanStore {
   setDayJustCompleted: (completed: boolean) => void;
 }
 
-export const useReadingPlanStore = create<ReadingPlanStore>()((set) => ({
-  activePlanId: null,
-  activeDayId: null,
-  activeDayNumber: null,
-  planTitle: null,
-  planDayCount: null,
-  readings: [],
-  currentReadingIndex: 0,
-  completedReadingIds: new Set(),
-  scrollProgress: 0,
-  dayJustCompleted: false,
-
-  startPlanSession: (data) =>
-    set({
-      activePlanId: data.planId,
-      activeDayId: data.dayId,
-      activeDayNumber: data.dayNumber,
-      planTitle: data.planTitle,
-      planDayCount: data.planDayCount,
-      readings: data.readings,
-      currentReadingIndex: 0,
-      completedReadingIds: data.completedReadingIds,
-      scrollProgress: 0,
-      dayJustCompleted: false,
-    }),
-
-  clearPlanSession: () =>
-    set({
+export const useReadingPlanStore = create<ReadingPlanStore>()(
+  persist(
+    (set) => ({
       activePlanId: null,
       activeDayId: null,
       activeDayNumber: null,
@@ -82,23 +58,75 @@ export const useReadingPlanStore = create<ReadingPlanStore>()((set) => ({
       completedReadingIds: new Set(),
       scrollProgress: 0,
       dayJustCompleted: false,
+
+      startPlanSession: (data) =>
+        set({
+          activePlanId: data.planId,
+          activeDayId: data.dayId,
+          activeDayNumber: data.dayNumber,
+          planTitle: data.planTitle,
+          planDayCount: data.planDayCount,
+          readings: data.readings,
+          currentReadingIndex: 0,
+          completedReadingIds: data.completedReadingIds,
+          scrollProgress: 0,
+          dayJustCompleted: false,
+        }),
+
+      clearPlanSession: () =>
+        set({
+          activePlanId: null,
+          activeDayId: null,
+          activeDayNumber: null,
+          planTitle: null,
+          planDayCount: null,
+          readings: [],
+          currentReadingIndex: 0,
+          completedReadingIds: new Set(),
+          scrollProgress: 0,
+          dayJustCompleted: false,
+        }),
+
+      setCurrentReadingIndex: (index) => set({ currentReadingIndex: index }),
+
+      markReadingComplete: (readingId) =>
+        set((state) => ({
+          completedReadingIds: new Set([
+            ...state.completedReadingIds,
+            readingId,
+          ]),
+        })),
+
+      markReadingUncomplete: (readingId) =>
+        set((state) => {
+          const next = new Set(state.completedReadingIds);
+          next.delete(readingId);
+          return { completedReadingIds: next };
+        }),
+
+      setScrollProgress: (progress) => set({ scrollProgress: progress }),
+
+      setDayJustCompleted: (completed) => set({ dayJustCompleted: completed }),
     }),
-
-  setCurrentReadingIndex: (index) => set({ currentReadingIndex: index }),
-
-  markReadingComplete: (readingId) =>
-    set((state) => ({
-      completedReadingIds: new Set([...state.completedReadingIds, readingId]),
-    })),
-
-  markReadingUncomplete: (readingId) =>
-    set((state) => {
-      const next = new Set(state.completedReadingIds);
-      next.delete(readingId);
-      return { completedReadingIds: next };
-    }),
-
-  setScrollProgress: (progress) => set({ scrollProgress: progress }),
-
-  setDayJustCompleted: (completed) => set({ dayJustCompleted: completed }),
-}));
+    {
+      name: "reading-plan-store",
+      storage: createJSONStorage(() => mmkvStorage, {
+        replacer: (_key, value) => (value instanceof Set ? [...value] : value),
+        reviver: (_key, value) =>
+          _key === "completedReadingIds" && Array.isArray(value)
+            ? new Set(value)
+            : value,
+      }),
+      partialize: (state) => ({
+        activePlanId: state.activePlanId,
+        activeDayId: state.activeDayId,
+        activeDayNumber: state.activeDayNumber,
+        planTitle: state.planTitle,
+        planDayCount: state.planDayCount,
+        readings: state.readings,
+        currentReadingIndex: state.currentReadingIndex,
+        completedReadingIds: state.completedReadingIds,
+      }),
+    },
+  ),
+);

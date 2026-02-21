@@ -11,7 +11,7 @@
 
 // @relayRequestID 3759af7ab2cb0b6bdebe1fa3188a65bd
 
-import { ConcreteRequest } from "relay-runtime";
+import { ConcreteRequest } from 'relay-runtime';
 export type UsernameLikeMutation$variables = {
   id: string;
 };
@@ -25,65 +25,65 @@ export type UsernameLikeMutation = {
   variables: UsernameLikeMutation$variables;
 };
 
-const node: ConcreteRequest = (function () {
-  var v0 = [
+const node: ConcreteRequest = (function(){
+var v0 = [
+  {
+    "defaultValue": null,
+    "kind": "LocalArgument",
+    "name": "id"
+  }
+],
+v1 = [
+  {
+    "alias": null,
+    "args": [
       {
-        defaultValue: null,
-        kind: "LocalArgument",
-        name: "id",
-      },
+        "kind": "Variable",
+        "name": "id",
+        "variableName": "id"
+      }
     ],
-    v1 = [
+    "concreteType": "BibleVersePostLikePayload",
+    "kind": "LinkedField",
+    "name": "bibleVersePostLike",
+    "plural": false,
+    "selections": [
       {
-        alias: null,
-        args: [
-          {
-            kind: "Variable",
-            name: "id",
-            variableName: "id",
-          },
-        ],
-        concreteType: "BibleVersePostLikePayload",
-        kind: "LinkedField",
-        name: "bibleVersePostLike",
-        plural: false,
-        selections: [
-          {
-            alias: null,
-            args: null,
-            kind: "ScalarField",
-            name: "likedAt",
-            storageKey: null,
-          },
-        ],
-        storageKey: null,
-      },
-    ];
-  return {
-    fragment: {
-      argumentDefinitions: v0 /*: any*/,
-      kind: "Fragment",
-      metadata: null,
-      name: "UsernameLikeMutation",
-      selections: v1 /*: any*/,
-      type: "Mutation",
-      abstractKey: null,
-    },
-    kind: "Request",
-    operation: {
-      argumentDefinitions: v0 /*: any*/,
-      kind: "Operation",
-      name: "UsernameLikeMutation",
-      selections: v1 /*: any*/,
-    },
-    params: {
-      id: "3759af7ab2cb0b6bdebe1fa3188a65bd",
-      metadata: {},
-      name: "UsernameLikeMutation",
-      operationKind: "mutation",
-      text: null,
-    },
-  };
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "likedAt",
+        "storageKey": null
+      }
+    ],
+    "storageKey": null
+  }
+];
+return {
+  "fragment": {
+    "argumentDefinitions": (v0/*: any*/),
+    "kind": "Fragment",
+    "metadata": null,
+    "name": "UsernameLikeMutation",
+    "selections": (v1/*: any*/),
+    "type": "Mutation",
+    "abstractKey": null
+  },
+  "kind": "Request",
+  "operation": {
+    "argumentDefinitions": (v0/*: any*/),
+    "kind": "Operation",
+    "name": "UsernameLikeMutation",
+    "selections": (v1/*: any*/)
+  },
+  "params": {
+    "id": "3759af7ab2cb0b6bdebe1fa3188a65bd",
+    "metadata": {},
+    "name": "UsernameLikeMutation",
+    "operationKind": "mutation",
+    "text": null
+  }
+};
 })();
 
 (node as any).hash = "be46925e8fe20ba5e5ebf25cb9de8f3b";

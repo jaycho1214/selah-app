@@ -155,30 +155,17 @@ export const BibleReader = memo(function BibleReader({
   const prev = getPrevChapter();
   const next = getNextChapter();
 
-  // Compute plan verse range for current chapter
+  // Compute plan verse range for current chapter (single-chapter readings only)
   const planVerseRange = useMemo(() => {
     if (!planActive || planReadings.length === 0) return null;
     const reading = planReadings[planCurrentIndex];
     if (!reading?.startVerse) return null;
+    if (currentChapter !== reading.startChapter) return null;
 
-    const endCh = reading.endChapter ?? reading.startChapter;
-    if (currentChapter < reading.startChapter || currentChapter > endCh)
-      return null;
-
-    if (reading.startChapter === endCh) {
-      return {
-        start: reading.startVerse,
-        end: reading.endVerse ?? reading.startVerse,
-      };
-    }
-    // Cross-chapter range
-    if (currentChapter === reading.startChapter) {
-      return { start: reading.startVerse, end: Infinity };
-    }
-    if (currentChapter === endCh) {
-      return { start: 1, end: reading.endVerse ?? Infinity };
-    }
-    return { start: 1, end: Infinity };
+    return {
+      start: reading.startVerse,
+      end: reading.endVerse ?? reading.startVerse,
+    };
   }, [planActive, planReadings, planCurrentIndex, currentChapter]);
 
   const triggerHaptic = useCallback(() => {

@@ -11,7 +11,7 @@
 
 // @relayRequestID 4cabb671e590728f940e12d055394246
 
-import { ConcreteRequest } from "relay-runtime";
+import { ConcreteRequest } from 'relay-runtime';
 export type ReadingPlanJoinButtonLeaveMutation$variables = {
   planId: string;
 };
@@ -23,54 +23,54 @@ export type ReadingPlanJoinButtonLeaveMutation = {
   variables: ReadingPlanJoinButtonLeaveMutation$variables;
 };
 
-const node: ConcreteRequest = (function () {
-  var v0 = [
+const node: ConcreteRequest = (function(){
+var v0 = [
+  {
+    "defaultValue": null,
+    "kind": "LocalArgument",
+    "name": "planId"
+  }
+],
+v1 = [
+  {
+    "alias": null,
+    "args": [
       {
-        defaultValue: null,
-        kind: "LocalArgument",
-        name: "planId",
-      },
+        "kind": "Variable",
+        "name": "planId",
+        "variableName": "planId"
+      }
     ],
-    v1 = [
-      {
-        alias: null,
-        args: [
-          {
-            kind: "Variable",
-            name: "planId",
-            variableName: "planId",
-          },
-        ],
-        kind: "ScalarField",
-        name: "readingPlanLeave",
-        storageKey: null,
-      },
-    ];
-  return {
-    fragment: {
-      argumentDefinitions: v0 /*: any*/,
-      kind: "Fragment",
-      metadata: null,
-      name: "ReadingPlanJoinButtonLeaveMutation",
-      selections: v1 /*: any*/,
-      type: "Mutation",
-      abstractKey: null,
-    },
-    kind: "Request",
-    operation: {
-      argumentDefinitions: v0 /*: any*/,
-      kind: "Operation",
-      name: "ReadingPlanJoinButtonLeaveMutation",
-      selections: v1 /*: any*/,
-    },
-    params: {
-      id: "4cabb671e590728f940e12d055394246",
-      metadata: {},
-      name: "ReadingPlanJoinButtonLeaveMutation",
-      operationKind: "mutation",
-      text: null,
-    },
-  };
+    "kind": "ScalarField",
+    "name": "readingPlanLeave",
+    "storageKey": null
+  }
+];
+return {
+  "fragment": {
+    "argumentDefinitions": (v0/*: any*/),
+    "kind": "Fragment",
+    "metadata": null,
+    "name": "ReadingPlanJoinButtonLeaveMutation",
+    "selections": (v1/*: any*/),
+    "type": "Mutation",
+    "abstractKey": null
+  },
+  "kind": "Request",
+  "operation": {
+    "argumentDefinitions": (v0/*: any*/),
+    "kind": "Operation",
+    "name": "ReadingPlanJoinButtonLeaveMutation",
+    "selections": (v1/*: any*/)
+  },
+  "params": {
+    "id": "4cabb671e590728f940e12d055394246",
+    "metadata": {},
+    "name": "ReadingPlanJoinButtonLeaveMutation",
+    "operationKind": "mutation",
+    "text": null
+  }
+};
 })();
 
 (node as any).hash = "cfac8c46f9067a28b842b8cb2b71783e";

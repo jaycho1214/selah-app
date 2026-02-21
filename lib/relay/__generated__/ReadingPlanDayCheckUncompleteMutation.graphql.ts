@@ -11,7 +11,7 @@
 
 // @relayRequestID 54d4aa61fbf143708bb76d1277f4287f
 
-import { ConcreteRequest } from "relay-runtime";
+import { ConcreteRequest } from 'relay-runtime';
 export type ReadingPlanDayCheckUncompleteMutation$variables = {
   dayId: string;
   planId: string;
@@ -24,62 +24,68 @@ export type ReadingPlanDayCheckUncompleteMutation = {
   variables: ReadingPlanDayCheckUncompleteMutation$variables;
 };
 
-const node: ConcreteRequest = (function () {
-  var v0 = {
-      defaultValue: null,
-      kind: "LocalArgument",
-      name: "dayId",
-    },
-    v1 = {
-      defaultValue: null,
-      kind: "LocalArgument",
-      name: "planId",
-    },
-    v2 = [
+const node: ConcreteRequest = (function(){
+var v0 = {
+  "defaultValue": null,
+  "kind": "LocalArgument",
+  "name": "dayId"
+},
+v1 = {
+  "defaultValue": null,
+  "kind": "LocalArgument",
+  "name": "planId"
+},
+v2 = [
+  {
+    "alias": null,
+    "args": [
       {
-        alias: null,
-        args: [
-          {
-            kind: "Variable",
-            name: "dayId",
-            variableName: "dayId",
-          },
-          {
-            kind: "Variable",
-            name: "planId",
-            variableName: "planId",
-          },
-        ],
-        kind: "ScalarField",
-        name: "readingPlanDayUncomplete",
-        storageKey: null,
+        "kind": "Variable",
+        "name": "dayId",
+        "variableName": "dayId"
       },
-    ];
-  return {
-    fragment: {
-      argumentDefinitions: [v0 /*: any*/, v1 /*: any*/],
-      kind: "Fragment",
-      metadata: null,
-      name: "ReadingPlanDayCheckUncompleteMutation",
-      selections: v2 /*: any*/,
-      type: "Mutation",
-      abstractKey: null,
-    },
-    kind: "Request",
-    operation: {
-      argumentDefinitions: [v1 /*: any*/, v0 /*: any*/],
-      kind: "Operation",
-      name: "ReadingPlanDayCheckUncompleteMutation",
-      selections: v2 /*: any*/,
-    },
-    params: {
-      id: "54d4aa61fbf143708bb76d1277f4287f",
-      metadata: {},
-      name: "ReadingPlanDayCheckUncompleteMutation",
-      operationKind: "mutation",
-      text: null,
-    },
-  };
+      {
+        "kind": "Variable",
+        "name": "planId",
+        "variableName": "planId"
+      }
+    ],
+    "kind": "ScalarField",
+    "name": "readingPlanDayUncomplete",
+    "storageKey": null
+  }
+];
+return {
+  "fragment": {
+    "argumentDefinitions": [
+      (v0/*: any*/),
+      (v1/*: any*/)
+    ],
+    "kind": "Fragment",
+    "metadata": null,
+    "name": "ReadingPlanDayCheckUncompleteMutation",
+    "selections": (v2/*: any*/),
+    "type": "Mutation",
+    "abstractKey": null
+  },
+  "kind": "Request",
+  "operation": {
+    "argumentDefinitions": [
+      (v1/*: any*/),
+      (v0/*: any*/)
+    ],
+    "kind": "Operation",
+    "name": "ReadingPlanDayCheckUncompleteMutation",
+    "selections": (v2/*: any*/)
+  },
+  "params": {
+    "id": "54d4aa61fbf143708bb76d1277f4287f",
+    "metadata": {},
+    "name": "ReadingPlanDayCheckUncompleteMutation",
+    "operationKind": "mutation",
+    "text": null
+  }
+};
 })();
 
 (node as any).hash = "b30114d2d8807f14e5fa3132ce6df8d8";

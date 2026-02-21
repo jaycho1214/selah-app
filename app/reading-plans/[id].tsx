@@ -1,4 +1,11 @@
-import { Suspense, useCallback, useMemo, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -9,6 +16,7 @@ import {
   View,
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -93,7 +101,6 @@ const detailQuery = graphql`
             book
             startChapter
             startVerse
-            endChapter
             endVerse
           }
           ...ReadingPlanDayCardFragment
@@ -194,6 +201,18 @@ function DetailContent({
     }
   }, [environment, id]);
 
+  // Refetch when returning to this screen (e.g. after Bible reading)
+  const isFirstFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (isFirstFocus.current) {
+        isFirstFocus.current = false;
+        return;
+      }
+      fetchQuery(environment, detailQuery, { id }).toPromise();
+    }, [environment, id]),
+  );
+
   const plan = data.readingPlanById;
   const isJoined = plan?.myParticipation != null;
   const completedDayIds = new Set(
@@ -253,7 +272,6 @@ function DetailContent({
         book: r.book ?? "",
         startChapter: r.startChapter ?? 1,
         startVerse: r.startVerse,
-        endChapter: r.endChapter,
         endVerse: r.endVerse,
       }));
       if (readings.length === 0) return;
@@ -287,6 +305,8 @@ function DetailContent({
     ],
   );
 
+  const [catchUpDone, setCatchUpDone] = useState(false);
+
   const handleCatchUp = useCallback(() => {
     if (!plan || isCatchingUp) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -294,6 +314,8 @@ function DetailContent({
       variables: { planId: plan.id },
       onCompleted: () => {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setCatchUpDone(true);
+        setTimeout(() => setCatchUpDone(false), 2000);
       },
     });
   }, [plan, isCatchingUp, commitCatchUp]);
@@ -521,13 +543,23 @@ function DetailContent({
               variant="outline"
               size="sm"
               onPress={handleCatchUp}
-              disabled={isCatchingUp}
+              disabled={isCatchingUp || catchUpDone}
               style={styles.catchUpButton}
             >
               <View style={styles.catchUpContent}>
-                <FastForward size={14} color={colors.text} />
+                {isCatchingUp ? (
+                  <ActivityIndicator size="small" color={colors.text} />
+                ) : catchUpDone ? (
+                  <Check size={14} color={colors.text} />
+                ) : (
+                  <FastForward size={14} color={colors.text} />
+                )}
                 <Text style={[styles.catchUpText, { color: colors.text }]}>
-                  Catch up ({behindDaysCount} days behind)
+                  {isCatchingUp
+                    ? "Catching up..."
+                    : catchUpDone
+                      ? "All caught up!"
+                      : `Catch up — ${behindDaysCount} ${behindDaysCount === 1 ? "day" : "days"} behind`}
                 </Text>
               </View>
             </Button>

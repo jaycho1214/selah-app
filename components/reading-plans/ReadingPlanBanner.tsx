@@ -1,5 +1,11 @@
 import { memo, useCallback, useEffect, useRef } from "react";
-import { Pressable, StyleSheet, useColorScheme, View } from "react-native";
+import {
+  Alert,
+  Pressable,
+  StyleSheet,
+  useColorScheme,
+  View,
+} from "react-native";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -211,8 +217,21 @@ export const ReadingPlanSheet = memo(function ReadingPlanSheet({
   );
 
   const handleClose = useCallback(() => {
-    clearPlanSession();
-    onClose();
+    Alert.alert(
+      "Exit Reading Plan",
+      "Are you sure you want to exit this reading plan session? Your progress for completed readings is saved.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Exit",
+          style: "destructive",
+          onPress: () => {
+            clearPlanSession();
+            onClose();
+          },
+        },
+      ],
+    );
   }, [clearPlanSession, onClose]);
 
   const renderBackdrop = useCallback(
@@ -305,20 +324,9 @@ export const ReadingPlanSheet = memo(function ReadingPlanSheet({
             let label = `${bookName} ${reading.startChapter}`;
             if (reading.startVerse) {
               label += `:${reading.startVerse}`;
-            }
-            if (
-              reading.endChapter &&
-              reading.endChapter !== reading.startChapter
-            ) {
-              label += `–${reading.endChapter}`;
-              if (reading.endVerse) {
-                label += `:${reading.endVerse}`;
+              if (reading.endVerse && reading.endVerse !== reading.startVerse) {
+                label += `–${reading.endVerse}`;
               }
-            } else if (
-              reading.endVerse &&
-              reading.endVerse !== reading.startVerse
-            ) {
-              label += `–${reading.endVerse}`;
             }
 
             return (

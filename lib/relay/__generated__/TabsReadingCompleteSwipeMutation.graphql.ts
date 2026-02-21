@@ -11,7 +11,7 @@
 
 // @relayRequestID 91afdcbcf44455cae2730bdd3901c795
 
-import { ConcreteRequest } from "relay-runtime";
+import { ConcreteRequest } from 'relay-runtime';
 export type TabsReadingCompleteSwipeMutation$variables = {
   dayId: string;
   planId: string;
@@ -25,72 +25,80 @@ export type TabsReadingCompleteSwipeMutation = {
   variables: TabsReadingCompleteSwipeMutation$variables;
 };
 
-const node: ConcreteRequest = (function () {
-  var v0 = {
-      defaultValue: null,
-      kind: "LocalArgument",
-      name: "dayId",
-    },
-    v1 = {
-      defaultValue: null,
-      kind: "LocalArgument",
-      name: "planId",
-    },
-    v2 = {
-      defaultValue: null,
-      kind: "LocalArgument",
-      name: "readingId",
-    },
-    v3 = [
+const node: ConcreteRequest = (function(){
+var v0 = {
+  "defaultValue": null,
+  "kind": "LocalArgument",
+  "name": "dayId"
+},
+v1 = {
+  "defaultValue": null,
+  "kind": "LocalArgument",
+  "name": "planId"
+},
+v2 = {
+  "defaultValue": null,
+  "kind": "LocalArgument",
+  "name": "readingId"
+},
+v3 = [
+  {
+    "alias": null,
+    "args": [
       {
-        alias: null,
-        args: [
-          {
-            kind: "Variable",
-            name: "dayId",
-            variableName: "dayId",
-          },
-          {
-            kind: "Variable",
-            name: "planId",
-            variableName: "planId",
-          },
-          {
-            kind: "Variable",
-            name: "readingId",
-            variableName: "readingId",
-          },
-        ],
-        kind: "ScalarField",
-        name: "readingPlanReadingComplete",
-        storageKey: null,
+        "kind": "Variable",
+        "name": "dayId",
+        "variableName": "dayId"
       },
-    ];
-  return {
-    fragment: {
-      argumentDefinitions: [v0 /*: any*/, v1 /*: any*/, v2 /*: any*/],
-      kind: "Fragment",
-      metadata: null,
-      name: "TabsReadingCompleteSwipeMutation",
-      selections: v3 /*: any*/,
-      type: "Mutation",
-      abstractKey: null,
-    },
-    kind: "Request",
-    operation: {
-      argumentDefinitions: [v1 /*: any*/, v2 /*: any*/, v0 /*: any*/],
-      kind: "Operation",
-      name: "TabsReadingCompleteSwipeMutation",
-      selections: v3 /*: any*/,
-    },
-    params: {
-      id: "91afdcbcf44455cae2730bdd3901c795",
-      metadata: {},
-      name: "TabsReadingCompleteSwipeMutation",
-      operationKind: "mutation",
-      text: null,
-    },
-  };
+      {
+        "kind": "Variable",
+        "name": "planId",
+        "variableName": "planId"
+      },
+      {
+        "kind": "Variable",
+        "name": "readingId",
+        "variableName": "readingId"
+      }
+    ],
+    "kind": "ScalarField",
+    "name": "readingPlanReadingComplete",
+    "storageKey": null
+  }
+];
+return {
+  "fragment": {
+    "argumentDefinitions": [
+      (v0/*: any*/),
+      (v1/*: any*/),
+      (v2/*: any*/)
+    ],
+    "kind": "Fragment",
+    "metadata": null,
+    "name": "TabsReadingCompleteSwipeMutation",
+    "selections": (v3/*: any*/),
+    "type": "Mutation",
+    "abstractKey": null
+  },
+  "kind": "Request",
+  "operation": {
+    "argumentDefinitions": [
+      (v1/*: any*/),
+      (v2/*: any*/),
+      (v0/*: any*/)
+    ],
+    "kind": "Operation",
+    "name": "TabsReadingCompleteSwipeMutation",
+    "selections": (v3/*: any*/)
+  },
+  "params": {
+    "id": "91afdcbcf44455cae2730bdd3901c795",
+    "metadata": {},
+    "name": "TabsReadingCompleteSwipeMutation",
+    "operationKind": "mutation",
+    "text": null
+  }
+};
 })();
 
 (node as any).hash = "421253a83a0b965c345fcf3a343dc809";
