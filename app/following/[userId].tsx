@@ -1,39 +1,22 @@
-import { View, StyleSheet } from "react-native";
+import { Suspense } from "react";
+import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
-import Animated, { FadeIn } from "react-native-reanimated";
-import { Users } from "lucide-react-native";
+import { graphql } from "relay-runtime";
+import { useLazyLoadQuery, usePaginationFragment } from "react-relay";
 
-import { Text } from "@/components/ui/text";
+import { UserList } from "@/components/user/user-list";
 import { useColors } from "@/hooks/use-colors";
 import {
   IS_LIQUID_GLASS,
   useTransparentHeaderPadding,
 } from "@/hooks/use-transparent-header";
+import type { UserIdFollowingQuery } from "@/lib/relay/__generated__/UserIdFollowingQuery.graphql";
+import type { UserIdFollowingFragment$key } from "@/lib/relay/__generated__/UserIdFollowingFragment.graphql";
 
-/**
- * Following list screen.
- *
- * NOTE: The GraphQL schema currently lacks a `following` connection field on User.
- * This screen shows an empty state until backend support is added.
- *
- * When backend adds `following(first: Int, after: String): UserConnection` to User type,
- * this screen should be updated to use usePaginationFragment with:
- *
- * fragment followingListFragment on User
- * @refetchable(queryName: "followingListPaginationQuery") {
- *   following(first: $first, after: $after)
- *   @connection(key: "followingList_following") {
- *     edges { node { id ...userRow_user } }
- *   }
- * }
- */
 export default function FollowingScreen() {
-  useLocalSearchParams<{ userId: string }>();
+  const { userId } = useLocalSearchParams<{ userId: string }>();
   const colors = useColors();
   const contentPaddingTop = useTransparentHeaderPadding();
-
-  // TODO: Implement with Relay pagination when backend adds following connection
-  // For now, show empty state indicating feature pending backend support
 
   return (
     <View
@@ -50,59 +33,85 @@ export default function FollowingScreen() {
             backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg,
           },
           headerShadowVisible: false,
+          headerBackTitle: "",
+          headerBackButtonDisplayMode: "minimal",
         }}
       />
-      <Animated.View
-        entering={FadeIn.duration(300)}
-        style={styles.emptyContainer}
+      <Suspense
+        fallback={
+          <View style={styles.loading}>
+            <ActivityIndicator />
+          </View>
+        }
       >
-        <View
-          style={[
-            styles.emptyIconContainer,
-            { backgroundColor: colors.surfaceElevated },
-          ]}
-        >
-          <Users size={32} color={colors.textMuted} strokeWidth={1.5} />
-        </View>
-        <Text style={[styles.emptyTitle, { color: colors.text }]}>
-          Not following anyone
-        </Text>
-        <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-          When this user follows people, they&apos;ll appear here
-        </Text>
-      </Animated.View>
+        <FollowingContent userId={userId} />
+      </Suspense>
     </View>
   );
 }
+
+function FollowingContent({ userId }: { userId: string }) {
+  const queryData = useLazyLoadQuery<UserIdFollowingQuery>(query, {
+    userId,
+  });
+
+  if (queryData.node == null) return null;
+
+  return <FollowingList dataKey={queryData.node} />;
+}
+
+function FollowingList({ dataKey }: { dataKey: UserIdFollowingFragment$key }) {
+  const { data, hasNext, isLoadingNext, loadNext } = usePaginationFragment(
+    fragment,
+    dataKey,
+  );
+
+  return (
+    <UserList
+      users={data.following.edges}
+      hasNext={hasNext}
+      isLoadingNext={isLoadingNext}
+      loadNext={() => loadNext(20)}
+      emptyMessage="Not following anyone"
+      emptySubMessage="When this user follows people, they'll appear here"
+    />
+  );
+}
+
+const query = graphql`
+  query UserIdFollowingQuery($userId: ID!) {
+    node(id: $userId) {
+      ...UserIdFollowingFragment
+    }
+  }
+`;
+
+const fragment = graphql`
+  fragment UserIdFollowingFragment on User
+  @refetchable(queryName: "UserIdFollowingPaginationQuery")
+  @argumentDefinitions(
+    count: { type: "Int", defaultValue: 20 }
+    cursor: { type: "String" }
+  ) {
+    following(first: $count, after: $cursor)
+      @connection(key: "UserIdFollowing_following") {
+      edges {
+        node {
+          id
+          ...userRow_user
+        }
+      }
+    }
+  }
+`;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  emptyContainer: {
+  loading: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 64,
-    paddingHorizontal: 32,
-  },
-  emptyIconContainer: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 20,
   },
 });

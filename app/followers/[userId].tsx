@@ -1,39 +1,22 @@
-import { View, StyleSheet } from "react-native";
+import { Suspense } from "react";
+import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
-import Animated, { FadeIn } from "react-native-reanimated";
-import { Users } from "lucide-react-native";
+import { graphql } from "relay-runtime";
+import { useLazyLoadQuery, usePaginationFragment } from "react-relay";
 
-import { Text } from "@/components/ui/text";
+import { UserList } from "@/components/user/user-list";
 import { useColors } from "@/hooks/use-colors";
 import {
   IS_LIQUID_GLASS,
   useTransparentHeaderPadding,
 } from "@/hooks/use-transparent-header";
+import type { UserIdFollowersQuery } from "@/lib/relay/__generated__/UserIdFollowersQuery.graphql";
+import type { UserIdFollowersFragment$key } from "@/lib/relay/__generated__/UserIdFollowersFragment.graphql";
 
-/**
- * Followers list screen.
- *
- * NOTE: The GraphQL schema currently lacks a `followers` connection field on User.
- * This screen shows an empty state until backend support is added.
- *
- * When backend adds `followers(first: Int, after: String): UserConnection` to User type,
- * this screen should be updated to use usePaginationFragment with:
- *
- * fragment followersListFragment on User
- * @refetchable(queryName: "followersListPaginationQuery") {
- *   followers(first: $first, after: $after)
- *   @connection(key: "followersList_followers") {
- *     edges { node { id ...userRow_user } }
- *   }
- * }
- */
 export default function FollowersScreen() {
-  useLocalSearchParams<{ userId: string }>();
+  const { userId } = useLocalSearchParams<{ userId: string }>();
   const colors = useColors();
   const contentPaddingTop = useTransparentHeaderPadding();
-
-  // TODO: Implement with Relay pagination when backend adds followers connection
-  // For now, show empty state indicating feature pending backend support
 
   return (
     <View
@@ -50,59 +33,85 @@ export default function FollowersScreen() {
             backgroundColor: IS_LIQUID_GLASS ? "transparent" : colors.bg,
           },
           headerShadowVisible: false,
+          headerBackTitle: "",
+          headerBackButtonDisplayMode: "minimal",
         }}
       />
-      <Animated.View
-        entering={FadeIn.duration(300)}
-        style={styles.emptyContainer}
+      <Suspense
+        fallback={
+          <View style={styles.loading}>
+            <ActivityIndicator />
+          </View>
+        }
       >
-        <View
-          style={[
-            styles.emptyIconContainer,
-            { backgroundColor: colors.surfaceElevated },
-          ]}
-        >
-          <Users size={32} color={colors.textMuted} strokeWidth={1.5} />
-        </View>
-        <Text style={[styles.emptyTitle, { color: colors.text }]}>
-          No followers yet
-        </Text>
-        <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-          When people follow this user, they&apos;ll appear here
-        </Text>
-      </Animated.View>
+        <FollowersContent userId={userId} />
+      </Suspense>
     </View>
   );
 }
+
+function FollowersContent({ userId }: { userId: string }) {
+  const queryData = useLazyLoadQuery<UserIdFollowersQuery>(query, {
+    userId,
+  });
+
+  if (queryData.node == null) return null;
+
+  return <FollowersList dataKey={queryData.node} />;
+}
+
+function FollowersList({ dataKey }: { dataKey: UserIdFollowersFragment$key }) {
+  const { data, hasNext, isLoadingNext, loadNext } = usePaginationFragment(
+    fragment,
+    dataKey,
+  );
+
+  return (
+    <UserList
+      users={data.followers.edges}
+      hasNext={hasNext}
+      isLoadingNext={isLoadingNext}
+      loadNext={() => loadNext(20)}
+      emptyMessage="No followers yet"
+      emptySubMessage="When people follow this user, they'll appear here"
+    />
+  );
+}
+
+const query = graphql`
+  query UserIdFollowersQuery($userId: ID!) {
+    node(id: $userId) {
+      ...UserIdFollowersFragment
+    }
+  }
+`;
+
+const fragment = graphql`
+  fragment UserIdFollowersFragment on User
+  @refetchable(queryName: "UserIdFollowersPaginationQuery")
+  @argumentDefinitions(
+    count: { type: "Int", defaultValue: 20 }
+    cursor: { type: "String" }
+  ) {
+    followers(first: $count, after: $cursor)
+      @connection(key: "UserIdFollowers_followers") {
+      edges {
+        node {
+          id
+          ...userRow_user
+        }
+      }
+    }
+  }
+`;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  emptyContainer: {
+  loading: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 64,
-    paddingHorizontal: 32,
-  },
-  emptyIconContainer: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 20,
   },
 });

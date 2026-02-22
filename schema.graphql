@@ -387,7 +387,6 @@ type ReadingPlanDay implements Node {
 
 type ReadingPlanDayReading implements Node {
   book: String
-  endChapter: Int
   endVerse: Int
   id: ID!
   readingOrder: Int
@@ -397,7 +396,6 @@ type ReadingPlanDayReading implements Node {
 
 input ReadingPlanDayReadingInput {
   book: BibleBook!
-  endChapter: Int
   endVerse: Int
   readingOrder: Int!
   startChapter: Int!
@@ -534,6 +532,8 @@ type User implements Node {
   email: String
   followedAt: DateTime
   followerCount: Int!
+  followers(after: String, before: String, first: Int, last: Int): UserConnection!
+  following(after: String, before: String, first: Int, last: Int): UserConnection!
   followingCount: Int!
   id: ID!
   image: Asset
@@ -558,6 +558,16 @@ type UserBibleReadState implements Node {
 
 type UserBlockPayload {
   user: User!
+}
+
+type UserConnection {
+  edges: [UserEdge!]!
+  pageInfo: PageInfo!
+}
+
+type UserEdge {
+  cursor: String!
+  node: User!
 }
 
 input UserFilterInput {
