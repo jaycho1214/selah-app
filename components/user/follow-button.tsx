@@ -92,6 +92,22 @@ export const FollowButton = memo(function FollowButton({
           );
         }
       },
+      updater: (store) => {
+        // Target user's followedAt and followerCount are auto-updated
+        // by Relay from the server response (which includes user { id ... }).
+        // But the current user's followingCount is not in the response,
+        // so we must re-apply it here after the optimistic rollback.
+        const root = store.getRoot();
+        const currentUser = root.getLinkedRecord("user");
+        if (currentUser) {
+          const followingCount =
+            (currentUser.getValue("followingCount") as number) ?? 0;
+          currentUser.setValue(
+            isFollowing ? Math.max(0, followingCount - 1) : followingCount + 1,
+            "followingCount",
+          );
+        }
+      },
       onError: (error) => {
         // Optimistic update auto-rolls back
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);

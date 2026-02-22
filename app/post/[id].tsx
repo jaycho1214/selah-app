@@ -470,6 +470,16 @@ function PostContent({
             postRecord.setValue(currentCount + 1, "likesCount");
           }
         },
+        updater: (store) => {
+          const postRecord = store.get(id);
+          if (postRecord) {
+            const payload = store.getRootField("bibleVersePostLike");
+            postRecord.setValue(payload?.getValue("likedAt"), "likedAt");
+            const currentCount =
+              (postRecord.getValue("likesCount") as number) ?? 0;
+            postRecord.setValue(currentCount + 1, "likesCount");
+          }
+        },
       });
     },
     [commitLike, capture],
@@ -481,6 +491,15 @@ function PostContent({
       commitUnlike({
         variables: { id },
         optimisticUpdater: (store) => {
+          const postRecord = store.get(id);
+          if (postRecord) {
+            postRecord.setValue(null, "likedAt");
+            const currentCount =
+              (postRecord.getValue("likesCount") as number) ?? 0;
+            postRecord.setValue(Math.max(0, currentCount - 1), "likesCount");
+          }
+        },
+        updater: (store) => {
           const postRecord = store.get(id);
           if (postRecord) {
             postRecord.setValue(null, "likedAt");

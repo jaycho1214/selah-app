@@ -462,6 +462,15 @@ function VerseContent({
             post.setValue(currentCount + 1, "likesCount");
           }
         },
+        updater: (store) => {
+          const post = store.get(postId);
+          if (post) {
+            const payload = store.getRootField("bibleVersePostLike");
+            post.setValue(payload?.getValue("likedAt"), "likedAt");
+            const currentCount = (post.getValue("likesCount") as number) ?? 0;
+            post.setValue(currentCount + 1, "likesCount");
+          }
+        },
       });
     },
     [commitLike, capture],
@@ -473,6 +482,14 @@ function VerseContent({
       commitUnlike({
         variables: { id: postId },
         optimisticUpdater: (store) => {
+          const post = store.get(postId);
+          if (post) {
+            post.setValue(null, "likedAt");
+            const currentCount = (post.getValue("likesCount") as number) ?? 0;
+            post.setValue(Math.max(0, currentCount - 1), "likesCount");
+          }
+        },
+        updater: (store) => {
           const post = store.get(postId);
           if (post) {
             post.setValue(null, "likedAt");
