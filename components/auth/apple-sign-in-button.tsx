@@ -105,6 +105,9 @@ export const AppleSignInButton = memo(function AppleSignInButton({
           opacity: isLoading ? 0.6 : 1,
         },
       ]}
+      accessibilityRole="button"
+      accessibilityLabel={isLoading ? "Signing in with Apple" : "Continue with Apple"}
+      accessibilityState={{ disabled: isLoading, busy: isLoading }}
     >
       <AppleIcon color={colors.icon} />
       <Text style={[styles.text, { color: colors.text }]}>

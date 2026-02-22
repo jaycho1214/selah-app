@@ -94,7 +94,12 @@ function SpoilerText({
   }, [revealed]);
 
   return (
-    <Pressable onPress={handlePress}>
+    <Pressable
+      onPress={handlePress}
+      accessibilityRole="button"
+      accessibilityLabel={revealed ? text : "Hidden spoiler text"}
+      accessibilityHint={revealed ? undefined : "Tap to reveal hidden text"}
+    >
       <Text
         style={[
           styles.spoilerText,
@@ -510,9 +515,21 @@ export const ReflectionItem = memo(function ReflectionItem({
       entering={FadeIn.duration(200).delay(Math.min(index, 10) * 25)}
       style={[styles.container, { borderBottomColor: colors.border }]}
     >
-      <Pressable style={styles.row} onPress={handleCardPress}>
+      <Pressable
+        style={styles.row}
+        onPress={handleCardPress}
+        accessibilityRole="button"
+        accessibilityLabel={`Post by ${user.name || user.username || "Anonymous"}, ${formattedDate}`}
+        accessibilityHint="Opens post details"
+      >
         {/* Avatar */}
-        <Pressable onPress={handleUserPress} style={[styles.avatarContainer]}>
+        <Pressable
+          onPress={handleUserPress}
+          style={[styles.avatarContainer]}
+          accessibilityRole="button"
+          accessibilityLabel={`${user.name || user.username || "Anonymous"}'s profile picture`}
+          accessibilityHint="Opens user profile"
+        >
           {user.image?.url ? (
             <Image
               source={{ uri: user.image.url }}
@@ -749,7 +766,12 @@ export const ReflectionItem = memo(function ReflectionItem({
           <View style={styles.footer}>
             {/* Verse Badge */}
             {verseReference && (
-              <Pressable onPress={handleVersePress}>
+              <Pressable
+                onPress={handleVersePress}
+                accessibilityRole="link"
+                accessibilityLabel={`Verse ${verseReference}`}
+                accessibilityHint="Opens verse details"
+              >
                 <View
                   style={[
                     styles.verseBadge,
@@ -784,7 +806,17 @@ export const ReflectionItem = memo(function ReflectionItem({
             {/* Action Buttons Row - Refined with better spacing */}
             <View style={styles.actionBar}>
               {/* Like */}
-              <Pressable onPress={handleLikeToggle} hitSlop={12}>
+              <Pressable
+                onPress={handleLikeToggle}
+                hitSlop={12}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  isLiked
+                    ? `Unlike post, ${likesCount} ${likesCount === 1 ? "like" : "likes"}`
+                    : `Like post, ${likesCount} ${likesCount === 1 ? "like" : "likes"}`
+                }
+                accessibilityState={{ selected: isLiked }}
+              >
                 <View style={styles.actionItem}>
                   <Heart
                     size={18}
@@ -806,7 +838,12 @@ export const ReflectionItem = memo(function ReflectionItem({
               </Pressable>
 
               {/* Comment */}
-              <Pressable onPress={handleComment} hitSlop={12}>
+              <Pressable
+                onPress={handleComment}
+                hitSlop={12}
+                accessibilityRole="button"
+                accessibilityLabel={`Reply, ${childPostsCount} ${childPostsCount === 1 ? "reply" : "replies"}`}
+              >
                 <View style={styles.actionItem}>
                   <MessageCircle
                     size={18}
@@ -824,7 +861,12 @@ export const ReflectionItem = memo(function ReflectionItem({
               </Pressable>
 
               {/* Share */}
-              <Pressable onPress={handleShare} hitSlop={12}>
+              <Pressable
+                onPress={handleShare}
+                hitSlop={12}
+                accessibilityRole="button"
+                accessibilityLabel="Share post"
+              >
                 <View style={styles.actionItem}>
                   <ShareIcon
                     size={17}
@@ -836,7 +878,12 @@ export const ReflectionItem = memo(function ReflectionItem({
 
               {/* Report - only for non-owner posts */}
               {!isOwner && onReport && (
-                <Pressable onPress={handleReport} hitSlop={12}>
+                <Pressable
+                  onPress={handleReport}
+                  hitSlop={12}
+                  accessibilityRole="button"
+                  accessibilityLabel="Report post"
+                >
                   <View style={styles.actionItem}>
                     <Flag
                       size={17}
@@ -852,7 +899,12 @@ export const ReflectionItem = memo(function ReflectionItem({
 
               {/* Delete - only for owner */}
               {isOwner && onDelete && (
-                <Pressable onPress={handleDelete} hitSlop={12}>
+                <Pressable
+                  onPress={handleDelete}
+                  hitSlop={12}
+                  accessibilityRole="button"
+                  accessibilityLabel="Delete post"
+                >
                   <View style={styles.actionItem}>
                     <Trash2
                       size={17}

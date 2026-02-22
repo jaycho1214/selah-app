@@ -37,6 +37,9 @@ client_*.plist
 .env
 .env*.local
 
+# mcp config (may contain credentials)
+.mcp.json
+
 # typescript
 *.tsbuildinfo
 

@@ -243,6 +243,9 @@ export default function HomeScreen() {
               <Pressable
                 onPress={() => setNavigatorVisible(true)}
                 style={styles.bookPickerPressable}
+                accessibilityRole="button"
+                accessibilityLabel={`${bookName} chapter ${currentChapter}`}
+                accessibilityHint="Opens book and chapter selector"
               >
                 <Text style={[styles.bookName, { color: colors.bookText }]}>
                   {bookName}
@@ -267,6 +270,9 @@ export default function HomeScreen() {
                   { backgroundColor: themeColors.surfaceElevated },
                 ]}
                 hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={`Translation ${currentTranslation}`}
+                accessibilityHint="Opens translation selector"
               >
                 <Text
                   style={[

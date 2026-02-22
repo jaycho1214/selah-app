@@ -15,6 +15,7 @@ import React, {
 } from "react";
 import { ErrorBoundary } from "@/components/error-boundary";
 import {
+  Alert,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -252,16 +253,25 @@ function UserProfileContent() {
   const handleDelete = useCallback(
     (postId: string) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      capture("post_deleted", { post_id: postId });
-      const connectionId = postsListRef.current?.connectionId;
-      const connections = connectionId ? [connectionId] : [];
+      Alert.alert("Delete Post", "Are you sure you want to delete this post?", [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            capture("post_deleted", { post_id: postId });
+            const connectionId = postsListRef.current?.connectionId;
+            const connections = connectionId ? [connectionId] : [];
 
-      commitDelete({
-        variables: { id: postId, connections },
-        onError: (error) => {
-          console.error("Failed to delete post:", error);
+            commitDelete({
+              variables: { id: postId, connections },
+              onError: (error) => {
+                console.error("Failed to delete post:", error);
+              },
+            });
+          },
         },
-      });
+      ]);
     },
     [commitDelete, capture],
   );

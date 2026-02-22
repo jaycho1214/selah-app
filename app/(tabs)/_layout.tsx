@@ -24,21 +24,21 @@ export default function TabLayout() {
       disableTransparentOnScrollEdge={!hasGlass}
     >
       <NativeTabs.Trigger name="index">
-        <Label hidden />
+        <Label hidden>Bible</Label>
         <Icon
           sf={{ default: "house", selected: "house.fill" }}
           androidSrc={<VectorIcon family={MaterialIcons} name="home" />}
         />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="posts">
-        <Label hidden />
+        <Label hidden>Posts</Label>
         <Icon
           sf={{ default: "text.bubble", selected: "text.bubble.fill" }}
           androidSrc={<VectorIcon family={MaterialIcons} name="forum" />}
         />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="plans">
-        <Label hidden />
+        <Label hidden>Reading Plans</Label>
         <Icon
           sf={{ default: "book", selected: "book.fill" }}
           androidSrc={<VectorIcon family={MaterialIcons} name="menu-book" />}
@@ -46,14 +46,14 @@ export default function TabLayout() {
         <Badge hidden={behindDays === 0}>{String(behindDays)}</Badge>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
-        <Label hidden />
+        <Label hidden>Profile</Label>
         <Icon
           sf={{ default: "person", selected: "person.fill" }}
           androidSrc={<VectorIcon family={MaterialIcons} name="person" />}
         />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="search" role={hasGlass ? "search" : undefined}>
-        <Label hidden />
+        <Label hidden>Search</Label>
         <Icon
           sf="magnifyingglass"
           androidSrc={<VectorIcon family={MaterialIcons} name="search" />}

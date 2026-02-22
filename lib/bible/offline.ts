@@ -12,7 +12,7 @@ import { translations, verses } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import type { BibleBook } from "./types";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "https://api.selah.app";
+const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "https://selah.kr";
 
 export interface DownloadProgress {
   status: "idle" | "downloading" | "processing" | "complete" | "error";

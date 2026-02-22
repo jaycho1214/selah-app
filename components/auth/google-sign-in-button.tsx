@@ -75,6 +75,9 @@ export const GoogleSignInButton = memo(function GoogleSignInButton({
           opacity: isLoading ? 0.6 : 1,
         },
       ]}
+      accessibilityRole="button"
+      accessibilityLabel={isLoading ? "Signing in with Google" : "Continue with Google"}
+      accessibilityState={{ disabled: isLoading, busy: isLoading }}
     >
       <GoogleIcon />
       <Text style={[styles.text, { color: colors.text }]}>

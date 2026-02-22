@@ -49,5 +49,9 @@ export async function fetchGraphQL(
     body: JSON.stringify(body),
   });
 
+  if (!response.ok) {
+    throw new Error(`GraphQL request failed: ${response.status} ${response.statusText}`);
+  }
+
   return response.json();
 }

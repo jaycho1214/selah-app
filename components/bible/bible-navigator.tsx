@@ -322,6 +322,8 @@ export const BibleNavigator = memo(function BibleNavigator({
               onPress={handleBack}
               style={styles.backButton}
               hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel="Back to book list"
             >
               <ChevronLeft size={24} color={colors.accent} />
             </Pressable>
@@ -361,6 +363,8 @@ export const BibleNavigator = memo(function BibleNavigator({
                       borderWidth: isCurrent ? 1.5 : 0,
                     },
                   ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Chapter ${chapter}${isCurrent ? ", current" : ""}`}
                 >
                   <Text
                     style={[
@@ -392,6 +396,9 @@ export const BibleNavigator = memo(function BibleNavigator({
                 styles.testamentTab,
                 testament === "old" && { backgroundColor: colors.surface },
               ]}
+              accessibilityRole="tab"
+              accessibilityLabel="Old Testament"
+              accessibilityState={{ selected: testament === "old" }}
             >
               <Text
                 style={[
@@ -411,6 +418,9 @@ export const BibleNavigator = memo(function BibleNavigator({
                 styles.testamentTab,
                 testament === "new" && { backgroundColor: colors.surface },
               ]}
+              accessibilityRole="tab"
+              accessibilityLabel="New Testament"
+              accessibilityState={{ selected: testament === "new" }}
             >
               <Text
                 style={[
@@ -459,6 +469,9 @@ export const BibleNavigator = memo(function BibleNavigator({
                             backgroundColor: isDark ? "#292524" : "#f5f0eb",
                           },
                         ]}
+                        accessibilityRole="button"
+                        accessibilityLabel={`${details.name}${isCurrent ? ", current book" : ""}`}
+                        accessibilityHint="Select book to choose a chapter"
                       >
                         <Text
                           style={[

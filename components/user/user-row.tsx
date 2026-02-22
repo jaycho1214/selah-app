@@ -58,6 +58,9 @@ export const UserRow = memo(function UserRow({ userRef }: UserRowProps) {
     <Pressable
       onPress={handlePress}
       style={[styles.container, dynamicStyles.container]}
+      accessibilityRole="button"
+      accessibilityLabel={`${data?.name || data?.username}, @${data?.username}`}
+      accessibilityHint="Opens user profile"
     >
       <UserAvatar imageUrl={data?.image?.url} name={data?.name} size={48} />
       <View style={styles.content}>

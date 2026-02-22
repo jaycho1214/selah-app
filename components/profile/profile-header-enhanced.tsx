@@ -51,7 +51,12 @@ export const ProfileHeaderEnhanced = memo(function ProfileHeaderEnhanced({
       <View style={styles.topRow}>
         <View style={styles.nameSection}>
           {name && (
-            <Text style={[styles.name, dynamicStyles.name]}>{name}</Text>
+            <Text
+              style={[styles.name, dynamicStyles.name]}
+              accessibilityRole="header"
+            >
+              {name}
+            </Text>
           )}
           {username && (
             <Text style={[styles.username, dynamicStyles.username]}>
@@ -64,6 +69,8 @@ export const ProfileHeaderEnhanced = memo(function ProfileHeaderEnhanced({
           onPress={onAvatarPress}
           disabled={!onAvatarPress}
           style={styles.avatarContainer}
+          accessibilityRole="image"
+          accessibilityLabel={`${name || username || "User"}'s profile picture`}
         >
           {imageUrl ? (
             <Image

@@ -23,15 +23,15 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLazyLoadQuery, useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { useSession } from "@/components/providers/session-provider";
 import { Text } from "@/components/ui/text";
 import { UserAvatar } from "@/components/user/user-avatar";
 import { useColors } from "@/hooks/use-colors";
 import { useAnalytics } from "@/lib/analytics";
+import { authClient } from "@/lib/auth-client";
 import type { userEditMutation } from "@/lib/relay/__generated__/userEditMutation.graphql";
 import type { userEditQuery } from "@/lib/relay/__generated__/userEditQuery.graphql";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "https://www.selah.kr";
+const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "https://selah.kr";
 
 const query = graphql`
   query userEditQuery {
@@ -71,7 +71,6 @@ export default function UserEditScreen() {
   const colors = useColors();
   const { capture } = useAnalytics();
   const insets = useSafeAreaInsets();
-  const { session } = useSession();
   const data = useLazyLoadQuery<userEditQuery>(query, {});
   const bottomSheetRef = useRef<BottomSheet>(null);
 
@@ -271,12 +270,14 @@ export default function UserEditScreen() {
         name: "avatar.jpg",
       } as any);
 
+      const cookie = authClient.getCookie() ?? "";
       const response = await fetch(`${API_URL}/api/upload`, {
         method: "POST",
         body: formData,
         headers: {
-          Authorization: `Bearer ${session?.session?.token}`,
+          ...(cookie ? { cookie } : {}),
         },
+        credentials: Platform.OS === "web" ? "include" : "omit",
       });
 
       const responseData = await response.json();
@@ -317,6 +318,8 @@ export default function UserEditScreen() {
             <Pressable
               onPress={handleCancel}
               style={{ paddingHorizontal: 8, paddingVertical: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel editing profile"
             >
               <RNText style={{ color: colors.accent, fontSize: 17 }}>
                 Cancel
@@ -332,6 +335,9 @@ export default function UserEditScreen() {
                 paddingHorizontal: 8,
                 paddingVertical: 8,
               }}
+              accessibilityRole="button"
+              accessibilityLabel="Save profile changes"
+              accessibilityState={{ disabled: isDoneDisabled }}
             >
               {isSaving ? (
                 <ActivityIndicator size="small" color={colors.accent} />
@@ -382,6 +388,8 @@ export default function UserEditScreen() {
             <Pressable
               onPress={showAvatarOptions}
               style={styles.changePhotoButton}
+              accessibilityRole="button"
+              accessibilityLabel="Change profile photo"
             >
               <Text
                 style={{
@@ -406,6 +414,8 @@ export default function UserEditScreen() {
               placeholder="Your name"
               placeholderTextColor={colors.textMuted}
               maxLength={30}
+              accessibilityLabel="Name"
+              accessibilityHint="Enter your display name"
               style={[
                 styles.input,
                 {
@@ -435,6 +445,8 @@ export default function UserEditScreen() {
               maxLength={20}
               autoCapitalize="none"
               autoCorrect={false}
+              accessibilityLabel="Username"
+              accessibilityHint="Enter your unique username"
               style={[
                 styles.input,
                 {
@@ -463,6 +475,8 @@ export default function UserEditScreen() {
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="url"
+              accessibilityLabel="Website"
+              accessibilityHint="Enter your website URL"
               style={[
                 styles.input,
                 {
@@ -491,6 +505,8 @@ export default function UserEditScreen() {
               multiline
               numberOfLines={4}
               textAlignVertical="top"
+              accessibilityLabel="Bio"
+              accessibilityHint="Enter a short description about yourself"
               style={[
                 styles.textArea,
                 {
@@ -534,6 +550,8 @@ export default function UserEditScreen() {
             <Pressable
               onPress={() => handleAvatarAction("camera")}
               style={{ paddingVertical: 14, paddingHorizontal: 16 }}
+              accessibilityRole="button"
+              accessibilityLabel="Take photo"
             >
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <View
@@ -572,6 +590,8 @@ export default function UserEditScreen() {
             <Pressable
               onPress={() => handleAvatarAction("library")}
               style={{ paddingVertical: 14, paddingHorizontal: 16 }}
+              accessibilityRole="button"
+              accessibilityLabel="Choose from library"
             >
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <View
@@ -614,6 +634,8 @@ export default function UserEditScreen() {
             <Pressable
               onPress={() => handleAvatarAction("remove")}
               style={{ paddingVertical: 14, paddingHorizontal: 16 }}
+              accessibilityRole="button"
+              accessibilityLabel="Remove photo"
             >
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <View

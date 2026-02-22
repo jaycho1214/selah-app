@@ -51,6 +51,9 @@ export const BibleNavigatorBar = memo(function BibleNavigatorBar({
           isFirstChapter && styles.disabled,
           pressed && !isFirstChapter && { backgroundColor: colors.muted },
         ]}
+        accessibilityRole="button"
+        accessibilityLabel="Previous chapter"
+        accessibilityState={{ disabled: isFirstChapter }}
       >
         <ChevronLeft size={24} color={colors.text} />
       </Pressable>
@@ -62,6 +65,9 @@ export const BibleNavigatorBar = memo(function BibleNavigatorBar({
           styles.centerButton,
           pressed && { backgroundColor: colors.muted },
         ]}
+        accessibilityRole="button"
+        accessibilityLabel={`${bookName} chapter ${currentChapter}, ${currentTranslation}`}
+        accessibilityHint="Opens book and chapter selector"
       >
         <View style={styles.centerContent}>
           <Text style={[styles.bookTitle, { color: colors.text }]}>
@@ -85,6 +91,9 @@ export const BibleNavigatorBar = memo(function BibleNavigatorBar({
           isLastChapter && styles.disabled,
           pressed && !isLastChapter && { backgroundColor: colors.muted },
         ]}
+        accessibilityRole="button"
+        accessibilityLabel="Next chapter"
+        accessibilityState={{ disabled: isLastChapter }}
       >
         <ChevronRight size={24} color={colors.text} />
       </Pressable>

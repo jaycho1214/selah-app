@@ -1,7 +1,7 @@
 import * as Haptics from "expo-haptics";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { ErrorBoundary } from "@/components/error-boundary";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Alert, Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
   useAnimatedStyle,
@@ -287,16 +287,25 @@ function ForYouFeed() {
   const handleDelete = useCallback(
     (postId: string) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      capture("post_deleted", { post_id: postId });
-      const connections = connectionIdRef.current
-        ? [connectionIdRef.current]
-        : [];
-      commitDelete({
-        variables: { id: postId, connections },
-        onError: (error) => {
-          console.error("Failed to delete post:", error);
+      Alert.alert("Delete Post", "Are you sure you want to delete this post?", [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            capture("post_deleted", { post_id: postId });
+            const connections = connectionIdRef.current
+              ? [connectionIdRef.current]
+              : [];
+            commitDelete({
+              variables: { id: postId, connections },
+              onError: (error) => {
+                console.error("Failed to delete post:", error);
+              },
+            });
+          },
         },
-      });
+      ]);
     },
     [commitDelete, capture],
   );
@@ -499,16 +508,25 @@ function FollowingFeedContent({
   const handleDelete = useCallback(
     (postId: string) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      capture("post_deleted", { post_id: postId });
-      const connections = connectionIdRef.current
-        ? [connectionIdRef.current]
-        : [];
-      commitDelete({
-        variables: { id: postId, connections },
-        onError: (error) => {
-          console.error("Failed to delete post:", error);
+      Alert.alert("Delete Post", "Are you sure you want to delete this post?", [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            capture("post_deleted", { post_id: postId });
+            const connections = connectionIdRef.current
+              ? [connectionIdRef.current]
+              : [];
+            commitDelete({
+              variables: { id: postId, connections },
+              onError: (error) => {
+                console.error("Failed to delete post:", error);
+              },
+            });
+          },
         },
-      });
+      ]);
     },
     [commitDelete, capture],
   );

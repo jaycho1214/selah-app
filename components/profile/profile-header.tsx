@@ -36,7 +36,12 @@ export const ProfileHeader = memo(function ProfileHeader({
 
       {/* Name */}
       {name && (
-        <Text style={[styles.name, { color: colors.text }]}>{name}</Text>
+        <Text
+          style={[styles.name, { color: colors.text }]}
+          accessibilityRole="header"
+        >
+          {name}
+        </Text>
       )}
 
       {/* Username */}

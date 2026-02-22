@@ -14,9 +14,6 @@
       "appleTeamId": "5ARDZKSX95",
       "usesAppleSignIn": true,
       "associatedDomains": ["applinks:selah.kr"],
-      "entitlements": {
-        "aps-environment": "development"
-      },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }

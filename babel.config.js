@@ -5,7 +5,7 @@ module.exports = function (api) {
     plugins: [
       "relay",
       ...(process.env.NODE_ENV === "production"
-        ? ["transform-remove-console"]
+        ? [["transform-remove-console", { exclude: ["error", "warn"] }]]
         : []),
       "react-native-reanimated/plugin", // Must be last
     ],

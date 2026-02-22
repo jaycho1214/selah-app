@@ -72,6 +72,8 @@ function SettingsItem({
         onPress();
       }}
       style={{ backgroundColor: colors.surface }}
+      accessibilityRole="button"
+      accessibilityLabel={label}
     >
       <View style={styles.menuItemRow}>
         <View
@@ -172,6 +174,9 @@ function ThemeSelector() {
                 },
               ],
             ]}
+            accessibilityRole="tab"
+            accessibilityLabel={`${option.label} theme`}
+            accessibilityState={{ selected: isActive }}
           >
             <Text
               style={[
@@ -232,6 +237,9 @@ function FontSizeSelector() {
                 },
               ],
             ]}
+            accessibilityRole="tab"
+            accessibilityLabel={`${option.label} font size`}
+            accessibilityState={{ selected: isActive }}
           >
             <Text
               style={{
@@ -273,6 +281,7 @@ function VerseHighlightSettings() {
             setEnabled(v);
           }}
           trackColor={{ false: colors.surfaceElevated, true: colors.accent }}
+          accessibilityLabel="Highlight posted verses"
         />
       </View>
       {enabled && (
@@ -287,6 +296,9 @@ function VerseHighlightSettings() {
                   setColor(c.value);
                 }}
                 hitSlop={4}
+                accessibilityRole="button"
+                accessibilityLabel={`Highlight color ${c.id}`}
+                accessibilityState={{ selected: isActive }}
               >
                 <View
                   style={[
@@ -358,6 +370,7 @@ function NotificationSettings() {
         onValueChange={handleToggle}
         disabled={isLoading}
         trackColor={{ false: colors.surfaceElevated, true: colors.accent }}
+        accessibilityLabel="Push notifications"
       />
     </View>
   );

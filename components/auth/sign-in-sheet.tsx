@@ -165,6 +165,8 @@ export const SignInSheet = forwardRef<BottomSheetModal, SignInSheetProps>(
               <Text
                 style={[styles.footerLink, { color: colors.textSecondary }]}
                 onPress={() => Linking.openURL("https://selah.kr/legal/terms")}
+                accessibilityRole="link"
+                accessibilityLabel="Terms of Service"
               >
                 Terms of Service
               </Text>{" "}
@@ -174,6 +176,8 @@ export const SignInSheet = forwardRef<BottomSheetModal, SignInSheetProps>(
                 onPress={() =>
                   Linking.openURL("https://selah.kr/legal/privacy")
                 }
+                accessibilityRole="link"
+                accessibilityLabel="Privacy Policy"
               >
                 Privacy Policy
               </Text>

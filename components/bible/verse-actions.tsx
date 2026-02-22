@@ -267,6 +267,8 @@ export function VerseActions() {
             onPress={handleCompare}
             disabled={compareLoading}
             style={styles.actionButton}
+            accessibilityRole="button"
+            accessibilityLabel="Compare translations"
           >
             <ArrowLeftRight size={18} color={t.textMuted} strokeWidth={1.8} />
             <Text style={[styles.actionLabel, dynamicStyles.actionLabel]}>
@@ -276,7 +278,12 @@ export function VerseActions() {
 
           <View style={[styles.divider, dynamicStyles.divider]} />
 
-          <Pressable onPress={handleShare} style={styles.actionButton}>
+          <Pressable
+            onPress={handleShare}
+            style={styles.actionButton}
+            accessibilityRole="button"
+            accessibilityLabel="Share verse"
+          >
             <Share2 size={18} color={t.textMuted} strokeWidth={1.8} />
             <Text style={[styles.actionLabel, dynamicStyles.actionLabel]}>
               Share
@@ -285,7 +292,12 @@ export function VerseActions() {
 
           <View style={[styles.divider, dynamicStyles.divider]} />
 
-          <Pressable onPress={handleCopy} style={styles.actionButton}>
+          <Pressable
+            onPress={handleCopy}
+            style={styles.actionButton}
+            accessibilityRole="button"
+            accessibilityLabel="Copy verse"
+          >
             <Copy size={18} color={t.textMuted} strokeWidth={1.8} />
             <Text style={[styles.actionLabel, dynamicStyles.actionLabel]}>
               Copy
@@ -294,7 +306,12 @@ export function VerseActions() {
 
           <View style={[styles.divider, dynamicStyles.divider]} />
 
-          <Pressable onPress={clearSelection} style={styles.closeButton}>
+          <Pressable
+            onPress={clearSelection}
+            style={styles.closeButton}
+            accessibilityRole="button"
+            accessibilityLabel="Clear selection"
+          >
             <X size={18} color={t.textSubtle} strokeWidth={2} />
           </Pressable>
         </AnimatedGlassView>

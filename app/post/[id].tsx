@@ -14,6 +14,7 @@ import {
 import { ErrorBoundary } from "@/components/error-boundary";
 import {
   ActivityIndicator,
+  Alert,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -495,29 +496,38 @@ function PostContent({
 
   const handleDelete = useCallback(
     (deletedId: string) => {
-      capture("post_deleted", { post_id: deletedId });
-      const connections = connectionId ? [connectionId] : [];
+      Alert.alert("Delete Post", "Are you sure you want to delete this post?", [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            capture("post_deleted", { post_id: deletedId });
+            const connections = connectionId ? [connectionId] : [];
 
-      commitDelete({
-        variables: { id: deletedId, connections },
-        optimisticUpdater: (store) => {
-          // Decrement parent post's childPostsCount if deleting a reply
-          if (post?.id && deletedId !== post.id) {
-            const parentPost = store.get(post.id);
-            if (parentPost) {
-              const currentCount =
-                (parentPost.getValue("childPostsCount") as number) ?? 0;
-              parentPost.setValue(
-                Math.max(0, currentCount - 1),
-                "childPostsCount",
-              );
-            }
-          }
+            commitDelete({
+              variables: { id: deletedId, connections },
+              optimisticUpdater: (store) => {
+                // Decrement parent post's childPostsCount if deleting a reply
+                if (post?.id && deletedId !== post.id) {
+                  const parentPost = store.get(post.id);
+                  if (parentPost) {
+                    const currentCount =
+                      (parentPost.getValue("childPostsCount") as number) ?? 0;
+                    parentPost.setValue(
+                      Math.max(0, currentCount - 1),
+                      "childPostsCount",
+                    );
+                  }
+                }
+              },
+              onError: (error) => {
+                console.error("Failed to delete post:", error);
+              },
+            });
+          },
         },
-        onError: (error) => {
-          console.error("Failed to delete post:", error);
-        },
-      });
+      ]);
     },
     [connectionId, commitDelete, post?.id, capture],
   );

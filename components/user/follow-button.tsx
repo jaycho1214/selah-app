@@ -121,6 +121,9 @@ export const FollowButton = memo(function FollowButton({
           : dynamicStyles.followButton,
         isMutationInFlight && styles.disabledButton,
       ]}
+      accessibilityRole="button"
+      accessibilityLabel={isFollowing ? "Unfollow" : "Follow"}
+      accessibilityState={{ disabled: isMutationInFlight }}
     >
       {isMutationInFlight ? (
         <ActivityIndicator
