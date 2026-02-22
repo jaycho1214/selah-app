@@ -11,6 +11,10 @@
     "preview": {
       "distribution": "internal",
       "env": {
+        "EXPO_PUBLIC_API_URL": "https://selah.kr",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "707707053099-p97fb057gqfmtu53unvqr2vlco2arim4.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "707707053099-robncnjvk5fidk58dkhsduelgscdemnn.apps.googleusercontent.com",
+        "EXPO_PUBLIC_POSTHOG_KEY": "phc_zS57HkLSSpP32ggWHX0ql9tkTlx6xdOOlVQRD4SqWNO",
         "EXPO_UNSTABLE_METRO_OPTIMIZE_GRAPH": "1",
         "EXPO_UNSTABLE_TREE_SHAKING": "1"
       }
@@ -18,6 +22,10 @@
     "production": {
       "autoIncrement": true,
       "env": {
+        "EXPO_PUBLIC_API_URL": "https://selah.kr",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "707707053099-p97fb057gqfmtu53unvqr2vlco2arim4.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "707707053099-robncnjvk5fidk58dkhsduelgscdemnn.apps.googleusercontent.com",
+        "EXPO_PUBLIC_POSTHOG_KEY": "phc_zS57HkLSSpP32ggWHX0ql9tkTlx6xdOOlVQRD4SqWNO",
         "EXPO_UNSTABLE_METRO_OPTIMIZE_GRAPH": "1",
         "EXPO_UNSTABLE_TREE_SHAKING": "1"
       }
