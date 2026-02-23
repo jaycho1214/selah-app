@@ -25,7 +25,7 @@ Notifications.setNotificationHandler({
   }),
 });
 
-// Suppress deprecation warning from dependencies (tentap-editor, expo-router)
+// Suppress deprecation warning from dependencies (expo-router)
 LogBox.ignoreLogs(["SafeAreaView has been deprecated"]);
 
 /* eslint-disable import/first */

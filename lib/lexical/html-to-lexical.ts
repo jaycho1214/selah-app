@@ -59,7 +59,7 @@ type LexicalInlineNode =
 
 /**
  * Simple HTML to Lexical converter
- * Handles basic formatting from tentap-editor output
+ * Handles basic formatting from HTML output
  */
 export function htmlToLexical(html: string): string {
   // For plain text (no HTML tags), create simple structure
