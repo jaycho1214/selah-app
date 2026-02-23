@@ -4,6 +4,7 @@ import {
   AtSign,
   Heart,
   MessageCirclePlus,
+  MessagesSquare,
   Reply,
   UserRoundPlus,
   type LucideIcon,
@@ -87,6 +88,11 @@ const TYPE_CONFIG: Record<
     icon: AtSign,
     color: "",
     getMessage: (name) => ` mentioned you`,
+  },
+  BIBLE_VERSE_POST_THREAD_REPLY: {
+    icon: MessagesSquare,
+    color: "",
+    getMessage: (name) => ` replied in a thread you're in`,
   },
   USER_FOLLOWED: {
     icon: UserRoundPlus,
