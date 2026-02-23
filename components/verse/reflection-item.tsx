@@ -9,7 +9,7 @@ import {
   Share as ShareIcon,
   Trash2,
 } from "lucide-react-native";
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, Suspense, useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -20,7 +20,7 @@ import {
   View,
 } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
-import { graphql, useMutation } from "react-relay";
+import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 
 import { Text } from "@/components/ui/text";
 import { useVerseReferenceSheet } from "@/components/providers/verse-reference-sheet-provider";
@@ -31,6 +31,7 @@ import { getPostShareUrl } from "@/lib/utils";
 import { MAX_IMAGES_PER_POST } from "@/lib/constants";
 import type { reflectionItemPollVoteMutation } from "@/lib/relay/__generated__/reflectionItemPollVoteMutation.graphql";
 import type { reflectionItemPollUnvoteMutation } from "@/lib/relay/__generated__/reflectionItemPollUnvoteMutation.graphql";
+import type { reflectionItemTopReplyQuery } from "@/lib/relay/__generated__/reflectionItemTopReplyQuery.graphql";
 
 // Poll vote mutation
 const PollVoteMutation = graphql`
@@ -75,6 +76,91 @@ const PollUnvoteMutation = graphql`
     }
   }
 `;
+
+// Top reply query
+const TopReplyQuery = graphql`
+  query reflectionItemTopReplyQuery($postId: ID!) {
+    bibleVersePostById(id: $postId) {
+      topReply {
+        id
+        content
+        user {
+          id
+          name
+          username
+          image {
+            url
+          }
+        }
+      }
+    }
+  }
+`;
+
+function TopReplyPreview({
+  postId,
+  colors,
+  onPress,
+}: {
+  postId: string;
+  colors: ReflectionItemProps["colors"];
+  onPress: () => void;
+}) {
+  const data = useLazyLoadQuery<reflectionItemTopReplyQuery>(TopReplyQuery, {
+    postId,
+  });
+  const topReply = data.bibleVersePostById?.topReply;
+  if (!topReply) return null;
+
+  const plainText = extractPlainText(topReply.content);
+  if (!plainText) return null;
+
+  const initial = (topReply.user.name ||
+    topReply.user.username ||
+    "?")[0].toUpperCase();
+
+  return (
+    <Pressable onPress={onPress} style={styles.topReplyContainer}>
+      <View style={[styles.topReplyBar, { backgroundColor: colors.border }]} />
+      <View style={styles.topReplyInner}>
+        <View style={styles.topReplyHeader}>
+          {topReply.user.image?.url ? (
+            <Image
+              source={{ uri: topReply.user.image.url }}
+              style={styles.topReplyAvatar}
+              contentFit="cover"
+            />
+          ) : (
+            <View
+              style={[
+                styles.topReplyAvatarPlaceholder,
+                { backgroundColor: colors.accent + "12" },
+              ]}
+            >
+              <Text
+                style={[styles.topReplyAvatarInitial, { color: colors.accent }]}
+              >
+                {initial}
+              </Text>
+            </View>
+          )}
+          <Text
+            style={[styles.topReplyName, { color: colors.textMuted }]}
+            numberOfLines={1}
+          >
+            {topReply.user.name || topReply.user.username || "Anonymous"}
+          </Text>
+        </View>
+        <Text
+          style={[styles.topReplyText, { color: colors.textSecondary }]}
+          numberOfLines={2}
+        >
+          {plainText}
+        </Text>
+      </View>
+    </Pressable>
+  );
+}
 
 // Spoiler component for tap-to-reveal
 function SpoilerText({
@@ -918,6 +1004,17 @@ export const ReflectionItem = memo(function ReflectionItem({
           </View>
         </View>
       </Pressable>
+
+      {/* Top Reply Preview — hidden on detail page where replies are already visible */}
+      {childPostsCount > 0 && !disableNavigation && (
+        <Suspense fallback={null}>
+          <TopReplyPreview
+            postId={id}
+            colors={colors}
+            onPress={handleCardPress}
+          />
+        </Suspense>
+      )}
     </Animated.View>
   );
 });
@@ -1157,5 +1254,49 @@ const styles = StyleSheet.create({
     color: "#0d9488",
     fontWeight: "500",
     fontStyle: "italic",
+  },
+  // Top Reply Preview
+  topReplyContainer: {
+    flexDirection: "row",
+    alignItems: "stretch",
+    marginTop: 10,
+  },
+  topReplyBar: {
+    width: 2,
+    borderRadius: 1,
+  },
+  topReplyInner: {
+    flex: 1,
+    gap: 3,
+    paddingLeft: 10,
+  },
+  topReplyHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  topReplyAvatar: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+  },
+  topReplyAvatarPlaceholder: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  topReplyAvatarInitial: {
+    fontSize: 10,
+    fontWeight: "600",
+  },
+  topReplyName: {
+    fontSize: 13,
+    fontWeight: "500",
+  },
+  topReplyText: {
+    fontSize: 14,
+    lineHeight: 19,
   },
 });

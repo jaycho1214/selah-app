@@ -125,6 +125,7 @@ type BibleVersePost implements Node {
   likesCount: Int!
   parentPost: BibleVersePost
   poll: Poll
+  topReply: BibleVersePost
   user: User!
   verse: BibleVerse
 }
@@ -251,6 +252,7 @@ enum NotificationType {
   BIBLE_VERSE_POST_LIKE
   BIBLE_VERSE_POST_MENTION
   BIBLE_VERSE_POST_REPLY
+  BIBLE_VERSE_POST_THREAD_REPLY
   USER_FOLLOWED
 }
 

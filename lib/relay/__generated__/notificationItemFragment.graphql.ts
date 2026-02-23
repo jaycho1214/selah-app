@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<233ed9bc832f8bc9de3064928522abe7>>
+ * @generated SignedSource<<8899f6378a53a299b245ecc0b2b2e01c>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,7 +11,7 @@
 import { ReaderFragment } from 'relay-runtime';
 export type BibleBook = "ACTS" | "AMOS" | "COLOSSIANS" | "DANIEL" | "DEUTERONOMY" | "ECCLESIASTES" | "EPHESIANS" | "ESTHER" | "EXODUS" | "EZEKIEL" | "EZRA" | "FIRST_CHRONICLES" | "FIRST_CORINTHIANS" | "FIRST_JOHN" | "FIRST_KINGS" | "FIRST_PETER" | "FIRST_SAMUEL" | "FIRST_THESSALONIANS" | "FIRST_TIMOTHY" | "GALATIANS" | "GENESIS" | "HABAKKUK" | "HAGGAI" | "HEBREWS" | "HOSEA" | "ISAIAH" | "JAMES" | "JEREMIAH" | "JOB" | "JOEL" | "JOHN" | "JONAH" | "JOSHUA" | "JUDE" | "JUDGES" | "LAMENTATIONS" | "LEVITICUS" | "LUKE" | "MALACHI" | "MARK" | "MATTHEW" | "MICAH" | "NAHUM" | "NEHEMIAH" | "NUMBERS" | "OBADIAH" | "PHILEMON" | "PHILIPPIANS" | "PROVERBS" | "PSALMS" | "REVELATION" | "ROMANS" | "RUTH" | "SECOND_CHRONICLES" | "SECOND_CORINTHIANS" | "SECOND_JOHN" | "SECOND_KINGS" | "SECOND_PETER" | "SECOND_SAMUEL" | "SECOND_THESSALONIANS" | "SECOND_TIMOTHY" | "SONG_OF_SONGS" | "THIRD_JOHN" | "TITUS" | "ZECHARIAH" | "ZEPHANIAH" | "%future added value";
 export type BibleTranslation = "ASV" | "KJV" | "%future added value";
-export type NotificationType = "BIBLE_VERSE_POST_FOLLOWER_POST" | "BIBLE_VERSE_POST_LIKE" | "BIBLE_VERSE_POST_MENTION" | "BIBLE_VERSE_POST_REPLY" | "USER_FOLLOWED" | "%future added value";
+export type NotificationType = "BIBLE_VERSE_POST_FOLLOWER_POST" | "BIBLE_VERSE_POST_LIKE" | "BIBLE_VERSE_POST_MENTION" | "BIBLE_VERSE_POST_REPLY" | "BIBLE_VERSE_POST_THREAD_REPLY" | "USER_FOLLOWED" | "%future added value";
 import { FragmentRefs } from "relay-runtime";
 export type notificationItemFragment$data = {
   readonly createdAt: any | null | undefined;
