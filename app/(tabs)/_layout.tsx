@@ -43,7 +43,7 @@ export default function TabLayout() {
           sf={{ default: "book", selected: "book.fill" }}
           androidSrc={<VectorIcon family={MaterialIcons} name="menu-book" />}
         />
-        <Badge hidden={behindDays === 0}>{String(behindDays)}</Badge>
+        {behindDays > 0 && <Badge>{String(behindDays)}</Badge>}
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Label hidden>Profile</Label>
