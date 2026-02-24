@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<a8492be48d6bd6bd6614a9fc1723da64>>
+ * @generated SignedSource<<28d89ccc17517fb684a579b5344e0783>>
  * @relayHash 47a39bb0796e791929dabdc3018dc9c9
  * @lightSyntaxTransform
  * @nogrep
@@ -411,7 +411,7 @@ return {
             "alias": null,
             "args": null,
             "filters": null,
-            "handle": "prependNode",
+            "handle": "appendNode",
             "key": "",
             "kind": "LinkedHandle",
             "name": "bibleVersePost",
@@ -443,6 +443,6 @@ return {
 };
 })();
 
-(node as any).hash = "33dc49eb6e8019357ed40e89196463be";
+(node as any).hash = "7cb3c8fd1107ebdfd0644797caf58154";
 
 export default node;

@@ -108,7 +108,7 @@ const createReplyMutation = graphql`
   ) {
     bibleVersePostCreate(input: $input) {
       bibleVersePost
-        @prependNode(
+        @appendNode(
           connections: $connections
           edgeTypeName: "BibleVersePostEdge"
         ) {
