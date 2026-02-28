@@ -17,7 +17,11 @@ export const useSettingsStore = create<SettingsStore>()(
     }),
     {
       name: "settings-store",
+      version: 1,
       storage: createJSONStorage(() => mmkvStorage),
+      partialize: (state) => ({
+        fontSize: state.fontSize,
+      }),
     },
   ),
 );

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as Notifications from "expo-notifications";
-import { useRouter } from "expo-router";
+import { useRouter, type Router } from "expo-router";
 import { useRelayEnvironment } from "react-relay";
 import { useSession } from "@/components/providers/session-provider";
 import { getStorage } from "@/lib/storage";
@@ -49,6 +49,13 @@ export function useNotificationSetup() {
 
   // Set up notification listeners
   useEffect(() => {
+    // Handle cold-start: check if app was opened from a notification tap
+    Notifications.getLastNotificationResponseAsync().then((response) => {
+      if (response) {
+        handleNotificationResponse(response, router);
+      }
+    });
+
     // Foreground notification received
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
@@ -58,19 +65,7 @@ export function useNotificationSetup() {
     // User tapped on a notification
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        const data = response.notification.request.content.data;
-        const url = data?.url as string | undefined;
-
-        if (url) {
-          // Deep link: handle selah://, https://selah.kr/, or /path formats
-          let path = url;
-          if (url.startsWith("selah://")) {
-            path = url.replace("selah://", "/");
-          } else if (url.startsWith("https://selah.kr")) {
-            path = url.replace("https://selah.kr", "");
-          }
-          router.push(path as never);
-        }
+        handleNotificationResponse(response, router);
       });
 
     return () => {
@@ -78,6 +73,24 @@ export function useNotificationSetup() {
       responseListener.current?.remove();
     };
   }, [router]);
+}
+
+function handleNotificationResponse(
+  response: Notifications.NotificationResponse,
+  router: Router,
+) {
+  const data = response.notification.request.content.data;
+  const url = data?.url as string | undefined;
+
+  if (url) {
+    let path = url;
+    if (url.startsWith("selah://")) {
+      path = url.replace("selah://", "/");
+    } else if (url.startsWith("https://selah.kr")) {
+      path = url.replace("https://selah.kr", "");
+    }
+    router.push(path as never);
+  }
 }
 
 /**

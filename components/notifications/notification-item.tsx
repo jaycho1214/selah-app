@@ -247,6 +247,7 @@ export const NotificationItem = memo(function NotificationItem({
           {data.sender?.image?.url ? (
             <Image
               source={{ uri: data.sender.image.url }}
+              recyclingKey={data.sender.image.url}
               style={styles.avatar}
               contentFit="cover"
               transition={200}

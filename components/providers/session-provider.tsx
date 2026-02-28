@@ -8,6 +8,7 @@ import {
 } from "react";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { authClient, useSession as useAuthSession } from "@/lib/auth-client";
+import { signOutFromGoogle } from "@/lib/google-signin";
 import { SignInSheet } from "@/components/auth/sign-in-sheet";
 
 type Session = ReturnType<typeof useAuthSession>["data"];
@@ -38,6 +39,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const isAuthenticated = !!session;
 
   const signOut = useCallback(async () => {
+    await signOutFromGoogle();
     await authClient.signOut();
   }, []);
 

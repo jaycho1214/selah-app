@@ -1,3 +1,6 @@
+import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
+import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Pressable,
@@ -6,11 +9,8 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
-import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
-import { graphql, useMutation } from "react-relay";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { graphql, useMutation } from "react-relay";
 
 import { BibleNavigator } from "@/components/bible/bible-navigator";
 import { BibleReader } from "@/components/bible/bible-reader";
@@ -24,10 +24,10 @@ import { Text } from "@/components/ui/text";
 import { useColors } from "@/hooks/use-colors";
 import { BIBLE_BOOK_DETAILS } from "@/lib/bible/constants";
 import type { BibleBook } from "@/lib/bible/types";
+import type { TabsReadingCompleteSwipeMutation } from "@/lib/relay/__generated__/TabsReadingCompleteSwipeMutation.graphql";
 import { useBibleStore } from "@/lib/stores/bible-store";
 import { useReadingPlanStore } from "@/lib/stores/reading-plan-store";
 import { useVerseSelectionStore } from "@/lib/stores/verse-selection-store";
-import type { TabsReadingCompleteSwipeMutation } from "@/lib/relay/__generated__/TabsReadingCompleteSwipeMutation.graphql";
 
 const hasGlass = isLiquidGlassAvailable();
 
@@ -212,7 +212,7 @@ export default function HomeScreen() {
 
       {/* Floating navigator pill - hidden during selection */}
       {!isSelecting && (
-        <View style={[styles.pillContainer, { bottom: insets.bottom + 60 }]}>
+        <View style={[styles.pillContainer, { bottom: insets.bottom + 30 }]}>
           <GlassView
             glassEffectStyle="regular"
             isInteractive

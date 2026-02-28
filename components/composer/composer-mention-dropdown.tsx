@@ -51,6 +51,7 @@ export const ComposerMentionDropdown = memo(function ComposerMentionDropdown({
         {item.imageUrl ? (
           <Image
             source={{ uri: item.imageUrl }}
+            recyclingKey={item.imageUrl}
             style={styles.avatar}
             contentFit="cover"
           />

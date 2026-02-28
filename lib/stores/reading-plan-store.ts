@@ -110,12 +110,17 @@ export const useReadingPlanStore = create<ReadingPlanStore>()(
     }),
     {
       name: "reading-plan-store",
+      version: 1,
       storage: createJSONStorage(() => mmkvStorage, {
-        replacer: (_key, value) => (value instanceof Set ? [...value] : value),
-        reviver: (_key, value) =>
-          _key === "completedReadingIds" && Array.isArray(value)
-            ? new Set(value)
-            : value,
+        replacer: (_key, value) =>
+          value instanceof Set ? { __type: "Set", data: [...value] } : value,
+        reviver: (_key, value) => {
+          if (value && typeof value === "object" && "__type" in value && value.__type === "Set") {
+            const { data } = value as unknown as { data: unknown[] };
+            return new Set(data);
+          }
+          return value;
+        },
       }),
       partialize: (state) => ({
         activePlanId: state.activePlanId,

@@ -32,6 +32,7 @@ export const useBibleStore = create<BibleStore>()(
     }),
     {
       name: "bible-store",
+      version: 1,
       storage: createJSONStorage(() => mmkvStorage),
       partialize: (state) => ({
         currentBook: state.currentBook,

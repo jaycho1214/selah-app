@@ -1,12 +1,5 @@
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
-import {
-  NativeTabs,
-  Icon,
-  Label,
-  Badge,
-  VectorIcon,
-} from "expo-router/unstable-native-tabs";
+import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { useColorScheme } from "react-native";
 
 import { useBehindDaysStore } from "@/lib/stores/behind-days-store";
@@ -24,40 +17,41 @@ export default function TabLayout() {
       disableTransparentOnScrollEdge={!hasGlass}
     >
       <NativeTabs.Trigger name="index">
-        <Label hidden>Bible</Label>
-        <Icon
+        <NativeTabs.Trigger.Label hidden>Bible</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
           sf={{ default: "house", selected: "house.fill" }}
-          androidSrc={<VectorIcon family={MaterialIcons} name="home" />}
+          md="home"
         />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="posts">
-        <Label hidden>Posts</Label>
-        <Icon
+        <NativeTabs.Trigger.Label hidden>Posts</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
           sf={{ default: "text.bubble", selected: "text.bubble.fill" }}
-          androidSrc={<VectorIcon family={MaterialIcons} name="forum" />}
+          md="forum"
         />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="plans">
-        <Label hidden>Reading Plans</Label>
-        <Icon
+        <NativeTabs.Trigger.Label hidden>
+          Reading Plans
+        </NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
           sf={{ default: "book", selected: "book.fill" }}
-          androidSrc={<VectorIcon family={MaterialIcons} name="menu-book" />}
+          md="menu_book"
         />
-        {behindDays > 0 && <Badge>{String(behindDays)}</Badge>}
+        {behindDays > 0 && (
+          <NativeTabs.Trigger.Badge>{String(behindDays)}</NativeTabs.Trigger.Badge>
+        )}
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
-        <Label hidden>Profile</Label>
-        <Icon
+        <NativeTabs.Trigger.Label hidden>Profile</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
           sf={{ default: "person", selected: "person.fill" }}
-          androidSrc={<VectorIcon family={MaterialIcons} name="person" />}
+          md="person"
         />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="search" role={hasGlass ? "search" : undefined}>
-        <Label hidden>Search</Label>
-        <Icon
-          sf="magnifyingglass"
-          androidSrc={<VectorIcon family={MaterialIcons} name="search" />}
-        />
+        <NativeTabs.Trigger.Label hidden>Search</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="magnifyingglass" md="search" />
       </NativeTabs.Trigger>
     </NativeTabs>
   );

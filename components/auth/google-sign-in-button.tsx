@@ -4,7 +4,7 @@ import Svg, { Path } from "react-native-svg";
 import { Text } from "@/components/ui/text";
 import { useAnalytics } from "@/lib/analytics";
 import { authClient } from "@/lib/auth-client";
-import { configureGoogleSignIn, signInWithGoogle } from "@/lib/google-signin";
+import { signInWithGoogle } from "@/lib/google-signin";
 
 interface GoogleSignInButtonProps {
   onSuccess?: () => void;
@@ -25,7 +25,6 @@ export const GoogleSignInButton = memo(function GoogleSignInButton({
 
     setIsLoading(true);
     try {
-      configureGoogleSignIn();
       const idToken = await signInWithGoogle();
 
       if (idToken) {

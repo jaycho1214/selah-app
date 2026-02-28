@@ -31,7 +31,12 @@ export const useVerseHighlightStore = create<VerseHighlightStore>()(
     }),
     {
       name: "verse-highlight-store",
+      version: 1,
       storage: createJSONStorage(() => mmkvStorage),
+      partialize: (state) => ({
+        enabled: state.enabled,
+        color: state.color,
+      }),
     },
   ),
 );

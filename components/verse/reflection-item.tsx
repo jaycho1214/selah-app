@@ -127,6 +127,7 @@ function TopReplyPreview({
           {topReply.user.image?.url ? (
             <Image
               source={{ uri: topReply.user.image.url }}
+              recyclingKey={topReply.user.image.url}
               style={styles.topReplyAvatar}
               contentFit="cover"
             />
@@ -619,6 +620,7 @@ export const ReflectionItem = memo(function ReflectionItem({
           {user.image?.url ? (
             <Image
               source={{ uri: user.image.url }}
+              recyclingKey={user.image.url}
               style={styles.avatar}
               contentFit="cover"
               transition={200}
@@ -703,6 +705,7 @@ export const ReflectionItem = memo(function ReflectionItem({
                     >
                       <Image
                         source={{ uri: image.url }}
+                        recyclingKey={image.url}
                         style={styles.imageFill}
                         contentFit="cover"
                         transition={150}

@@ -31,8 +31,12 @@ export function ThemeProvider({
   const systemColorScheme = useColorScheme();
   const [theme, setThemeState] = useState<Theme>(defaultTheme);
 
-  const resolvedTheme =
-    theme === "system" ? (systemColorScheme ?? "light") : theme;
+  const resolvedTheme: "light" | "dark" =
+    theme === "system"
+      ? systemColorScheme === "dark"
+        ? "dark"
+        : "light"
+      : theme;
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);

@@ -58,7 +58,12 @@ export async function registerForPushNotificationsAsync(): Promise<
     return null;
   }
 
-  const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+  const projectId =
+    Constants.expoConfig?.extra?.eas?.projectId ??
+    Constants.easConfig?.projectId;
+  if (!projectId) {
+    throw new Error("EAS project ID not found in app config");
+  }
   const tokenData = await Notifications.getExpoPushTokenAsync({
     projectId,
   });

@@ -35,7 +35,9 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
         host: "https://us.i.posthog.com",
         enableSessionReplay: false,
       }}
-      autocapture
+      autocapture={{
+        captureScreens: false,
+      }}
     >
       <PostHogBridge>{children}</PostHogBridge>
     </PHProvider>

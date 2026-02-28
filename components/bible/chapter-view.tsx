@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   View,
   type NativeScrollEvent,
@@ -7,7 +7,6 @@ import {
 import { FlashList, type FlashListRef } from "@shopify/flash-list";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import * as Network from "expo-network";
 import { VerseItem } from "./verse-item";
 import { ChapterHeader } from "./chapter-header";
 import { ChapterSkeleton } from "./chapter-skeleton";
@@ -15,7 +14,6 @@ import { useBibleStore } from "@/lib/stores/bible-store";
 import { useReadingPlanStore } from "@/lib/stores/reading-plan-store";
 import { useVerseSelectionStore } from "@/lib/stores/verse-selection-store";
 import { useVerseHighlightStore } from "@/lib/stores/verse-highlight-store";
-import { isTranslationDownloaded, getOfflineVerses } from "@/lib/bible/offline";
 import { createVerseId } from "@/lib/bible/utils";
 import type { BibleBook } from "@/lib/bible/types";
 import type {
@@ -76,105 +74,6 @@ export function ChapterView({
 }: ChapterViewProps) {
   const currentTranslation = useBibleStore((s) => s.currentTranslation);
 
-  // Track offline state and availability
-  const [isOffline, setIsOffline] = useState(false);
-  const [offlineAvailable, setOfflineAvailable] = useState(false);
-  const [offlineVerses, setOfflineVerses] = useState<Verse[] | null>(null);
-
-  // Check network status and offline availability
-  useEffect(() => {
-    const checkOfflineStatus = async () => {
-      const netState = await Network.getNetworkStateAsync();
-      const offline = !netState.isConnected;
-      setIsOffline(offline);
-
-      const downloaded = await isTranslationDownloaded(currentTranslation);
-      setOfflineAvailable(downloaded);
-
-      // If offline and translation is downloaded, load from SQLite
-      if (offline && downloaded) {
-        const verses = await getOfflineVerses(
-          currentTranslation,
-          book,
-          chapter,
-        );
-        setOfflineVerses(verses as Verse[]);
-      } else {
-        setOfflineVerses(null);
-      }
-    };
-
-    checkOfflineStatus();
-
-    // Subscribe to network changes
-    const subscription = Network.addNetworkStateListener((state) => {
-      setIsOffline(!state.isConnected);
-      if (!state.isConnected) {
-        checkOfflineStatus();
-      }
-    });
-
-    return () => subscription.remove();
-  }, [currentTranslation, book, chapter]);
-
-  // Conditionally render the Relay version or offline version
-  if (isOffline && offlineAvailable && offlineVerses) {
-    return (
-      <ChapterViewContent
-        book={book}
-        chapter={chapter}
-        translation={currentTranslation}
-        verses={offlineVerses}
-        topInset={topInset}
-        scrollToVerse={scrollToVerse}
-        planVerseRange={planVerseRange}
-        onVersePress={onVersePress}
-        onVerseLongPress={onVerseLongPress}
-      />
-    );
-  }
-
-  // Online mode - use Relay
-  return (
-    <ChapterViewRelay
-      book={book}
-      chapter={chapter}
-      currentTranslation={currentTranslation}
-      topInset={topInset}
-      scrollToVerse={scrollToVerse}
-      planVerseRange={planVerseRange}
-      onVersePress={onVersePress}
-      onVerseLongPress={onVerseLongPress}
-    />
-  );
-}
-
-// Relay-powered chapter view (for online use)
-function ChapterViewRelay({
-  book,
-  chapter,
-  currentTranslation,
-  topInset,
-  scrollToVerse,
-  planVerseRange,
-  onVersePress,
-  onVerseLongPress,
-}: {
-  book: BibleBook;
-  chapter: number;
-  currentTranslation: string;
-  topInset?: number;
-  scrollToVerse?: number | null;
-  planVerseRange?: { start: number; end: number } | null;
-  onVersePress?: (verseId: string, verseText?: string) => void;
-  onVerseLongPress?: (
-    verseId: string,
-    verseText: string,
-    book: BibleBook,
-    chapter: number,
-    verseNumber: number,
-  ) => void;
-}) {
   const data = useLazyLoadQuery<chapterViewQuery>(
     chapterQuery,
     {
@@ -186,51 +85,11 @@ function ChapterViewRelay({
     { fetchPolicy: "store-or-network" },
   );
 
-  const verses = data.bibleVersesByReference ?? [];
-
-  return (
-    <ChapterViewContent
-      book={book}
-      chapter={chapter}
-      translation={currentTranslation}
-      verses={verses as Verse[]}
-      topInset={topInset}
-      scrollToVerse={scrollToVerse}
-      planVerseRange={planVerseRange}
-      onVersePress={onVersePress}
-      onVerseLongPress={onVerseLongPress}
-    />
+  const verses = useMemo(
+    () => (data.bibleVersesByReference ?? []) as Verse[],
+    [data.bibleVersesByReference],
   );
-}
 
-// Shared content renderer
-function ChapterViewContent({
-  book,
-  chapter,
-  translation,
-  verses,
-  topInset = 0,
-  scrollToVerse,
-  planVerseRange,
-  onVersePress,
-  onVerseLongPress,
-}: {
-  book: BibleBook;
-  chapter: number;
-  translation: string;
-  verses: Verse[];
-  topInset?: number;
-  scrollToVerse?: number | null;
-  planVerseRange?: { start: number; end: number } | null;
-  onVersePress?: (verseId: string, verseText?: string) => void;
-  onVerseLongPress?: (
-    verseId: string,
-    verseText: string,
-    book: BibleBook,
-    chapter: number,
-    verseNumber: number,
-  ) => void;
-}) {
   const insets = useSafeAreaInsets();
   const setScrollToVerse = useBibleStore((s) => s.setScrollToVerse);
   const planActive = useReadingPlanStore((s) => s.activePlanId) != null;
@@ -280,7 +139,7 @@ function ChapterViewContent({
 
   const renderItem = useCallback(
     ({ item }: { item: Verse }) => {
-      const verseId = createVerseId(translation, book, chapter, item.verse);
+      const verseId = createVerseId(currentTranslation, book, chapter, item.verse);
 
       // When in selection mode, tap toggles selection (same as long press)
       const handlePress = isSelecting
@@ -317,7 +176,7 @@ function ChapterViewContent({
       onVerseLongPress,
       book,
       chapter,
-      translation,
+      currentTranslation,
     ],
   );
 

@@ -64,7 +64,11 @@ const MarkAsReadMutation = graphql`
 
 // ---------- Notification List ----------
 
-function NotificationList() {
+function NotificationList({
+  contentPaddingTop,
+}: {
+  contentPaddingTop: number;
+}) {
   const colors = useColors();
   const environment = useRelayEnvironment();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -128,6 +132,7 @@ function NotificationList() {
       <EmptyState
         title="No notifications yet"
         message="When someone likes, replies, or mentions you, it will show up here"
+        style={{ paddingTop: contentPaddingTop }}
       />
     );
   }
@@ -205,7 +210,7 @@ export default function NotificationsScreen() {
               </View>
             }
           >
-            <NotificationList />
+            <NotificationList contentPaddingTop={contentPaddingTop} />
           </Suspense>
         </ErrorBoundary>
       )}

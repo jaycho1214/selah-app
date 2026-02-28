@@ -7,13 +7,14 @@
     "icon": "./assets/images/icon.png",
     "scheme": "selah",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "kr.selah.selah",
       "supportsTablet": true,
       "appleTeamId": "5ARDZKSX95",
       "usesAppleSignIn": true,
-      "associatedDomains": ["applinks:selah.kr"],
+      "associatedDomains": [
+        "applinks:selah.kr"
+      ],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -25,7 +26,6 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "kr.selah.selah",
       "softwareKeyboardLayoutMode": "pan",
@@ -50,7 +50,10 @@
               "pathPrefix": "/user"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -76,9 +79,10 @@
           "iosUrlScheme": "com.googleusercontent.apps.707707053099-robncnjvk5fidk58dkhsduelgscdemnn"
         }
       ],
-      "expo-sqlite",
       "@react-native-community/datetimepicker",
-      "expo-notifications"
+      "expo-notifications",
+      "expo-font",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,

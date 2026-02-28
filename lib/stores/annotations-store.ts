@@ -69,7 +69,12 @@ export const useAnnotationsStore = create<AnnotationsStore>()(
     }),
     {
       name: "annotations-store",
+      version: 1,
       storage: createJSONStorage(() => mmkvStorage),
+      partialize: (state) => ({
+        bookmarks: state.bookmarks,
+        notes: state.notes,
+      }),
     },
   ),
 );

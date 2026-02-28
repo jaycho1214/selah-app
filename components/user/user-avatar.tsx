@@ -55,6 +55,7 @@ export const UserAvatar = memo(function UserAvatar({
   const content = imageUrl ? (
     <Image
       source={{ uri: imageUrl }}
+      recyclingKey={imageUrl}
       style={dynamicStyles.avatar}
       contentFit="cover"
       transition={150}
