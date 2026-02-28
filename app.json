@@ -9,12 +9,10 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "bundleIdentifier": "kr.selah.selah",
-      "supportsTablet": true,
+      "supportsTablet": false,
       "appleTeamId": "5ARDZKSX95",
       "usesAppleSignIn": true,
-      "associatedDomains": [
-        "applinks:selah.kr"
-      ],
+      "associatedDomains": ["applinks:selah.kr"],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -50,10 +48,7 @@
               "pathPrefix": "/user"
             }
           ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "category": ["BROWSABLE", "DEFAULT"]
         }
       ]
     },

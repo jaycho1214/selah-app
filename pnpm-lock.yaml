@@ -168,6 +168,9 @@ importers:
       babel-plugin-transform-remove-console:
         specifier: ^6.9.4
         version: 6.9.4
+      babel-preset-expo:
+        specifier: ^55.0.10
+        version: 55.0.10(@babel/core@7.29.0)(@babel/runtime@7.28.6)(expo@55.0.4)(react-refresh@0.14.2)
       eslint:
         specifier: ^9.39.3
         version: 9.39.3
