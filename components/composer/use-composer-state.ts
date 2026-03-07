@@ -182,7 +182,7 @@ export function useComposerState(
 
   const keyboardOffset = useMemo(
     () => ({
-      closed: insets.bottom,
+      closed: Platform.OS === "android" ? 0 : insets.bottom,
       opened: 0,
     }),
     [insets.bottom],

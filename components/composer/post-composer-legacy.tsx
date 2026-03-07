@@ -1,42 +1,43 @@
+import DateTimePicker from "@react-native-community/datetimepicker";
+import {
+  ArrowUp,
+  AtSign,
+  BarChart2,
+  BookOpen,
+  Clock,
+  EyeOff,
+  Maximize2,
+  X,
+} from "lucide-react-native";
 import { forwardRef } from "react";
 import {
-  View,
-  Pressable,
-  StyleSheet,
-  ScrollView,
-  TextInput,
-  Modal,
   ActivityIndicator,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
 } from "react-native";
-import { WebView } from "react-native-webview";
 import { KeyboardStickyView } from "react-native-keyboard-controller";
-import {
-  BarChart2,
-  ArrowUp,
-  X,
-  AtSign,
-  EyeOff,
-  Clock,
-  Maximize2,
-  BookOpen,
-} from "lucide-react-native";
 import Animated, {
   FadeInDown,
   FadeOutDown,
   LinearTransition,
 } from "react-native-reanimated";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import { WebView } from "react-native-webview";
 
 import { Text } from "@/components/ui/text";
-import { ImagePickerGrid, ImagePickerButton } from "../verse/image-picker-grid";
-import { ComposerMentionDropdown } from "./composer-mention-dropdown";
-import { ComposerVerseReferenceDropdown } from "./composer-verse-reference-dropdown";
+import { ImagePickerButton, ImagePickerGrid } from "../verse/image-picker-grid";
 import { ComposerFullscreenModal } from "./composer-fullscreen-modal";
-import { CircularProgress, AnimatedPressable } from "./composer-shared";
+import { ComposerMentionDropdown } from "./composer-mention-dropdown";
+import { AnimatedPressable, CircularProgress } from "./composer-shared";
+import { ComposerVerseReferenceDropdown } from "./composer-verse-reference-dropdown";
 import {
   useComposerState,
-  type PostComposerRef,
   type PostComposerProps,
+  type PostComposerRef,
 } from "./use-composer-state";
 
 export const PostComposerLegacy = forwardRef<
@@ -88,6 +89,7 @@ export const PostComposerLegacy = forwardRef<
     isVerseRefLoading,
     selectVerseReference,
     insertVerseReference,
+    insets,
   } = state;
 
   return (
@@ -98,6 +100,8 @@ export const PostComposerLegacy = forwardRef<
           {
             backgroundColor: colors.surface,
             borderTopColor: colors.border,
+            paddingBottom:
+              8 + (Platform.OS === "android" ? insets.bottom : 0),
           },
         ]}
       >
@@ -408,7 +412,6 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: 16,
     paddingTop: 12,
-    paddingBottom: 8,
   },
   inputContainer: {
     flexDirection: "row",
