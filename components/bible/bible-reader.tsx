@@ -85,6 +85,39 @@ export const BibleReader = memo(function BibleReader({
   const completedReadingIds = useReadingPlanStore((s) => s.completedReadingIds);
   const setScrollProgress = useReadingPlanStore((s) => s.setScrollProgress);
 
+  // Track recent drag to suppress accidental verse taps on release
+  const recentDragRef = useRef(false);
+
+  const setDragFlag = useCallback((active: boolean) => {
+    recentDragRef.current = active;
+  }, []);
+
+  const clearDragFlag = useCallback(() => {
+    recentDragRef.current = false;
+  }, []);
+
+  const guardedVersePress = useCallback(
+    (verseId: string, verseText?: string) => {
+      if (recentDragRef.current) return;
+      onVersePress?.(verseId, verseText);
+    },
+    [onVersePress],
+  );
+
+  const guardedVerseLongPress = useCallback(
+    (
+      verseId: string,
+      verseText: string,
+      book: BibleBook,
+      chapter: number,
+      verseNumber: number,
+    ) => {
+      if (recentDragRef.current) return;
+      onVerseLongPress?.(verseId, verseText, book, chapter, verseNumber);
+    },
+    [onVerseLongPress],
+  );
+
   // Timer ref for transition cleanup
   const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(
@@ -275,8 +308,11 @@ export const BibleReader = memo(function BibleReader({
 
   // Pan gesture with sticky resistance
   const panGesture = Gesture.Pan()
+    .activeOffsetX([-15, 15])
+    .failOffsetY([-10, 10])
     .onStart((e) => {
       isDragging.value = true;
+      runOnJS(setDragFlag)(true);
       fingerY.value = e.absoluteY;
     })
     .onUpdate((e) => {
@@ -293,8 +329,9 @@ export const BibleReader = memo(function BibleReader({
 
       translateX.value = newX;
     })
-    .onEnd((e) => {
+    .onEnd(() => {
       isDragging.value = false;
+      runOnJS(clearDragFlag)();
 
       const shouldGoNext = translateX.value < -SWIPE_THRESHOLD && next;
       const shouldGoPrev = translateX.value > SWIPE_THRESHOLD && prev;
@@ -388,8 +425,8 @@ export const BibleReader = memo(function BibleReader({
                   topInset={insets.top}
                   scrollToVerse={scrollToVerse}
                   planVerseRange={planVerseRange}
-                  onVersePress={onVersePress}
-                  onVerseLongPress={onVerseLongPress}
+                  onVersePress={guardedVersePress}
+                  onVerseLongPress={guardedVerseLongPress}
                 />
               </Suspense>
             </ErrorBoundary>
