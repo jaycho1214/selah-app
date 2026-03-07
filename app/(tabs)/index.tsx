@@ -3,6 +3,7 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  Platform,
   Pressable,
   StatusBar,
   StyleSheet,
@@ -212,7 +213,7 @@ export default function HomeScreen() {
 
       {/* Floating navigator pill - hidden during selection */}
       {!isSelecting && (
-        <View style={[styles.pillContainer, { bottom: insets.bottom + 30 }]}>
+        <View style={[styles.pillContainer, { bottom: Platform.OS === "android" ? 16 : insets.bottom + 30 }]}>
           <GlassView
             glassEffectStyle="regular"
             isInteractive
