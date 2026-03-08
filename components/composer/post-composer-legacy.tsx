@@ -342,65 +342,69 @@ export const PostComposerLegacy = forwardRef<
         </View>
 
         {/* Toolbar */}
-        <View style={styles.toolbar}>
-          <View style={styles.toolbarActions}>
-            <View
-              style={[
-                styles.toolbarIconWrap,
-                images.length > 0 && {
-                  backgroundColor: colors.surfaceElevated,
-                },
-              ]}
-            >
-              <ImagePickerButton
-                onImagesSelected={addImages}
-                currentCount={images.length}
-                colors={colors}
-              />
-            </View>
-            <Pressable onPress={insertMention}>
-              <AtSign size={20} color={colors.textSecondary} />
-            </Pressable>
-            <Pressable onPress={insertVerseReference}>
-              <BookOpen size={18} color={colors.textSecondary} />
-            </Pressable>
-            <Pressable
-              onPress={toggleSpoiler}
-              disabled={!hasSelection}
-              style={{ opacity: hasSelection ? 1 : 0.3 }}
-            >
-              <EyeOff
-                size={20}
-                color={isInsideSpoiler ? colors.text : colors.textSecondary}
-              />
-            </Pressable>
-            <View
-              style={[
-                styles.toolbarIconWrap,
-                (poll || showPollCreator) && {
-                  backgroundColor: colors.surfaceElevated,
-                },
-              ]}
-            >
-              <Pressable onPress={togglePollCreator}>
-                <BarChart2
+        {isAuthenticated && (
+          <View style={styles.toolbar}>
+            <View style={styles.toolbarActions}>
+              <View
+                style={[
+                  styles.toolbarIconWrap,
+                  images.length > 0 && {
+                    backgroundColor: colors.surfaceElevated,
+                  },
+                ]}
+              >
+                <ImagePickerButton
+                  onImagesSelected={addImages}
+                  currentCount={images.length}
+                  colors={colors}
+                />
+              </View>
+              <Pressable onPress={insertMention}>
+                <AtSign size={20} color={colors.textSecondary} />
+              </Pressable>
+              <Pressable onPress={insertVerseReference}>
+                <BookOpen size={18} color={colors.textSecondary} />
+              </Pressable>
+              <Pressable
+                onPress={toggleSpoiler}
+                disabled={!hasSelection}
+                style={{ opacity: hasSelection ? 1 : 0.3 }}
+              >
+                <EyeOff
                   size={20}
-                  color={
-                    poll || showPollCreator ? colors.text : colors.textSecondary
-                  }
+                  color={isInsideSpoiler ? colors.text : colors.textSecondary}
                 />
               </Pressable>
+              <View
+                style={[
+                  styles.toolbarIconWrap,
+                  (poll || showPollCreator) && {
+                    backgroundColor: colors.surfaceElevated,
+                  },
+                ]}
+              >
+                <Pressable onPress={togglePollCreator}>
+                  <BarChart2
+                    size={20}
+                    color={
+                      poll || showPollCreator
+                        ? colors.text
+                        : colors.textSecondary
+                    }
+                  />
+                </Pressable>
+              </View>
+              <Pressable onPress={openFullscreen}>
+                <Maximize2 size={18} color={colors.textSecondary} />
+              </Pressable>
             </View>
-            <Pressable onPress={openFullscreen}>
-              <Maximize2 size={18} color={colors.textSecondary} />
+            <Pressable onPress={handleDismissKeyboard}>
+              <Text style={[styles.doneButton, { color: colors.text }]}>
+                Done
+              </Text>
             </Pressable>
           </View>
-          <Pressable onPress={handleDismissKeyboard}>
-            <Text style={[styles.doneButton, { color: colors.text }]}>
-              Done
-            </Text>
-          </Pressable>
-        </View>
+        )}
       </View>
 
       {/* Fullscreen Editor Modal */}
