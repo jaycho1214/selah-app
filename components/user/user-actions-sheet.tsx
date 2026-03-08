@@ -5,7 +5,8 @@ import React, {
   useImperativeHandle,
   useRef,
 } from "react";
-import { Alert, Pressable, StyleSheet } from "react-native";
+import { Alert, Platform, Pressable, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   BottomSheetModal,
   BottomSheetView,
@@ -67,6 +68,7 @@ export const UserActionsSheet = memo(
       ref,
     ) {
       const colors = useColors();
+      const insets = useSafeAreaInsets();
       const { capture } = useAnalytics();
       const bottomSheetRef = useRef<BottomSheetModal>(null);
 
@@ -165,7 +167,7 @@ export const UserActionsSheet = memo(
             marginTop: 12,
           }}
         >
-          <BottomSheetView style={styles.container}>
+          <BottomSheetView style={[styles.container, { paddingBottom: 40 + (Platform.OS === "android" ? insets.bottom : 0) }]}>
             <Pressable
               style={[styles.actionItem, { borderBottomColor: colors.border }]}
               onPress={handleReport}
@@ -217,7 +219,6 @@ export const UserActionsSheet = memo(
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 24,
-    paddingBottom: 40,
     paddingTop: 8,
   },
   actionItem: {

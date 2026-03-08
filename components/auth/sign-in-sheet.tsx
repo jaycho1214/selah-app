@@ -95,7 +95,7 @@ export const SignInSheet = forwardRef<BottomSheetModal, SignInSheetProps>(
         }}
       >
         <BottomSheetView
-          style={[styles.container, { paddingBottom: 40 + insets.bottom }]}
+          style={[styles.container, { paddingBottom: 40 + (Platform.OS === "android" ? insets.bottom : 0) }]}
         >
           {/* Logo */}
           <Animated.View

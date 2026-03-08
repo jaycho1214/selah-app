@@ -9,11 +9,13 @@ import React, {
 } from "react";
 import {
   ActivityIndicator,
+  Platform,
   Pressable,
   StyleSheet,
   useColorScheme,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   BottomSheetModal,
   BottomSheetView,
@@ -148,6 +150,7 @@ export const VerseReferenceSheet = memo(
     function VerseReferenceSheet({ environment }, ref) {
       const colorScheme = useColorScheme();
       const isDark = colorScheme === "dark";
+      const insets = useSafeAreaInsets();
       const hasGlass = isLiquidGlassAvailable();
       const colors = getColors(isDark);
       const bottomSheetRef = useRef<BottomSheetModal>(null);
@@ -213,7 +216,7 @@ export const VerseReferenceSheet = memo(
             marginTop: 10,
           }}
         >
-          <BottomSheetView style={styles.container}>
+          <BottomSheetView style={[styles.container, { paddingBottom: 40 + (Platform.OS === "android" ? insets.bottom : 0) }]}>
             <RelayEnvironmentProvider environment={environment}>
               {/* Header */}
               <View style={styles.header}>
@@ -248,7 +251,6 @@ export const VerseReferenceSheet = memo(
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
-    paddingBottom: 40,
   },
   header: {
     flexDirection: "row",

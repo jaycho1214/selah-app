@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useRef } from "react";
-import { View, Pressable, useColorScheme, StyleSheet } from "react-native";
+import { View, Platform, Pressable, useColorScheme, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -28,6 +29,7 @@ export const TranslationSelector = memo(function TranslationSelector({
 }: TranslationSelectorProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+  const insets = useSafeAreaInsets();
   const hasGlass = isLiquidGlassAvailable();
   const bottomSheetRef = useRef<BottomSheetModal>(null);
 
@@ -131,7 +133,7 @@ export const TranslationSelector = memo(function TranslationSelector({
         marginTop: 10,
       }}
     >
-      <BottomSheetView style={styles.container}>
+      <BottomSheetView style={[styles.container, { paddingBottom: 40 + (Platform.OS === "android" ? insets.bottom : 0) }]}>
         <Text style={[styles.title, { color: colors.text }]}>Translation</Text>
         <Text style={[styles.subtitle, { color: colors.textMuted }]}>
           Select your preferred Bible translation
@@ -198,7 +200,6 @@ export const TranslationSelector = memo(function TranslationSelector({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
-    paddingBottom: 40,
   },
   title: {
     fontSize: 20,

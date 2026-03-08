@@ -6,7 +6,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { StyleSheet, useColorScheme, View } from "react-native";
+import { Platform, StyleSheet, useColorScheme, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -51,6 +52,7 @@ export const ReadingPlanShareSheet = memo(
   forwardRef<ReadingPlanShareSheetRef>(function ReadingPlanShareSheet(_, ref) {
     const colorScheme = useColorScheme();
     const isDark = colorScheme === "dark";
+    const insets = useSafeAreaInsets();
     const hasGlass = isLiquidGlassAvailable();
     const colors = useColors();
     const bottomSheetRef = useRef<BottomSheetModal>(null);
@@ -187,7 +189,7 @@ export const ReadingPlanShareSheet = memo(
           marginTop: 10,
         }}
       >
-        <BottomSheetView style={styles.container}>
+        <BottomSheetView style={[styles.container, { paddingBottom: 40 + (Platform.OS === "android" ? insets.bottom : 0) }]}>
           <Text style={[styles.title, { color: colors.text }]}>
             Share your progress
           </Text>
@@ -239,7 +241,6 @@ export const ReadingPlanShareSheet = memo(
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
-    paddingBottom: 40,
     gap: 16,
   },
   title: {

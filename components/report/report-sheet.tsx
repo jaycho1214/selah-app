@@ -6,7 +6,8 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { Alert, Platform, Pressable, StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { TextInput as GHTextInput } from "react-native-gesture-handler";
 import {
   BottomSheetModal,
@@ -58,6 +59,7 @@ export interface ReportSheetRef {
 export const ReportSheet = memo(
   forwardRef<ReportSheetRef>(function ReportSheet(_, ref) {
     const colors = useColors();
+    const insets = useSafeAreaInsets();
     const { capture } = useAnalytics();
     const bottomSheetRef = useRef<BottomSheetModal>(null);
     const [type, setType] = useState<"post" | "user">("post");
@@ -186,7 +188,7 @@ export const ReportSheet = memo(
           marginTop: 12,
         }}
       >
-        <BottomSheetView style={styles.container}>
+        <BottomSheetView style={[styles.container, { paddingBottom: 40 + (Platform.OS === "android" ? insets.bottom : 0) }]}>
           {step === "reason" ? (
             <>
               <View style={styles.header}>
@@ -275,7 +277,6 @@ export const ReportSheet = memo(
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 24,
-    paddingBottom: 40,
     paddingTop: 8,
   },
   header: {

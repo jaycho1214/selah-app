@@ -22,6 +22,7 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
   FadeInDown,
   SlideInDown,
@@ -63,6 +64,7 @@ const compareQuery = graphql`
 export function VerseActions() {
   const compareSheetRef = useRef<BottomSheetModal>(null);
   const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
   const environment = useRelayEnvironment();
 
   const isSelecting = useVerseSelectionStore((s) => s.isSelecting);
@@ -387,7 +389,7 @@ export function VerseActions() {
               );
             })}
 
-          <View style={styles.bottomSpacer} />
+          <View style={{ height: 40 + (Platform.OS === "android" ? insets.bottom : 0) }} />
         </BottomSheetScrollView>
       </BottomSheetModal>
     </>
@@ -481,8 +483,5 @@ const styles = StyleSheet.create({
   compareText: {
     fontSize: 18,
     lineHeight: 30,
-  },
-  bottomSpacer: {
-    height: 40,
   },
 });

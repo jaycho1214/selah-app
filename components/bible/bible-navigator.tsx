@@ -13,11 +13,13 @@ import { ChevronLeft } from "lucide-react-native";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Dimensions,
+  Platform,
   Pressable,
   StyleSheet,
   useColorScheme,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeIn } from "react-native-reanimated";
 
 // Book categories for visual grouping
@@ -158,6 +160,7 @@ export const BibleNavigator = memo(function BibleNavigator({
 }: BibleNavigatorProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+  const insets = useSafeAreaInsets();
   const hasGlass = isLiquidGlassAvailable();
 
   const [selectedBook, setSelectedBook] = useState<BibleBook | null>(null);
@@ -315,7 +318,7 @@ export const BibleNavigator = memo(function BibleNavigator({
     >
       {selectedBook && bookDetails ? (
         // Chapter Selection View - uses BottomSheetView for proper dynamic sizing
-        <BottomSheetView style={styles.chapterContainer}>
+        <BottomSheetView style={[styles.chapterContainer, { paddingBottom: 40 + (Platform.OS === "android" ? insets.bottom : 0) }]}>
           {/* Header with back button */}
           <View style={styles.chapterHeader}>
             <Pressable
@@ -385,7 +388,7 @@ export const BibleNavigator = memo(function BibleNavigator({
       ) : (
         // Book Selection View
         <BottomSheetScrollView
-          contentContainerStyle={styles.bookScrollContent}
+          contentContainerStyle={[styles.bookScrollContent, { paddingBottom: 40 + (Platform.OS === "android" ? insets.bottom : 0) }]}
           showsVerticalScrollIndicator={false}
         >
           {/* Testament Tabs - simple text tabs, no sliding indicator */}
@@ -516,9 +519,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   // Book Sections
-  bookScrollContent: {
-    paddingBottom: 40,
-  },
+  bookScrollContent: {},
   bookSections: {
     paddingHorizontal: 20,
     gap: 20,
@@ -549,7 +550,6 @@ const styles = StyleSheet.create({
   // Chapter View
   chapterContainer: {
     paddingHorizontal: 20,
-    paddingBottom: 40,
   },
   chapterHeader: {
     flexDirection: "row",
