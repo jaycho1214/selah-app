@@ -93,6 +93,8 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
       selectVerseReference,
       insertVerseReference,
       uploadProgress,
+      isAuthenticated,
+      onAuthRequired,
     } = state;
 
     const dynamicStyles = useMemo(
@@ -224,38 +226,46 @@ export const PostComposerGlass = forwardRef<PostComposerRef, PostComposerProps>(
               !isExpanded && glassStyles.inputRowCollapsed,
             ]}
           >
-            <WebView
-              ref={webViewRef}
-              source={{ html: htmlContent }}
-              style={[
-                {
-                  flex: 1,
-                  height: isExpanded ? 56 : 36,
-                  backgroundColor: "transparent",
-                },
-                isSubmitting && {
-                  opacity: 0.5,
-                  pointerEvents: "none" as const,
-                },
-              ]}
-              originWhitelist={["*"]}
-              onMessage={handleWebViewMessage}
-              scrollEnabled={false}
-              bounces={false}
-              keyboardDisplayRequiresUserAction={false}
-              hideKeyboardAccessoryView={true}
-              automaticallyAdjustContentInsets={false}
-              contentInsetAdjustmentBehavior="never"
-              allowsInlineMediaPlayback={true}
-              mediaPlaybackRequiresUserAction={false}
-              javaScriptEnabled={true}
-              domStorageEnabled={true}
-              startInLoadingState={false}
-              showsVerticalScrollIndicator={false}
-              showsHorizontalScrollIndicator={false}
-              overScrollMode="never"
-              textInteractionEnabled={!isSubmitting}
-            />
+            <View style={{ flex: 1 }}>
+              <WebView
+                ref={webViewRef}
+                source={{ html: htmlContent }}
+                style={[
+                  {
+                    flex: 1,
+                    height: isExpanded ? 56 : 36,
+                    backgroundColor: "transparent",
+                  },
+                  isSubmitting && {
+                    opacity: 0.5,
+                    pointerEvents: "none" as const,
+                  },
+                ]}
+                originWhitelist={["*"]}
+                onMessage={handleWebViewMessage}
+                scrollEnabled={false}
+                bounces={false}
+                keyboardDisplayRequiresUserAction={false}
+                hideKeyboardAccessoryView={true}
+                automaticallyAdjustContentInsets={false}
+                contentInsetAdjustmentBehavior="never"
+                allowsInlineMediaPlayback={true}
+                mediaPlaybackRequiresUserAction={false}
+                javaScriptEnabled={true}
+                domStorageEnabled={true}
+                startInLoadingState={false}
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
+                overScrollMode="never"
+                textInteractionEnabled={!isSubmitting}
+              />
+              {!isAuthenticated && (
+                <Pressable
+                  style={StyleSheet.absoluteFill}
+                  onPress={onAuthRequired}
+                />
+              )}
+            </View>
 
             {/* Submit button inline only when collapsed */}
             {!isExpanded && (

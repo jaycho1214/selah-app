@@ -847,6 +847,7 @@ export function useComposerState(
     // Props passthrough
     colors,
     isAuthenticated,
+    onAuthRequired,
     isSubmitting,
     uploadProgress,
   };

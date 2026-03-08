@@ -90,6 +90,8 @@ export const PostComposerLegacy = forwardRef<
     selectVerseReference,
     insertVerseReference,
     insets,
+    isAuthenticated,
+    onAuthRequired,
   } = state;
 
   return (
@@ -295,6 +297,12 @@ export const PostComposerLegacy = forwardRef<
               overScrollMode="never"
               textInteractionEnabled={!isSubmitting}
             />
+            {!isAuthenticated && (
+              <Pressable
+                style={StyleSheet.absoluteFill}
+                onPress={onAuthRequired}
+              />
+            )}
           </View>
 
           {/* Submit Button with Progress Ring */}
