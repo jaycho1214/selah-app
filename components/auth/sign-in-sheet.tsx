@@ -1,5 +1,6 @@
 import React, { forwardRef, useCallback } from "react";
-import { useColorScheme, StyleSheet, Platform, Linking } from "react-native";
+import { useColorScheme, StyleSheet, Platform, Linking, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import {
   BottomSheetModal,
@@ -35,6 +36,7 @@ export const SignInSheet = forwardRef<BottomSheetModal, SignInSheetProps>(
   function SignInSheet({ onSignInSuccess }, ref) {
     const colorScheme = useColorScheme();
     const isDark = colorScheme === "dark";
+    const insets = useSafeAreaInsets();
 
     const handleSuccess = useCallback(() => {
       if (ref && "current" in ref && ref.current) {
@@ -92,7 +94,9 @@ export const SignInSheet = forwardRef<BottomSheetModal, SignInSheetProps>(
           marginTop: 12,
         }}
       >
-        <BottomSheetView style={styles.container}>
+        <BottomSheetView
+          style={[styles.container, { paddingBottom: 40 + insets.bottom }]}
+        >
           {/* Logo */}
           <Animated.View
             entering={FadeInDown.duration(500).delay(100)}
@@ -192,7 +196,6 @@ export const SignInSheet = forwardRef<BottomSheetModal, SignInSheetProps>(
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 24,
-    paddingBottom: 40,
     paddingTop: 8,
   },
   logoContainer: {
